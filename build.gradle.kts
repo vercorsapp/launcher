@@ -3,6 +3,7 @@ import java.util.*
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
     id("org.jetbrains.compose")
 }
 
@@ -16,16 +17,27 @@ repositories {
 }
 
 dependencies {
-    // Note, if you develop a library, you should use compose.desktop.common.
-    // compose.desktop.currentOs should be used in launcher-sourceSet
-    // (in a separate module for demo project and in testMain).
-    // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serialization.version")}")
+    implementation("io.ktor:ktor-client-core:${property("ktor.version")}")
+    implementation("io.ktor:ktor-client-cio:${property("ktor.version")}")
+    implementation("io.ktor:ktor-client-content-negotiation:${property("ktor.version")}")
+    implementation("io.ktor:ktor-client-logging:${property("ktor.version")}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${property("ktor.version")}")
+    implementation("cafe.adriel.voyager:voyager-navigator:${property("voyager.version")}")
+    implementation("net.harawata:appdirs:${property("appdirs.version")}")
+    implementation("org.slf4j:slf4j-simple:2.0.10") // TODO to replace
+    testImplementation(kotlin("test"))
+    testImplementation("org.slf4j:slf4j-simple:2.0.10")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "com.skyecodes.snowball.MainKt"
 
         nativeDistributions {
             targetFormats(
