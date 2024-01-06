@@ -1,25 +1,21 @@
 package com.skyecodes.snowball.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowScope
-import androidx.compose.ui.window.WindowState
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
@@ -113,14 +109,20 @@ private fun Toolbar(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () 
         Row {
             WindowButton(FontAwesomeIcons.Solid.WindowMinimize, "Minimize Window", onMinimize)
             WindowButton(FontAwesomeIcons.Solid.WindowMaximize, "Maximize Window", onMaximize)
-            WindowButton(FontAwesomeIcons.Solid.Times, "Close Window", onClose) // TODO make it red on hover
+            WindowButton(FontAwesomeIcons.Solid.Times, "Close Window", onClose, true)
         }
     }
 }
 
 @Composable
-private fun WindowButton(icon: ImageVector, name: String, onClick: () -> Unit) {
-    Box(Modifier.fillMaxHeight().width(40.dp).clickable(onClick = onClick)) {
+private fun WindowButton(icon: ImageVector, name: String, onClick: () -> Unit, isRed: Boolean = false) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    Box(
+        Modifier.fillMaxHeight().width(40.dp).clickable(onClick = onClick).hoverable(interactionSource)
+            .background(if (isRed && isHovered) MaterialTheme.colors.error else MaterialTheme.colors.surface)
+    ) {
         Icon(icon, name, Modifier.align(Alignment.Center).size(16.dp))
     }
 }

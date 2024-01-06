@@ -1,6 +1,7 @@
 package com.skyecodes.snowball.ui
 
 import androidx.compose.material.Colors
+import androidx.compose.material.darkColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -101,20 +102,14 @@ object Theme {
         override val mantle = Color(0xff181825)
         override val crust = Color(0xff11111b)
 
-        override val colors = Colors(
+        override val colors = darkColors(
             primary = mauve,
             primaryVariant = blue,
             secondary = teal,
             secondaryVariant = sky,
             background = base,
             surface = surface0,
-            error = red,
-            onPrimary = Color.White,
-            onSecondary = Color.White,
-            onBackground = Color.White,
-            onSurface = Color.White,
-            onError = Color.White,
-            isLight = false
+            error = red
         )
     }
 
