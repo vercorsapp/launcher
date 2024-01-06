@@ -2,6 +2,7 @@ package com.skyecodes.snowball.service
 
 import com.skyecodes.snowball.data.modrinth.ModrinthSearchResult
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 
@@ -41,5 +42,6 @@ object ModrinthApi {
     private fun HttpRequestBuilder.init() {
         initGlobal()
         header("Authorization", API_KEY)
+        expectSuccess = true
     }
 }

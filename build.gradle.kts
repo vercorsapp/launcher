@@ -24,8 +24,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:${property("ktor.version")}")
     implementation("io.ktor:ktor-client-logging:${property("ktor.version")}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${property("ktor.version")}")
-    implementation("cafe.adriel.voyager:voyager-navigator:${property("voyager.version")}")
+    implementation("cafe.adriel.voyager:voyager-tab-navigator:${property("voyager.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")
+    implementation("br.com.devsrsouza.compose.icons:font-awesome:${property("compose-icons.version")}")
     implementation("org.slf4j:slf4j-simple:2.0.10") // TODO to replace
     testImplementation(kotlin("test"))
     testImplementation("org.slf4j:slf4j-simple:2.0.10")

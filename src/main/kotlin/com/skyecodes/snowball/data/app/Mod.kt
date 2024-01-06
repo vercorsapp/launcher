@@ -4,6 +4,7 @@ import com.skyecodes.snowball.data.curseforge.CurseforgeMod
 import com.skyecodes.snowball.data.modrinth.ModrinthProjectResult
 
 interface Mod {
+    val provider: Provider
     val name: String
     val description: String
     val url: String
@@ -11,6 +12,7 @@ interface Mod {
 }
 
 private class CurseforgeModAdapter(mod: CurseforgeMod) : Mod {
+    override val provider = Provider.Curseforge
     override val name = mod.name
     override val description = mod.summary
     override val url = mod.links.websiteUrl
@@ -18,6 +20,7 @@ private class CurseforgeModAdapter(mod: CurseforgeMod) : Mod {
 }
 
 private class ModrinthModAdapter(mod: ModrinthProjectResult) : Mod {
+    override val provider = Provider.Modrinth
     override val name = mod.title
     override val description = mod.description
     override val url = "https://modrinth.com/${mod.projectType.value}/${mod.slug}"

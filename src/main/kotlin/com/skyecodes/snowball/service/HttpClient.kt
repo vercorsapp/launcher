@@ -3,6 +3,7 @@ package com.skyecodes.snowball.service
 import com.skyecodes.snowball.APP_VERSION
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
@@ -12,6 +13,13 @@ import io.ktor.serialization.kotlinx.json.*
 val HttpClient = HttpClient(CIO) {
     install(ContentNegotiation) {
         json()
+    }
+    install(HttpTimeout) {
+        requestTimeoutMillis = 5000
+    }
+    install(HttpRequestRetry) {
+        retryOnExceptionOrServerErrors(3)
+        exponentialDelay()
     }
     install(Logging) {
         logger = Logger.DEFAULT

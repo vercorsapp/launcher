@@ -10,8 +10,10 @@ object CurseforgeApi {
     private const val BASE_URL = "https://api.curseforge.com"
     private const val API_KEY = "\$2a\$10\$lCr8PZ1p3YwsVpHK4euhJe..bDmLaj52azYRTfvP.oOZghtCD.hbi"
     private const val MINECRAFT_GAME_ID = 432
+    private const val MODPACK_CATEGORY_ID = 4471
+    private const val MOD_CATEGORY_ID = 6
 
-    suspend fun getFeaturedMods(excludedModIds: List<Int>): GetFeaturedModsReponse =
+    suspend fun getFeaturedMods(excludedModIds: List<Int> = emptyList()): GetFeaturedModsReponse =
         postCurseforge("/v1/mods/featured", GetFeaturedModsRequest(excludedModIds, MINECRAFT_GAME_ID)).body()
 
     private suspend fun getCurseforge(

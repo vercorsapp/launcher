@@ -33,10 +33,11 @@ fun <T> AsyncImage(
     load: suspend () -> T,
     painterFor: @Composable (T) -> Painter,
     contentDescription: String,
+    defaultImage: T? = null,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
-    val image: T? by produceState<T?>(null) {
+    val image: T? by produceState(defaultImage) {
         value = withContext(Dispatchers.IO) {
             try {
                 load()
