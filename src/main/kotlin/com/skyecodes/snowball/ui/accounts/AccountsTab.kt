@@ -1,4 +1,4 @@
-package com.skyecodes.snowball.ui.settings
+package com.skyecodes.snowball.ui.accounts
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -8,18 +8,18 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Cog
+import compose.icons.fontawesomeicons.solid.User
 
-object SettingsTab : Tab {
+object AccountsTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            val title = "Settings"
-            val icon = rememberVectorPainter(FontAwesomeIcons.Solid.Cog)
+            val title = "Accounts"
+            val icon = rememberVectorPainter(FontAwesomeIcons.Solid.User)
 
             return remember {
                 TabOptions(
-                    index = 4u,
+                    index = 3u,
                     title = title,
                     icon = icon
                 )

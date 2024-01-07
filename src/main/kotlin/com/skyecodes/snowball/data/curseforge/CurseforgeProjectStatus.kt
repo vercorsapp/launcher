@@ -5,7 +5,7 @@ import com.skyecodes.snowball.data.IntEnumerableSerializer
 import kotlinx.serialization.Serializable
 
 @Serializable(with = CurseforgeModStatusSerializer::class)
-enum class CurseforgeModStatus(override val value: Int) : IntEnumerable {
+enum class CurseforgeProjectStatus(override val value: Int) : IntEnumerable {
     New(1),
     ChangesRequired(2),
     UnderSoftReview(3),
@@ -18,4 +18,5 @@ enum class CurseforgeModStatus(override val value: Int) : IntEnumerable {
     UnderReview(10)
 }
 
-private class CurseforgeModStatusSerializer : IntEnumerableSerializer<CurseforgeModStatus>(CurseforgeModStatus.entries)
+private class CurseforgeModStatusSerializer :
+    IntEnumerableSerializer<CurseforgeProjectStatus>(CurseforgeProjectStatus.entries)

@@ -15,11 +15,13 @@ val HttpClient = HttpClient(CIO) {
         json()
     }
     install(HttpTimeout) {
-        requestTimeoutMillis = 5000
+        connectTimeoutMillis = 1000
+
     }
     install(HttpRequestRetry) {
-        retryOnExceptionOrServerErrors(3)
-        exponentialDelay()
+        retryOnServerErrors(3)
+        retryOnException(3, true)
+        constantDelay()
     }
     install(Logging) {
         logger = Logger.DEFAULT

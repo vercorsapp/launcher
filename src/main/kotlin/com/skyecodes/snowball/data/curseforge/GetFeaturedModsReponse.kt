@@ -9,8 +9,8 @@ data class GetFeaturedModsReponse(
 ) {
     @Serializable
     data class Data(
-        val featured: List<CurseforgeMod> = emptyList(),
-        val popular: List<CurseforgeMod> = emptyList(),
-        val recentlyUpdated: List<CurseforgeMod> = emptyList()
+        val featured: List<CurseforgeProject> = emptyList(),
+        val popular: List<CurseforgeProject> = emptyList(),
+        val recentlyUpdated: List<CurseforgeProject> = emptyList()
     )
 }

@@ -3,7 +3,7 @@ package com.skyecodes.snowball.data.curseforge
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CurseforgeMod(
+data class CurseforgeProject(
     val allowModDistribution: Boolean? = null,
     val authors: List<Author>,
     val categories: List<CurseforgeCategory>,
@@ -28,7 +28,7 @@ data class CurseforgeMod(
     val rating: Double? = null,
     val screenshots: List<ModAsset>,
     val slug: String,
-    val status: CurseforgeModStatus,
+    val status: CurseforgeProjectStatus,
     val summary: String,
     val thumbsUpCount: Int
 ) {
@@ -38,16 +38,6 @@ data class CurseforgeMod(
         val id: Int,
         val name: String,
         val url: String
-    )
-
-    @Serializable
-    data class LatestEarlyAccessFilesIndex(
-        val fileId: Int,
-        val filename: String,
-        val gameVersion: String,
-        val gameVersionTypeId: Int,
-        val modLoader: Int,
-        val releaseType: Int
     )
 
     @Serializable

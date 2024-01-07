@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -41,14 +42,14 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
-        var featuredCurseforge: List<Mod> by remember { mutableStateOf(emptyList()) }
-        var popularModrinth: List<Mod> by remember { mutableStateOf(emptyList()) }
-        var popularCurseforge: List<Mod> by remember { mutableStateOf(emptyList()) }
-        var recentlyUpdatedModrinth: List<Mod> by remember { mutableStateOf(emptyList()) }
-        var recentlyUpdatedCurseforge: List<Mod> by remember { mutableStateOf(emptyList()) }
+        var featuredCurseforge: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
+        var popularModrinth: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
+        var popularCurseforge: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
+        var recentlyUpdatedModrinth: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
+        var recentlyUpdatedCurseforge: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
         val scope = rememberCoroutineScope()
 
-        LaunchedEffect(true) {
+        if (featuredCurseforge.isEmpty() || popularCurseforge.isEmpty() || recentlyUpdatedCurseforge.isEmpty()) {
             scope.launch {
                 try {
                     val apiData = CurseforgeApi.getFeaturedMods(emptyList()).data
@@ -61,15 +62,22 @@ object HomeTab : Tab {
                     e.printStackTrace()
                 }
             }
+        }
+
+        if (popularModrinth.isEmpty()) {
             scope.launch {
                 try {
                     popularModrinth = ModrinthApi.getPopularMods().hits.fromModrinth()
+                    println("a")
                 } catch (e: CancellationException) {
                     // do nothing
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
+        }
+
+        if (recentlyUpdatedModrinth.isEmpty()) {
             scope.launch {
                 try {
                     recentlyUpdatedModrinth = ModrinthApi.getRecentlyUpdatedMods().hits.fromModrinth()
