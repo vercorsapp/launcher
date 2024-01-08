@@ -11,13 +11,13 @@ enum class ModLoader(val strName: String) {
     val iconPath: String = "/icon/svg/$strName.svg"
 }
 
-fun List<String>.modLoadersFromModrinth() = mapNotNull { it.modLoaderFromModrinth() }
+fun List<String>.toModLoadersModrinth() = mapNotNull { it.toModLoader() }
 
-fun String.modLoaderFromModrinth(): ModLoader? = ModLoader.entries.firstOrNull { it.strName == this }
+fun String.toModLoader(): ModLoader? = ModLoader.entries.firstOrNull { it.strName == this }
 
-fun List<CurseforgeModLoaderType>.fromCurseforge() = mapNotNull { it.fromCurseforge() }
+fun List<CurseforgeModLoaderType>.toModLoadersCurseforge() = mapNotNull { it.toModLoader() }
 
-fun CurseforgeModLoaderType.fromCurseforge(): ModLoader? = when (this) {
+fun CurseforgeModLoaderType.toModLoader(): ModLoader? = when (this) {
     CurseforgeModLoaderType.Forge -> ModLoader.Forge
     CurseforgeModLoaderType.NeoForge -> ModLoader.NeoForge
     CurseforgeModLoaderType.Fabric -> ModLoader.Fabric

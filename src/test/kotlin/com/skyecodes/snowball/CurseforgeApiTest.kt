@@ -9,8 +9,10 @@ class CurseforgeApiTest {
     @Test
     fun test() {
         runBlocking {
-            val featuredMods = CurseforgeApi.getFeaturedMods(emptyList())
-            assertTrue(featuredMods.data.featured.isNotEmpty())
+            val featuredMods = CurseforgeApi.getPopularMods()
+            assertTrue(featuredMods.data.isNotEmpty())
+            val classes = CurseforgeApi.getClasses()
+            assertTrue(true)
         }
     }
 }

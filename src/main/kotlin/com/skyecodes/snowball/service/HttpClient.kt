@@ -16,12 +16,14 @@ val HttpClient = HttpClient(CIO) {
     }
     install(HttpTimeout) {
         connectTimeoutMillis = 1000
-
     }
     install(HttpRequestRetry) {
         retryOnServerErrors(3)
         retryOnException(3, true)
         constantDelay()
+    }
+    install(UserAgent) {
+        agent = "skyecodes/snowball-launcher/$APP_VERSION (contact@skye.codes)"
     }
     install(Logging) {
         logger = Logger.DEFAULT
@@ -30,7 +32,7 @@ val HttpClient = HttpClient(CIO) {
 }
 
 fun HttpRequestBuilder.initGlobal() {
-    userAgent("skyecodes/snowball-launcher/$APP_VERSION (contact@skye.codes)")
+
 }
 
 inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {

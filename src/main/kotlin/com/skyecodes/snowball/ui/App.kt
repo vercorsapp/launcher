@@ -48,7 +48,10 @@ fun WindowScope.App(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () 
                             Toolbar(onMinimize, onMaximize, onClose)
                         }
                     }
-                    Surface(modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize().padding(),
+                        color = MaterialTheme.colors.background
+                    ) {
                         CurrentTab()
                     }
                 }

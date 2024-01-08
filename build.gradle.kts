@@ -35,6 +35,10 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:2.0.10")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks.test {
     useJUnitPlatform()
 }

@@ -1,7 +1,9 @@
 package com.skyecodes.snowball.service
 
-import com.skyecodes.snowball.data.curseforge.GetFeaturedModsReponse
-import com.skyecodes.snowball.data.curseforge.GetFeaturedModsRequest
+import com.skyecodes.snowball.data.app.SortOrder
+import com.skyecodes.snowball.data.curseforge.CurseforgeCategoriesResponse
+import com.skyecodes.snowball.data.curseforge.CurseforgeProjectSearchResponse
+import com.skyecodes.snowball.data.curseforge.CurseforgeProjectSearchSortField
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -10,13 +12,43 @@ object CurseforgeApi {
     private const val BASE_URL = "https://api.curseforge.com"
     private const val API_KEY = "\$2a\$10\$lCr8PZ1p3YwsVpHK4euhJe..bDmLaj52azYRTfvP.oOZghtCD.hbi"
     private const val MINECRAFT_GAME_ID = 432
-    private const val MODPACK_CATEGORY_ID = 4471
-    private const val MOD_CATEGORY_ID = 6
+    private const val MODPACK_CLASS_ID = 4471
+    private const val MOD_CLASS_ID = 6
+    private const val RESOURCEPACK_CLASS_ID = 12
+    private const val SHADERPACK_CLASS_ID = 6552
+    private const val WORLD_CLASS_ID = 17
 
-    suspend fun getFeaturedMods(excludedModIds: List<Int> = emptyList()): GetFeaturedModsReponse =
-        postCurseforge("/v1/mods/featured", GetFeaturedModsRequest(excludedModIds, MINECRAFT_GAME_ID)).body()
+    suspend fun getPopularMods() = search(MOD_CLASS_ID)
 
-    private suspend fun getCurseforge(
+    suspend fun getPopularModpacks() = search(MODPACK_CLASS_ID)
+
+    suspend fun getPopularResourcePacks() = search(RESOURCEPACK_CLASS_ID)
+
+    suspend fun getPopularShaderPacks() = search(SHADERPACK_CLASS_ID)
+
+    suspend fun getPopularWorlds() = search(WORLD_CLASS_ID)
+
+    suspend fun getClasses(): CurseforgeCategoriesResponse = get("/v1/categories") {
+        parameter("gameId", MINECRAFT_GAME_ID)
+        parameter("classesOnly", true)
+    }.body()
+
+    private suspend fun search(
+        classId: Int,
+        searchFilter: String? = null,
+        sortField: CurseforgeProjectSearchSortField = CurseforgeProjectSearchSortField.Popularity,
+        sortOrder: SortOrder = SortOrder.Desc,
+        pageSize: Int = 10
+    ): CurseforgeProjectSearchResponse = get("/v1/mods/search") {
+        parameter("gameId", MINECRAFT_GAME_ID)
+        parameter("classId", classId)
+        if (searchFilter != null) parameter("searchFilter", searchFilter)
+        parameter("sortField", sortField.value)
+        parameter("sortOrder", sortOrder.value)
+        parameter("pageSize", pageSize)
+    }.body()
+
+    private suspend fun get(
         urlString: String,
         block: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse = HttpClient.get(BASE_URL + urlString) {
@@ -24,7 +56,7 @@ object CurseforgeApi {
         block()
     }
 
-    private suspend inline fun <reified T> postCurseforge(
+    private suspend inline fun <reified T> post(
         urlString: String,
         body: T,
         block: HttpRequestBuilder.() -> Unit = {}
@@ -35,7 +67,6 @@ object CurseforgeApi {
     }
 
     private fun HttpRequestBuilder.init() {
-        initGlobal()
         header("x-api-key", API_KEY)
     }
 }

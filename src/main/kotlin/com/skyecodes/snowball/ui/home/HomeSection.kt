@@ -14,9 +14,8 @@ import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -30,15 +29,51 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.skyecodes.snowball.AsyncImage
 import com.skyecodes.snowball.data.app.Mod
-import com.skyecodes.snowball.loadImageBitmap
 import com.skyecodes.snowball.openURL
 import com.skyecodes.snowball.ui.Theme
+import com.skyecodes.snowball.ui.util.AsyncImage
+import kotlinx.coroutines.*
 import java.net.URI
+import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
-fun HomeSection(headerTitle: String, mods: List<Mod>) {
+fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Mod>) {
+    var projects: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
+    var fetchJobs: List<Deferred<List<Mod>>> by rememberSaveable { mutableStateOf(emptyList()) }
+    var joinJob: Job? by rememberSaveable { mutableStateOf(null) }
+    val scope = rememberCoroutineScope()
+
+    if (projects.isEmpty() && (fetchJobs.none { it.isActive } || joinJob?.isActive != true)) {
+        fetchJobs = providers.map {
+            scope.async {
+                try {
+                    it()
+                } catch (e: CancellationException) {
+                    emptyList()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emptyList()
+                }
+            }
+        }
+        joinJob = scope.launch {
+            projects = fetchJobs.awaitAll().map { it.toMutableList() }.let { lists ->
+                buildList {
+                    var curListIdx = 0
+                    while (size < 10) {
+                        val v = lists[curListIdx].removeFirst()
+                        if (none { it.name == v.name }) {
+                            add(v)
+                            curListIdx++
+                            if (curListIdx == lists.size) curListIdx = 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Column(Modifier.fillMaxWidth().background(MaterialTheme.colors.background).padding(8.dp)) {
         Text(
             text = headerTitle,
@@ -53,8 +88,8 @@ fun HomeSection(headerTitle: String, mods: List<Mod>) {
                 modifier = Modifier.padding(bottom = 10.dp),
                 state = listState
             ) {
-                if (mods.isNotEmpty()) {
-                    items(mods) {
+                if (projects.isNotEmpty()) {
+                    items(projects, key = { it.key }) {
                         ModCard(it)
                     }
                 } else {
@@ -85,7 +120,8 @@ private fun ModCard(mod: Mod) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AsyncImage(
-                load = { loadImageBitmap(mod.logoUrl!!) },
+                key = mod.key,
+                url = mod.logoUrl!!,
                 painterFor = { remember { BitmapPainter(it) } },
                 contentDescription = "${mod.name} thumbnail",
                 modifier = Modifier.size(128.dp)
