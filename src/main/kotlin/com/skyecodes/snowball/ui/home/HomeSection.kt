@@ -2,6 +2,7 @@ package com.skyecodes.snowball.ui.home
 
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,15 +22,19 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.skyecodes.snowball.data.app.Project
 import com.skyecodes.snowball.openURL
 import com.skyecodes.snowball.readable
-import com.skyecodes.snowball.ui.Theme
+import com.skyecodes.snowball.resourceAsStream
+import com.skyecodes.snowball.ui.UI
 import com.skyecodes.snowball.ui.util.AsyncImage
+import com.skyecodes.snowball.ui.util.loadImageBitmap
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Calendar
@@ -76,16 +81,16 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
         }
     }
 
-    Column(Modifier.fillMaxWidth().background(MaterialTheme.colors.background).padding(8.dp)) {
+    Column(Modifier.fillMaxWidth().background(MaterialTheme.colors.background).padding(UI.mediumPadding)) {
         Text(
             text = headerTitle,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.ExtraBold
+            style = MaterialTheme.typography.h6,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(Modifier.padding(4.dp))
+        Spacer(Modifier.padding(UI.smallPadding))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(UI.largePadding),
             modifier = Modifier.fillMaxWidth().onGloballyPositioned { rowSize = (it.size.width - 80) / 450 }
         ) {
             if (projects.isNotEmpty()) {
@@ -106,39 +111,51 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
 private fun RowScope.ModCard(project: Project) {
     Card(
         modifier = Modifier.weight(1f).aspectRatio(1.1f).pointerHoverIcon(PointerIcon.Hand),
-        shape = RoundedCornerShape(15.dp),
         onClick = { if (project.url.isNotEmpty()) openURL(URI(project.url)) }
     ) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
             ) {
                 Surface(
-                    color = Theme.currentPalette.surface1,
+                    color = UI.colors.surface1,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = RoundedCornerShape(15.dp),
+                    shape = UI.defaultCornerShape,
                     elevation = 1.dp
                 ) {
-                    AsyncImage(
-                        key = "logo-${project.key}",
-                        url = project.logoUrl!!,
-                        painterFor = { remember { BitmapPainter(it) } },
+                    project.logoUrl?.let { url ->
+                        AsyncImage(
+                            key = "logo-${project.key}",
+                            url = url,
+                            painterFor = { remember { BitmapPainter(it) } },
+                            contentDescription = "${project.name} thumbnail",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } ?: Image(
+                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.jpg")),
                         contentDescription = "${project.name} thumbnail",
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 }
                 Column {
                     Text(
                         project.name,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.subtitle1,
                         maxLines = 1,
                         fontWeight = FontWeight.ExtraBold,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        "by ${project.author}",
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                append("by ")
+                            }
+                            append(project.author)
+                        },
+                        style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -154,7 +171,12 @@ private fun RowScope.ModCard(project: Project) {
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                } ?: Spacer(modifier = Modifier)
+                } ?: Image(
+                    bitmap = loadImageBitmap(resourceAsStream("/img/pack.jpg")),
+                    contentDescription = "${project.name} image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
 
                 Row(
                     modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, end = 10.dp),
@@ -176,7 +198,8 @@ private fun RowScope.ModCard(project: Project) {
 
             Text(
                 project.description,
-                modifier = Modifier.fillMaxWidth().height(80.dp).padding(10.dp),
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.fillMaxWidth().height(80.dp).padding(UI.mediumPadding),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -188,23 +211,23 @@ private fun RowScope.ModCard(project: Project) {
 @Composable
 private fun ProjectChip(name: String, icon: ImageVector, text: String) {
     Card(
-        modifier = Modifier.padding(bottom = 10.dp),
-        backgroundColor = Theme.currentPalette.surface1
+        modifier = Modifier.padding(bottom = UI.mediumPadding),
+        backgroundColor = UI.colors.surface1
     ) {
         Row(
-            modifier = Modifier.padding(5.dp),
+            modifier = Modifier.padding(horizontal = UI.mediumPadding, vertical = UI.smallPadding),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = name,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(UI.smallIconSize)
             )
             Text(
                 text = text,
-                fontSize = 12.sp,
-                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.caption,
+                fontSize = UI.smallFontSize
             )
         }
     }
@@ -231,7 +254,7 @@ private fun RowScope.FakeModCard() {
             val offset = width * progressAnimated
 
             val brush = Brush.linearGradient(
-                colors = listOf(Theme.currentPalette.surface1, Theme.currentPalette.surface0),
+                colors = listOf(UI.colors.surface1, UI.colors.surface0),
                 start = Offset(offset, 0f),
                 end = Offset(offset + width, height)
             )

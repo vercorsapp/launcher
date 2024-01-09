@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.skyecodes.snowball.APP_NAME
 import com.skyecodes.snowball.APP_VERSION
@@ -32,13 +31,13 @@ fun Toolbar(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit)
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Row(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(UI.mediumPadding),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
         ) {
             Text(APP_NAME)
-            Text("v$APP_VERSION", fontSize = 10.sp)
-            Text("-", modifier = Modifier.padding(horizontal = 5.dp))
+            Text("v$APP_VERSION", style = MaterialTheme.typography.caption)
+            Text("-", modifier = Modifier.padding(horizontal = UI.smallPadding))
             Text(tabNavigator.current.options.title)
         }
         Spacer(Modifier.weight(1f))
@@ -59,6 +58,6 @@ private fun WindowButton(icon: ImageVector, name: String, onClick: () -> Unit, i
         Modifier.fillMaxHeight().width(40.dp).clickable(onClick = onClick).hoverable(interactionSource)
             .background(if (isRed && isHovered) MaterialTheme.colors.error else MaterialTheme.colors.surface)
     ) {
-        Icon(icon, name, Modifier.align(Alignment.Center).size(16.dp))
+        Icon(icon, name, Modifier.align(Alignment.Center).size(UI.mediumIconSize))
     }
 }

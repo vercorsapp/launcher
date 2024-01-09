@@ -31,9 +31,12 @@ dependencies {
     implementation("br.com.devsrsouza.compose.icons:font-awesome:${property("compose-icons.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")
     implementation("org.ocpsoft.prettytime:prettytime:${property("prettytime.version")}")
-    implementation("org.slf4j:slf4j-simple:2.0.10") // TODO to replace
+    implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
+    implementation("org.kodein.di:kodein-di-framework-compose:${property("kodein.version")}")
+    implementation("org.kodein.di:kodein-di-conf:${property("kodein.version")}")
+    runtimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
     testImplementation(kotlin("test"))
-    testImplementation("org.slf4j:slf4j-simple:2.0.10")
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.10")
 }
 
 kotlin {

@@ -17,6 +17,7 @@ import com.skyecodes.snowball.data.app.convertCurseforge
 import com.skyecodes.snowball.data.app.convertModrinth
 import com.skyecodes.snowball.service.CurseforgeApi
 import com.skyecodes.snowball.service.ModrinthApi
+import com.skyecodes.snowball.ui.UI
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Home
@@ -39,10 +40,13 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
-        Box(Modifier.padding(start = 10.dp, end = 5.dp)) {
+        Box(Modifier.padding(start = UI.mediumPadding, end = UI.smallPadding)) {
             val scrollState = rememberScrollState()
 
-            Column(Modifier.fillMaxSize().padding(top = 5.dp, bottom = 5.dp, end = 18.dp).verticalScroll(scrollState)) {
+            Column(
+                Modifier.fillMaxSize().padding(top = UI.smallPadding, bottom = UI.smallPadding, end = 18.dp)
+                    .verticalScroll(scrollState)
+            ) {
                 HomeSection(
                     "Popular Mods",
                     { ModrinthApi.getPopularMods().hits.convertModrinth() },

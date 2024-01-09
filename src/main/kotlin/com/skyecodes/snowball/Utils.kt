@@ -1,6 +1,7 @@
 package com.skyecodes.snowball
 
 import androidx.compose.ui.input.pointer.PointerIcon
+import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
 import java.awt.Cursor
 import java.awt.Desktop
@@ -8,6 +9,8 @@ import java.net.URI
 import java.time.Instant
 
 private object Utils
+
+val appJson = Json
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
 

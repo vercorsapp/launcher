@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.unit.Density
-import com.skyecodes.snowball.service.CacheService
+import com.skyecodes.snowball.service.StorageService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xml.sax.InputSource
@@ -37,7 +37,7 @@ fun AsyncImage(
         value = withContext(Dispatchers.IO) {
             try {
                 val u = URL(url)
-                val file = CacheService.cacheDir.resolve("image").resolve(key + "." + File(u.file).extension)
+                val file = StorageService.cacheDir.resolve("image").resolve(key + "." + File(u.file).extension)
                 if (file.exists()) {
                     loadImageBitmap(file.toFile())
                 } else {
