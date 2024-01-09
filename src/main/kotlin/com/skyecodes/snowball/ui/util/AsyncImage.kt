@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.net.URL
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -64,23 +65,26 @@ fun AsyncImage(
 
 /* Loading from file with java.io API */
 
-fun loadImageBitmap(file: File): ImageBitmap =
-    file.inputStream().buffered().use(::loadImageBitmap)
+fun loadImageBitmap(file: File): ImageBitmap = loadImageBitmap(file.inputStream())
 
-fun loadSvgPainter(file: File, density: Density): Painter =
-    file.inputStream().buffered().use { androidx.compose.ui.res.loadSvgPainter(it, density) }
+fun loadSvgPainter(file: File, density: Density): Painter = loadSvgPainter(file.inputStream(), density)
 
-fun loadXmlImageVector(file: File, density: Density): ImageVector =
-    file.inputStream().buffered().use { androidx.compose.ui.res.loadXmlImageVector(InputSource(it), density) }
+fun loadXmlImageVector(file: File, density: Density): ImageVector = loadXmlImageVector(file.inputStream(), density)
 
 /* Loading from network with java.net API */
 
-fun loadImageBitmap(url: String): ImageBitmap =
-    URL(url).openStream().buffered().use(::loadImageBitmap)
+fun loadImageBitmap(url: String): ImageBitmap = loadImageBitmap(URL(url).openStream())
 
-fun loadSvgPainter(url: String, density: Density): Painter =
-    URL(url).openStream().buffered().use { androidx.compose.ui.res.loadSvgPainter(it, density) }
+fun loadSvgPainter(url: String, density: Density): Painter = loadSvgPainter(URL(url).openStream(), density)
 
-fun loadXmlImageVector(url: String, density: Density): ImageVector =
-    URL(url).openStream().buffered().use { androidx.compose.ui.res.loadXmlImageVector(InputSource(it), density) }
+fun loadXmlImageVector(url: String, density: Density): ImageVector = loadXmlImageVector(URL(url).openStream(), density)
+
+fun loadImageBitmap(`is`: InputStream): ImageBitmap =
+    `is`.buffered().use(::loadImageBitmap)
+
+fun loadSvgPainter(`is`: InputStream, density: Density): Painter =
+    `is`.buffered().use { androidx.compose.ui.res.loadSvgPainter(it, density) }
+
+fun loadXmlImageVector(`is`: InputStream, density: Density): ImageVector =
+    `is`.buffered().use { androidx.compose.ui.res.loadXmlImageVector(InputSource(it), density) }
 

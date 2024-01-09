@@ -39,10 +39,10 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
-        Box {
+        Box(Modifier.padding(start = 10.dp, end = 5.dp)) {
             val scrollState = rememberScrollState()
 
-            Column(Modifier.fillMaxSize().padding(end = 10.dp).verticalScroll(scrollState)) {
+            Column(Modifier.fillMaxSize().padding(top = 5.dp, bottom = 5.dp, end = 18.dp).verticalScroll(scrollState)) {
                 HomeSection(
                     "Popular Mods",
                     { ModrinthApi.getPopularMods().hits.convertModrinth() },
@@ -67,56 +67,4 @@ object HomeTab : Tab {
             )
         }
     }
-    /*
-        var popularModrinthMods: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
-        var popularCurseforgeMods: List<Mod> by rememberSaveable { mutableStateOf(emptyList()) }
-        var popularModrinthModsJob: Job? by rememberSaveable { mutableStateOf(null) }
-        var popularCurseforgeModsJob: Job? by rememberSaveable { mutableStateOf(null) }
-        val scope = rememberCoroutineScope()
-
-        if (popularModrinthModsJob?.isActive != true && popularModrinthMods.isEmpty()) {
-            popularModrinthModsJob = scope.launch {
-                try {
-                    popularModrinthMods = ModrinthApi.getPopularMods().hits.convertModrinth()
-                } catch (e: CancellationException) {
-                    // do nothing
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        if (popularCurseforgeModsJob?.isActive != true && popularCurseforgeMods.isEmpty()) {
-            scope.launch {
-                try {
-                    popularCurseforgeMods = CurseforgeApi.getPopularMods().data.convertCurseforge()
-                } catch (e: CancellationException) {
-                    // do nothing
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        HomeContent({ ModrinthApi.getPopularMods().hits.convertModrinth() }, { CurseforgeApi.getPopularMods().data.convertCurseforge() })
-    }*/
-}/*
-@Composable
-private fun HomeContent(
-    popularModrinthMods: suspend () -> List<Mod>,
-    popularCurseforgeMods: suspend () -> List<Mod>,
-) {
-    Box {
-        val scrollState = rememberScrollState()
-
-        Column(Modifier.fillMaxSize().padding(end = 10.dp).verticalScroll(scrollState)) {
-            HomeSection("Popular mods on Modrinth", popularModrinthMods)
-            HomeSection("Popular mods on CurseForge", popularCurseforgeMods)
-        }
-
-        VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(scrollState)
-        )
-    }
-}*/
+}

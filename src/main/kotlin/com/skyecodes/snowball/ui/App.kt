@@ -49,7 +49,7 @@ fun WindowScope.App(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () 
                         }
                     }
                     Surface(
-                        modifier = Modifier.fillMaxSize().padding(),
+                        modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colors.background
                     ) {
                         CurrentTab()

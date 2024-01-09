@@ -31,10 +31,6 @@ val HttpClient = HttpClient(CIO) {
     }
 }
 
-fun HttpRequestBuilder.initGlobal() {
-
-}
-
 inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
     setBody(body)
     contentType(ContentType.Application.Json)

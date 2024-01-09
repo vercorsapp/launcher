@@ -18,7 +18,7 @@ data class ModrinthProjectResult(
     val description: String,
     @SerialName("display_categories")
     val displayCategories: List<String>? = null,
-    val downloads: Int,
+    val downloads: Long,
     @SerialName("featured_gallery")
     val featuredGallery: String? = null,
     val follows: Int,

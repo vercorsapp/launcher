@@ -12,7 +12,7 @@ import com.skyecodes.snowball.ui.App
 import java.awt.Toolkit
 
 const val APP_VERSION = "0.1.0"
-const val APP_NAME = "Snowball Launcher"
+const val APP_NAME = "Unnamed Launcher"
 
 fun main() = application {
     val state = rememberWindowState(size = DpSize(1080.dp, 720.dp))
@@ -34,9 +34,12 @@ fun main() = application {
                     size.value = window.size
                     pos.value = state.position
                     val insets = Toolkit.getDefaultToolkit().getScreenInsets(window.graphicsConfiguration)
-                    val bounds = window.graphicsConfiguration.bounds
-                    window.setSize(bounds.width, bounds.height - insets.bottom)
-                    window.setLocation(0, 0)
+                    val screenBounds = window.graphicsConfiguration.bounds
+                    window.setSize(
+                        screenBounds.width - (insets.left + insets.right),
+                        screenBounds.height - (insets.top + insets.bottom)
+                    )
+                    window.setLocation(screenBounds.x + insets.left, screenBounds.y + insets.top)
                     WindowPlacement.Maximized
                 } else {
                     window.size = size.value
