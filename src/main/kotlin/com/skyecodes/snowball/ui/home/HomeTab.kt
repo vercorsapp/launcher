@@ -15,12 +15,14 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.skyecodes.snowball.data.app.convertCurseforge
 import com.skyecodes.snowball.data.app.convertModrinth
-import com.skyecodes.snowball.service.CurseforgeApi
-import com.skyecodes.snowball.service.ModrinthApi
+import com.skyecodes.snowball.service.CurseforgeService
+import com.skyecodes.snowball.service.ModrinthService
 import com.skyecodes.snowball.ui.UI
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Home
+import org.kodein.di.compose.rememberDI
+import org.kodein.di.instance
 
 object HomeTab : Tab {
     override val options: TabOptions
@@ -40,6 +42,9 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
+        val modrinthService: ModrinthService by rememberDI { instance() }
+        val curseforgeService: CurseforgeService by rememberDI { instance() }
+
         Box(Modifier.padding(start = UI.mediumPadding, end = UI.smallPadding)) {
             val scrollState = rememberScrollState()
 
@@ -49,20 +54,20 @@ object HomeTab : Tab {
             ) {
                 HomeSection(
                     "Popular Mods",
-                    { ModrinthApi.getPopularMods().hits.convertModrinth() },
-                    { CurseforgeApi.getPopularMods().data.convertCurseforge() })
+                    { modrinthService.getPopularMods().hits.convertModrinth() },
+                    { curseforgeService.getPopularMods().data.convertCurseforge() })
                 HomeSection(
                     "Popular Modpacks",
-                    { ModrinthApi.getPopularModpacks().hits.convertModrinth() },
-                    { CurseforgeApi.getPopularModpacks().data.convertCurseforge() })
+                    { modrinthService.getPopularModpacks().hits.convertModrinth() },
+                    { curseforgeService.getPopularModpacks().data.convertCurseforge() })
                 HomeSection(
                     "Popular Resource Packs",
-                    { ModrinthApi.getPopularResourcePacks().hits.convertModrinth() },
-                    { CurseforgeApi.getPopularResourcePacks().data.convertCurseforge() })
+                    { modrinthService.getPopularResourcePacks().hits.convertModrinth() },
+                    { curseforgeService.getPopularResourcePacks().data.convertCurseforge() })
                 HomeSection(
                     "Popular Shader Packs",
-                    { ModrinthApi.getPopularShaderPacks().hits.convertModrinth() },
-                    { CurseforgeApi.getPopularShaderPacks().data.convertCurseforge() })
+                    { modrinthService.getPopularShaderPacks().hits.convertModrinth() },
+                    { curseforgeService.getPopularShaderPacks().data.convertCurseforge() })
             }
 
             VerticalScrollbar(

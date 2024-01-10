@@ -3,23 +3,20 @@ package com.skyecodes.snowball.ui.instances
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import com.skyecodes.snowball.data.app.Instance
-import com.skyecodes.snowball.service.InstanceService
+import com.skyecodes.snowball.ui.Data
 import com.skyecodes.snowball.ui.UI
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Server
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 object InstancesTab : Tab {
     override val options: TabOptions
@@ -39,13 +36,7 @@ object InstancesTab : Tab {
 
     @Composable
     override fun Content() {
-        var instances: List<Instance> by rememberSaveable { mutableStateOf(emptyList()) }
-        var readJob: Job? by rememberSaveable { mutableStateOf(null) }
-        val scope = rememberCoroutineScope()
-
-        if (instances.isEmpty() && readJob?.isActive != true) {
-            readJob = scope.launch { instances = InstanceService.fetchInstances(scope) }
-        }
+        val instances = Data.instances.current
 
         if (instances.isEmpty()) {
             Column(

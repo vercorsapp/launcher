@@ -217,7 +217,7 @@ private fun ProjectChip(name: String, icon: ImageVector, text: String) {
         Row(
             modifier = Modifier.padding(horizontal = UI.mediumPadding, vertical = UI.smallPadding),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
+            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
         ) {
             Icon(
                 imageVector = icon,

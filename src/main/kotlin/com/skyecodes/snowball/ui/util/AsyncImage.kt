@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.Density
 import com.skyecodes.snowball.service.StorageService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.kodein.di.compose.rememberDI
+import org.kodein.di.instance
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.IOException
@@ -33,11 +35,13 @@ fun AsyncImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
+    val storageService: StorageService by rememberDI { instance() }
+
     val image: ImageBitmap? by produceState(defaultImage) {
         value = withContext(Dispatchers.IO) {
             try {
                 val u = URL(url)
-                val file = StorageService.cacheDir.resolve("image").resolve(key + "." + File(u.file).extension)
+                val file = storageService.cacheDir.resolve("image").resolve(key + "." + File(u.file).extension)
                 if (file.exists()) {
                     loadImageBitmap(file.toFile())
                 } else {
