@@ -4,6 +4,9 @@ package com.skyecodes.snowball.ui.home
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -34,11 +37,13 @@ import com.skyecodes.snowball.readable
 import com.skyecodes.snowball.resourceAsStream
 import com.skyecodes.snowball.ui.UI
 import com.skyecodes.snowball.ui.util.AsyncImage
+import com.skyecodes.snowball.ui.util.IconTextButton
 import com.skyecodes.snowball.ui.util.loadImageBitmap
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Calendar
-import compose.icons.fontawesomeicons.solid.Download
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Calendar
+import compose.icons.feathericons.Download
+import compose.icons.feathericons.Eye
+import compose.icons.feathericons.Plus
 import kotlinx.coroutines.*
 import java.net.URI
 import kotlin.coroutines.cancellation.CancellationException
@@ -46,7 +51,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @Composable
 fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Project>) {
     var projects: List<Project> by rememberSaveable { mutableStateOf(emptyList()) }
-    var rowSize by remember { mutableStateOf(0) }
+    var rowSize by rememberSaveable { mutableStateOf(0) }
     var fetchJobs: List<Deferred<List<Project>>> by rememberSaveable { mutableStateOf(emptyList()) }
     var joinJob: Job? by rememberSaveable { mutableStateOf(null) }
     val scope = rememberCoroutineScope()
@@ -95,7 +100,7 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
         ) {
             if (projects.isNotEmpty()) {
                 for (mod in projects.take(rowSize)) {
-                    ModCard(mod)
+                    ProjectCard(mod)
                 }
             } else {
                 for (i in 0 until rowSize) {
@@ -108,9 +113,14 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun RowScope.ModCard(project: Project) {
+private fun RowScope.ProjectCard(project: Project) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val weight by animateFloatAsState(if (isHovered) 0f else 1f)
+
     Card(
-        modifier = Modifier.weight(1f).aspectRatio(1.1f).pointerHoverIcon(PointerIcon.Hand),
+        modifier = Modifier.weight(1f).aspectRatio(1.1f).pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource),
         onClick = { if (project.url.isNotEmpty()) openURL(URI(project.url)) }
     ) {
         Column {
@@ -122,7 +132,7 @@ private fun RowScope.ModCard(project: Project) {
                 Surface(
                     color = UI.colors.surface1,
                     modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = UI.defaultCornerShape,
+                    shape = UI.defaultRoundedCornerShape,
                     elevation = 1.dp
                 ) {
                     project.logoUrl?.let { url ->
@@ -134,7 +144,7 @@ private fun RowScope.ModCard(project: Project) {
                             modifier = Modifier.fillMaxSize()
                         )
                     } ?: Image(
-                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.jpg")),
+                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
                         contentDescription = "${project.name} thumbnail",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -161,50 +171,100 @@ private fun RowScope.ModCard(project: Project) {
                     )
                 }
             }
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                project.imageUrl?.let { url ->
-                    AsyncImage(
-                        key = "image-${project.key}",
-                        url = url,
-                        painterFor = { remember { BitmapPainter(it) } },
+
+            if (weight < 1) {
+                Column(
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.weight(1 - weight).fillMaxWidth()
+                ) {
+                    Text(
+                        project.description,
+                        style = MaterialTheme.typography.body2,
+                        minLines = 4,
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = UI.mediumPadding, end = UI.mediumPadding),
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
+                        ) {
+                            Icon(FeatherIcons.Download, "Downloads", Modifier.size(UI.mediumIconSize))
+                            Text(project.downloads.readable(), style = MaterialTheme.typography.body2)
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
+                        ) {
+                            Icon(FeatherIcons.Calendar, "Last updated", Modifier.size(UI.mediumIconSize))
+                            Text(project.lastUpdated.readable(), style = MaterialTheme.typography.body2)
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = UI.largePadding),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconTextButton(
+                            onClick = {},
+                            colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.surface1),
+                            imageVector = FeatherIcons.Eye,
+                            text = UI.Text.VIEW
+                        )
+
+                        IconTextButton(
+                            onClick = {},
+                            colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.green),
+                            imageVector = FeatherIcons.Plus,
+                            text = UI.Text.INSTALL
+                        )
+                    }
+                }
+            }
+
+            if (weight > 0) {
+                Box(modifier = Modifier.weight(weight).fillMaxWidth()) {
+                    project.imageUrl?.let { url ->
+                        AsyncImage(
+                            key = "image-${project.key}",
+                            url = url,
+                            painterFor = { remember { BitmapPainter(it) } },
+                            contentDescription = "${project.name} image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } ?: Image(
+                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
                         contentDescription = "${project.name} image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                } ?: Image(
-                    bitmap = loadImageBitmap(resourceAsStream("/img/pack.jpg")),
-                    contentDescription = "${project.name} image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
 
-                Row(
-                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, end = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ProjectChip(
-                        name = "Downloads",
-                        icon = FontAwesomeIcons.Solid.Download,
-                        text = project.downloads.readable()
-                    )
-                    ProjectChip(
-                        name = "Last updated",
-                        icon = FontAwesomeIcons.Solid.Calendar,
-                        text = project.lastUpdated.readable()
-                    )
+                    Row(
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(start = 10.dp, end = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProjectChip(
+                            name = "Downloads",
+                            icon = FeatherIcons.Download,
+                            text = project.downloads.readable()
+                        )
+                        ProjectChip(
+                            name = "Last updated",
+                            icon = FeatherIcons.Calendar,
+                            text = project.lastUpdated.readable()
+                        )
+                    }
                 }
             }
-
-            Text(
-                project.description,
-                style = MaterialTheme.typography.body2,
-                modifier = Modifier.fillMaxWidth().height(80.dp).padding(UI.mediumPadding),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
         }
-
     }
 }
 

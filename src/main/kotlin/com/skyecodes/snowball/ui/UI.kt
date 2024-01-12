@@ -1,17 +1,22 @@
 package com.skyecodes.snowball.ui
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Colors
+import androidx.compose.material.Typography
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 object UI {
-    val defaultCornerShape = RoundedCornerShape(15.dp)
+    val defaultRoundedCornerShape = RoundedCornerShape(5.dp)
+    val largeRoundedCornerShape = RoundedCornerShape(15.dp)
     val titleFontSize = 20.sp
     val subtitleFontSize = 16.sp
     val smallFontSize = 10.sp
@@ -22,8 +27,15 @@ object UI {
     val smallPadding = 5.dp
 
     object Text {
-        const val CREATE_NEW_INSTANCE = "Create new instance"
+        const val VIEW = "View"
+        const val INSTALL = "Install"
         const val NO_INSTANCES_FOUND = "No instances found"
+        const val CREATE_NEW_INSTANCE = "Create new instance"
+        const val INSTANCE_NAME = "Instance name"
+        const val MINECRAFT_VERSION = "Minecraft version"
+        const val INCLUDE_SNAPSHOTS = "Include snapshots"
+        const val MOD_LOADER = "Mod loader"
+        const val CREATE = "Create"
     }
 
     var colors: Palette = Mocha
@@ -89,9 +101,9 @@ object UI {
 
         override val material = lightColors(
             primary = mauve,
-            primaryVariant = blue,
-            secondary = sky,
-            secondaryVariant = sapphire,
+            primaryVariant = mauve,
+            secondary = mauve,
+            secondaryVariant = mauve,
             background = base,
             surface = surface0,
             error = red
@@ -107,7 +119,9 @@ object UI {
         override val maroon = Color(0xffeba0ac)
         override val peach = Color(0xfffab387)
         override val yellow = Color(0xfff9e2af)
-        override val green = Color(0xffa6e3a1)
+
+        //override val green = Color(0xffa6e3a1)
+        override val green = Color(0xff508e54)
         override val teal = Color(0xff94e2d5)
         override val sky = Color(0xff89dceb)
         override val sapphire = Color(0xff74c7ec)
@@ -128,9 +142,9 @@ object UI {
 
         override val material = darkColors(
             primary = mauve,
-            primaryVariant = blue,
-            secondary = sky,
-            secondaryVariant = sapphire,
+            primaryVariant = mauve,
+            secondary = mauve,
+            secondaryVariant = mauve,
             background = base,
             surface = surface0,
             error = red
@@ -138,20 +152,28 @@ object UI {
     }
 
     object Font {
-        private val black = Font("font/Inter-Black.ttf", FontWeight.Black)
-        private val bold = Font("font/Inter-Bold.ttf", FontWeight.Bold)
-        private val extraBold = Font("font/Inter-ExtraBold.ttf", FontWeight.ExtraBold)
-        private val extraLight = Font("font/Inter-ExtraLight.ttf", FontWeight.ExtraLight)
-        private val light = Font("font/Inter-Light.ttf", FontWeight.Light)
-        private val medium = Font("font/Inter-Medium.ttf", FontWeight.Medium)
-        private val regular = Font("font/Inter-Regular.ttf")
-        private val semiBold = Font("font/Inter-SemiBold.ttf", FontWeight.SemiBold)
-        private val thin = Font("font/Inter-Thin.ttf", FontWeight.Thin)
 
-        val family = FontFamily(black, bold, extraBold, extraLight, light, medium, regular, semiBold, thin)
+        val family = FontFamily(
+            Font("font/Inter-Black.ttf", FontWeight.Black),
+            Font("font/Inter-Bold.ttf", FontWeight.Bold),
+            Font("font/Inter-ExtraBold.ttf", FontWeight.ExtraBold),
+            Font("font/Inter-ExtraLight.ttf", FontWeight.ExtraLight),
+            Font("font/Inter-Light.ttf", FontWeight.Light),
+            Font("font/Inter-Medium.ttf", FontWeight.Medium),
+            Font("font/Inter-Regular.ttf"),
+            Font("font/Inter-SemiBold.ttf", FontWeight.SemiBold),
+            Font("font/Inter-Thin.ttf", FontWeight.Thin),
+            Font("font/Inter-BlackItalic.ttf", FontWeight.Black, FontStyle.Italic),
+            Font("font/Inter-BoldItalic.ttf", FontWeight.Bold, FontStyle.Italic),
+            Font("font/Inter-ExtraBoldItalic.ttf", FontWeight.ExtraBold, FontStyle.Italic),
+            Font("font/Inter-ExtraLightItalic.ttf", FontWeight.ExtraLight, FontStyle.Italic),
+            Font("font/Inter-LightItalic.ttf", FontWeight.Light, FontStyle.Italic),
+            Font("font/Inter-MediumItalic.ttf", FontWeight.Medium, FontStyle.Italic),
+            Font("font/Inter-Italic.ttf", style = FontStyle.Italic),
+            Font("font/Inter-SemiBoldItalic.ttf", FontWeight.SemiBold, FontStyle.Italic),
+            Font("font/Inter-ThinItalic.ttf", FontWeight.Thin, FontStyle.Italic)
+        )
     }
-
-    val shapes = Shapes(defaultCornerShape, defaultCornerShape, defaultCornerShape)
 
     val typography = Typography(
         defaultFontFamily = Font.family,

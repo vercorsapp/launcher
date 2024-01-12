@@ -28,7 +28,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-screenmodel:${property("voyager.version")}")
     implementation("cafe.adriel.voyager:voyager-tab-navigator:${property("voyager.version")}")
     implementation("cafe.adriel.voyager:voyager-transitions:${property("voyager.version")}")
-    implementation("br.com.devsrsouza.compose.icons:font-awesome:${property("compose-icons.version")}")
+    implementation("br.com.devsrsouza.compose.icons:feather:${property("compose-icons.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")
     implementation("org.ocpsoft.prettytime:prettytime:${property("prettytime.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")

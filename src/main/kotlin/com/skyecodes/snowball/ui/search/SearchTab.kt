@@ -6,17 +6,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Search
-import compose.icons.fontawesomeicons.solid.Server
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Search
 
 object SearchTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
             val title = "Search"
-            val icon = rememberVectorPainter(FontAwesomeIcons.Solid.Search)
+            val icon = rememberVectorPainter(FeatherIcons.Search)
 
             return remember {
                 TabOptions(

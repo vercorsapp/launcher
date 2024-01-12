@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable(with = ModLoaderSerializer::class)
 enum class ModLoader(override val value: String) : StringEnumerable {
+    Vanilla("vanilla"),
     Forge("forge"),
     NeoForge("neoforge"),
     Fabric("fabric"),

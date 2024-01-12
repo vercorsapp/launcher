@@ -4,7 +4,7 @@ package com.skyecodes.snowball.data.mojang
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VersionManifest(
+data class MojangVersionManifest(
     val latest: Latest,
     val versions: List<Version>
 ) {
@@ -21,9 +21,9 @@ data class VersionManifest(
         val releaseTime: MojangInstant,
         val sha1: String,
         val time: MojangInstant,
-        val type: String,
+        val type: MojangReleaseType,
         val url: String
     )
 }
 
-operator fun List<VersionManifest.Version>.get(id: String): VersionManifest.Version = first { it.id == id }
+operator fun List<MojangVersionManifest.Version>.get(id: String): MojangVersionManifest.Version = first { it.id == id }

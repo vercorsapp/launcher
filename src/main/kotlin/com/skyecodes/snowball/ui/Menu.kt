@@ -53,6 +53,7 @@ private fun TabNavigationItem(tab: Tab) {
             colors = if (tabNavigator.current === tab) ButtonDefaults.buttonColors(backgroundColor = UI.colors.surface1)
             else ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colors.onSurface),
             contentPadding = PaddingValues(12.dp),
+            shape = UI.largeRoundedCornerShape,
             onClick = { tabNavigator.current = tab }
         ) {
             Icon(tab.options.icon!!, tab.options.title, Modifier.fillMaxSize())
@@ -65,7 +66,7 @@ private fun TabTooltip(tab: Tab) {
     Surface(
         color = UI.colors.surface1,
         modifier = Modifier.shadow(4.dp),
-        shape = UI.defaultCornerShape
+        shape = UI.largeRoundedCornerShape
     ) {
         Text(
             style = MaterialTheme.typography.body1,

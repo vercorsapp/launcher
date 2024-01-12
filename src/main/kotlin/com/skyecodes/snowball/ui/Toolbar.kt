@@ -19,11 +19,10 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.skyecodes.snowball.APP_NAME
 import com.skyecodes.snowball.APP_VERSION
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Times
-import compose.icons.fontawesomeicons.solid.WindowMaximize
-import compose.icons.fontawesomeicons.solid.WindowMinimize
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Minus
+import compose.icons.feathericons.Square
+import compose.icons.feathericons.X
 
 @Composable
 fun Toolbar(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit) {
@@ -42,9 +41,9 @@ fun Toolbar(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit)
         }
         Spacer(Modifier.weight(1f))
         Row {
-            WindowButton(FontAwesomeIcons.Solid.WindowMinimize, "Minimize Window", onMinimize)
-            WindowButton(FontAwesomeIcons.Solid.WindowMaximize, "Maximize Window", onMaximize)
-            WindowButton(FontAwesomeIcons.Solid.Times, "Close Window", onClose, true)
+            WindowButton(FeatherIcons.Minus, "Minimize Window", onMinimize)
+            WindowButton(FeatherIcons.Square, "Maximize Window", onMaximize)
+            WindowButton(FeatherIcons.X, "Close Window", onClose, true)
         }
     }
 }

@@ -58,7 +58,7 @@ fun WindowScope.App(
     MaterialTheme(
         colors = colors,
         typography = UI.typography,
-        shapes = UI.shapes
+        //shapes = UI.shapes
     ) {
         TabNavigator(HomeTab) {
             Row {

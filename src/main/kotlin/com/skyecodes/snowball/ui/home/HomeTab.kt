@@ -18,9 +18,8 @@ import com.skyecodes.snowball.data.app.convertModrinth
 import com.skyecodes.snowball.service.CurseforgeService
 import com.skyecodes.snowball.service.ModrinthService
 import com.skyecodes.snowball.ui.UI
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Home
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Home
 import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
 
@@ -29,7 +28,7 @@ object HomeTab : Tab {
         @Composable
         get() {
             val title = "Home"
-            val icon = rememberVectorPainter(FontAwesomeIcons.Solid.Home)
+            val icon = rememberVectorPainter(FeatherIcons.Home)
 
             return remember {
                 TabOptions(
