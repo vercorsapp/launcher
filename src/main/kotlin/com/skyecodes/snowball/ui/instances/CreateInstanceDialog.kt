@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
@@ -16,9 +17,12 @@ import com.skyecodes.snowball.data.mojang.MojangReleaseType
 import com.skyecodes.snowball.data.mojang.MojangVersionManifest
 import com.skyecodes.snowball.service.MojangService
 import com.skyecodes.snowball.ui.UI
+import com.skyecodes.snowball.ui.util.ScrollableExposedDropdownMenu
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ChevronDown
 import compose.icons.feathericons.ChevronUp
+import compose.icons.feathericons.Clock
+import compose.icons.feathericons.Star
 import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
 
@@ -86,11 +90,45 @@ fun CreateInstanceDialog(onClose: () -> Unit) {
                                 }
                             )
 
-                            ExposedDropdownMenu(
+                            ScrollableExposedDropdownMenu(
                                 expanded = isVersionDropdownMenuExpanded,
                                 onDismissRequest = { isVersionDropdownMenuExpanded = false }
                             ) {
                                 versionManifest?.let { manifest ->
+                                    /*DropdownMenuItem(
+                                        onClick = {
+                                            minecraftVersion = manifest.latest.release
+                                            isVersionDropdownMenuExpanded = false
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 10.dp)
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("Latest release (${manifest.latest.release})")
+                                            Icon(FeatherIcons.Star, null, Modifier.size(UI.mediumIconSize))
+                                        }
+                                    }
+
+                                    if (includeSnapshots) {
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                minecraftVersion = manifest.latest.snapshot
+                                                isVersionDropdownMenuExpanded = false
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 10.dp)
+                                        ) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text("Latest snapshot (${manifest.latest.snapshot})")
+                                                Icon(FeatherIcons.Clock, null, Modifier.size(UI.mediumIconSize))
+                                            }
+                                        }
+                                    }*/
+
                                     manifest.versions
                                         .filter { version -> version.type == MojangReleaseType.Release || includeSnapshots }
                                         .forEach { version ->
@@ -101,7 +139,23 @@ fun CreateInstanceDialog(onClose: () -> Unit) {
                                                 },
                                                 contentPadding = PaddingValues(horizontal = 10.dp)
                                             ) {
-                                                Text(version.id)
+                                                Row(
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    var text = version.id
+                                                    var icon: ImageVector? = null
+                                                    if (version.id == manifest.latest.release) {
+                                                        text += " (latest release)"
+                                                        icon = FeatherIcons.Star
+                                                    } else if (version.id == manifest.latest.snapshot) {
+                                                        text += " (latest snapshot)"
+                                                        icon = FeatherIcons.Clock
+                                                    }
+                                                    Text(text)
+                                                    icon?.let { Icon(it, null, Modifier.size(UI.mediumIconSize)) }
+                                                }
                                             }
                                         }
                                 }

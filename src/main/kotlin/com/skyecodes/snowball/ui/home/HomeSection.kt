@@ -183,7 +183,7 @@ private fun RowScope.ProjectCard(project: Project) {
                         minLines = 4,
                         maxLines = 4,
                         modifier = Modifier.fillMaxWidth()
-                            .padding(start = UI.mediumPadding, end = UI.mediumPadding),
+                            .padding(UI.mediumLargePadding),
                         overflow = TextOverflow.Ellipsis
                     )
 

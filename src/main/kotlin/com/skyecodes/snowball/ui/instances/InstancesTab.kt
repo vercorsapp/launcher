@@ -1,5 +1,8 @@
 package com.skyecodes.snowball.ui.instances
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,7 +62,7 @@ object InstancesTab : Tab {
                 )
             }
 
-            if (openDialog) {
+            AnimatedVisibility(openDialog, enter = fadeIn(), exit = fadeOut()) {
                 CreateInstanceDialog(
                     onClose = { openDialog = false }
                 )

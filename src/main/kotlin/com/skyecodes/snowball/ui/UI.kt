@@ -23,6 +23,7 @@ object UI {
     val mediumIconSize = 16.dp
     val smallIconSize = 12.dp
     val largePadding = 20.dp
+    val mediumLargePadding = 15.dp
     val mediumPadding = 10.dp
     val smallPadding = 5.dp
 
