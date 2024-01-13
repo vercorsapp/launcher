@@ -49,7 +49,7 @@ tasks.test {
 
 compose.desktop {
     application {
-        mainClass = "com.skyecodes.snowball.MainKt"
+        mainClass = "com.skyecodes.vercors.MainKt"
 
         nativeDistributions {
             targetFormats(
@@ -60,9 +60,9 @@ compose.desktop {
                 TargetFormat.Exe,
                 TargetFormat.Msi
             )
-            packageName = "Snowball Launcher"
+            packageName = "Vercors"
             packageVersion = version as String
-            description = "Snowball Launcher"
+            description = "Vercors"
             copyright = "Copyright (c) ${Calendar.getInstance().get(Calendar.YEAR)} skyecodes"
             vendor = "skyecodes"
             licenseFile = file("LICENSE")

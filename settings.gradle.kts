@@ -11,4 +11,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "snowball-launcher"
+rootProject.name = "vercors"

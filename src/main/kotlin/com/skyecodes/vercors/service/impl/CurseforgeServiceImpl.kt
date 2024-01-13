@@ -1,0 +1,77 @@
+package com.skyecodes.vercors.service.impl
+
+import com.skyecodes.vercors.data.app.SortOrder
+import com.skyecodes.vercors.data.curseforge.CurseforgeCategoriesResponse
+import com.skyecodes.vercors.data.curseforge.CurseforgeProjectSearchResponse
+import com.skyecodes.vercors.data.curseforge.CurseforgeProjectSearchSortField
+import com.skyecodes.vercors.service.CurseforgeService
+import com.skyecodes.vercors.service.HttpService
+import com.skyecodes.vercors.service.jsonBody
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+
+class CurseforgeServiceImpl(private val httpService: HttpService) : CurseforgeService {
+    override suspend fun getPopularMods() = search(MOD_CLASS_ID)
+
+    override suspend fun getPopularModpacks() = search(MODPACK_CLASS_ID)
+
+    override suspend fun getPopularResourcePacks() = search(RESOURCEPACK_CLASS_ID)
+
+    override suspend fun getPopularShaderPacks() = search(SHADERPACK_CLASS_ID)
+
+    override suspend fun getPopularWorlds() = search(WORLD_CLASS_ID)
+
+    override suspend fun getClasses(): CurseforgeCategoriesResponse = get("/v1/categories") {
+        parameter("gameId", MINECRAFT_GAME_ID)
+        parameter("classesOnly", true)
+    }.body()
+
+    override suspend fun search(
+        classId: Int,
+        searchFilter: String?,
+        sortField: CurseforgeProjectSearchSortField,
+        sortOrder: SortOrder,
+        pageSize: Int
+    ): CurseforgeProjectSearchResponse = get("/v1/mods/search") {
+        parameter("gameId", MINECRAFT_GAME_ID)
+        parameter("classId", classId)
+        if (searchFilter != null) parameter("searchFilter", searchFilter)
+        parameter("sortField", sortField.value)
+        parameter("sortOrder", sortOrder.value)
+        parameter("pageSize", pageSize)
+    }.body()
+
+    private suspend fun get(
+        urlString: String,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): HttpResponse = httpService.client.get(BASE_URL + urlString) {
+        init()
+        block()
+    }
+
+    private suspend inline fun <reified T> post(
+        urlString: String,
+        body: T,
+        block: HttpRequestBuilder.() -> Unit = {}
+    ): HttpResponse = httpService.client.post(BASE_URL + urlString) {
+        init()
+        jsonBody(body)
+        block()
+    }
+
+    private fun HttpRequestBuilder.init() {
+        header("x-api-key", API_KEY)
+    }
+
+    companion object {
+        private const val BASE_URL = "https://api.curseforge.com"
+        private const val API_KEY = "\$2a\$10\$lCr8PZ1p3YwsVpHK4euhJe..bDmLaj52azYRTfvP.oOZghtCD.hbi"
+        private const val MINECRAFT_GAME_ID = 432
+        private const val MODPACK_CLASS_ID = 4471
+        private const val MOD_CLASS_ID = 6
+        private const val RESOURCEPACK_CLASS_ID = 12
+        private const val SHADERPACK_CLASS_ID = 6552
+        private const val WORLD_CLASS_ID = 17
+    }
+}
