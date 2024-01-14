@@ -1,22 +1,18 @@
 package com.skyecodes.vercors
 
-import androidx.compose.ui.input.pointer.PointerIcon
 import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
-import java.awt.Cursor
 import java.awt.Desktop
 import java.net.URI
 import java.time.Instant
 
-private object Utils
+private class Utils
 
 val appJson = Json
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
 
 fun resource(name: String) = Utils::class.java.getResource(name)!!
-
-fun handCursor() = PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
 
 fun openURL(uri: URI) = Desktop.getDesktop().browse(uri)
 
@@ -33,4 +29,4 @@ fun Long.readable(decimals: Int = 1): String {
 
 private val prettyTime = PrettyTime()
 
-fun Instant.readable(full: Boolean = false): String = prettyTime.format(this)
+fun Instant.readable(): String = prettyTime.format(this)

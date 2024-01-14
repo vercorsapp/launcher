@@ -29,12 +29,13 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-tab-navigator:${property("voyager.version")}")
     implementation("cafe.adriel.voyager:voyager-transitions:${property("voyager.version")}")
     implementation("br.com.devsrsouza.compose.icons:feather:${property("compose-icons.version")}")
+    implementation("br.com.devsrsouza.compose.icons:simple-icons:${property("compose-icons.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")
     implementation("org.ocpsoft.prettytime:prettytime:${property("prettytime.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
     implementation("org.kodein.di:kodein-di-framework-compose:${property("kodein.version")}")
     implementation("org.kodein.di:kodein-di-conf:${property("kodein.version")}")
-    runtimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
+    implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.10")
 }
@@ -62,16 +63,32 @@ compose.desktop {
             )
             packageName = "Vercors"
             packageVersion = version as String
-            description = "Vercors"
+            description = "A modern Minecraft launcher with mod support"
             copyright = "Copyright (c) ${Calendar.getInstance().get(Calendar.YEAR)} skyecodes"
             vendor = "skyecodes"
             licenseFile = file("LICENSE")
+
+            windows {
+                perUserInstall = true
+                shortcut = true
+                menu = true
+            }
+
+            linux {
+                shortcut = true
+            }
 
             macOS {
                 packageVersion = (version as String)
                     .split('.')
                     .mapIndexed { index, s -> if (index == 0) (s.toInt() + 1).toString() else s }
                     .joinToString(".")
+            }
+
+            buildTypes.release.proguard {
+                configurationFiles.from(file("proguard-rules.pro"))
+                isEnabled = true
+                obfuscate = true
             }
         }
     }

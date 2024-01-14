@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Instance(
     val name: String,
-    val version: String,
-    val loader: ModLoader?,
-    val loaderVersion: String?,
+    val gameVersion: String,
+    val loader: Loader? = null,
+    val loaderVersion: String? = null,
     val created: AppInstant,
-    val lastLaunched: AppInstant
+    val lastLaunched: AppInstant? = null
 )

@@ -16,11 +16,11 @@ class HttpServiceImpl : HttpService {
             json(appJson)
         }
         install(HttpTimeout) {
-            connectTimeoutMillis = 1000
+            requestTimeoutMillis = 3000
         }
         install(HttpRequestRetry) {
-            retryOnServerErrors(3)
-            retryOnException(3, true)
+            retryOnServerErrors(1)
+            retryOnException(1, true)
             constantDelay()
         }
         install(UserAgent) {

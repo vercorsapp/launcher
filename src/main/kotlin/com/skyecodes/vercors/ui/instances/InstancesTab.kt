@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -58,7 +57,7 @@ object InstancesTab : Tab {
                     onClick = { openDialog = true },
                     imageVector = FeatherIcons.Plus,
                     text = UI.Text.CREATE_NEW_INSTANCE,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.green)
+                    colors = UI.successButtonColors
                 )
             }
 
@@ -66,6 +65,10 @@ object InstancesTab : Tab {
                 CreateInstanceDialog(
                     onClose = { openDialog = false }
                 )
+            }
+        } else {
+            Column {
+                instances.forEach { Text(it.name) }
             }
         }
     }

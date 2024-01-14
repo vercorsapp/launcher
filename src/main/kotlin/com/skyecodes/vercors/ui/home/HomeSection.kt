@@ -70,15 +70,17 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
             }
         }
         joinJob = scope.launch {
-            projects = fetchJobs.awaitAll().map { it.toMutableList() }.let { lists ->
+            projects = fetchJobs.awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {
-                    var curListIdx = 0
-                    while (size < 10) {
-                        val v = lists[curListIdx].removeFirst()
-                        if (none { it.name == v.name }) {
-                            add(v)
-                            curListIdx++
-                            if (curListIdx == lists.size) curListIdx = 0
+                    if (lists.isNotEmpty()) {
+                        var curListIdx = 0
+                        while (size < 10) {
+                            val v = lists[curListIdx].removeFirst()
+                            if (none { it.name == v.name }) {
+                                add(v)
+                                curListIdx++
+                                if (curListIdx == lists.size) curListIdx = 0
+                            }
                         }
                     }
                 }
@@ -220,7 +222,7 @@ private fun RowScope.ProjectCard(project: Project) {
 
                         IconTextButton(
                             onClick = {},
-                            colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.green),
+                            colors = UI.successButtonColors,
                             imageVector = FeatherIcons.Plus,
                             text = UI.Text.INSTALL
                         )

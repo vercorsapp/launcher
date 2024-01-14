@@ -16,5 +16,7 @@ private class AppInstantSerializer : KSerializer<AppInstant> {
 
     override fun deserialize(decoder: Decoder): AppInstant = Instant.parse(decoder.decodeString())
 
-    override fun serialize(encoder: Encoder, value: AppInstant) {}
+    override fun serialize(encoder: Encoder, value: AppInstant) {
+        encoder.encodeString(value.toString())
+    }
 }

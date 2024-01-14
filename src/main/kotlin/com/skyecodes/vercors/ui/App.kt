@@ -43,7 +43,7 @@ fun WindowScope.App(
     }
 
     LaunchedEffect(true) {
-        instances = instanceService.fetchInstances(this)
+        instances = instanceService.loadInstances(this)
     }
 
     LaunchedEffect(configuration) {

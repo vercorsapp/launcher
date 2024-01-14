@@ -1,14 +1,11 @@
 package com.skyecodes.vercors.ui
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Colors
-import androidx.compose.material.Typography
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
@@ -35,11 +32,15 @@ object UI {
         const val INSTANCE_NAME = "Instance name"
         const val MINECRAFT_VERSION = "Minecraft version"
         const val INCLUDE_SNAPSHOTS = "Include snapshots"
-        const val MOD_LOADER = "Mod loader"
+        const val LOADER = "Loader"
+        const val LOADER_VERSION = "Loader version"
+        const val CANCEL = "Cancel"
         const val CREATE = "Create"
     }
 
     var colors: Palette = Mocha
+
+    val successButtonColors @Composable get() = ButtonDefaults.buttonColors(backgroundColor = colors.green)
 
     interface Palette {
         val rosewater: Color
@@ -155,24 +156,9 @@ object UI {
     object Font {
 
         val family = FontFamily(
-            Font("font/Inter-Black.ttf", FontWeight.Black),
-            Font("font/Inter-Bold.ttf", FontWeight.Bold),
-            Font("font/Inter-ExtraBold.ttf", FontWeight.ExtraBold),
-            Font("font/Inter-ExtraLight.ttf", FontWeight.ExtraLight),
-            Font("font/Inter-Light.ttf", FontWeight.Light),
-            Font("font/Inter-Medium.ttf", FontWeight.Medium),
-            Font("font/Inter-Regular.ttf"),
-            Font("font/Inter-SemiBold.ttf", FontWeight.SemiBold),
-            Font("font/Inter-Thin.ttf", FontWeight.Thin),
-            Font("font/Inter-BlackItalic.ttf", FontWeight.Black, FontStyle.Italic),
-            Font("font/Inter-BoldItalic.ttf", FontWeight.Bold, FontStyle.Italic),
-            Font("font/Inter-ExtraBoldItalic.ttf", FontWeight.ExtraBold, FontStyle.Italic),
-            Font("font/Inter-ExtraLightItalic.ttf", FontWeight.ExtraLight, FontStyle.Italic),
-            Font("font/Inter-LightItalic.ttf", FontWeight.Light, FontStyle.Italic),
-            Font("font/Inter-MediumItalic.ttf", FontWeight.Medium, FontStyle.Italic),
-            Font("font/Inter-Italic.ttf", style = FontStyle.Italic),
-            Font("font/Inter-SemiBoldItalic.ttf", FontWeight.SemiBold, FontStyle.Italic),
-            Font("font/Inter-ThinItalic.ttf", FontWeight.Thin, FontStyle.Italic)
+            Font("font/inter/Inter-Light.ttf", FontWeight.Light),
+            Font("font/inter/Inter-Medium.ttf", FontWeight.Medium),
+            Font("font/inter/Inter-Regular.ttf"),
         )
     }
 
