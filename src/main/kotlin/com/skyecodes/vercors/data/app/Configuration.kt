@@ -6,10 +6,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Configuration(
-    val theme: Theme
+    val theme: Theme = Theme.SYSTEM,
+    val defaultScene: AppScene = AppScene.Home
 ) {
     companion object {
-        val DEFAULT = Configuration(Theme.SYSTEM)
+        val DEFAULT = Configuration()
     }
 
     @Serializable(with = ThemeSerializer::class)

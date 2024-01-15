@@ -8,7 +8,10 @@ import java.time.Instant
 
 private class Utils
 
-val appJson = Json
+val appJson = Json {
+    encodeDefaults = true
+    ignoreUnknownKeys = true
+}
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
 

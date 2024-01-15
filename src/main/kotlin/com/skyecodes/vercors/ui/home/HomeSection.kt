@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.ui.home
 
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,8 +22,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
@@ -118,151 +117,151 @@ fun HomeSection(headerTitle: String, vararg providers: suspend () -> List<Projec
 private fun RowScope.ProjectCard(project: Project) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
-    val weight by animateFloatAsState(if (isHovered) 0f else 1f)
 
     Card(
-        modifier = Modifier.weight(1f).aspectRatio(1.1f).pointerHoverIcon(PointerIcon.Hand)
-            .hoverable(interactionSource),
+        modifier = Modifier.weight(1f).aspectRatio(1.1f).hoverable(interactionSource),
         onClick = { if (project.url.isNotEmpty()) openURL(URI(project.url)) }
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
-            ) {
-                Surface(
-                    color = UI.colors.surface1,
-                    modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                    shape = UI.defaultRoundedCornerShape,
-                    elevation = 1.dp
-                ) {
-                    project.logoUrl?.let { url ->
-                        AsyncImage(
-                            key = "project/${project.provider.value}/${project.slug}/logo",
-                            url = url,
-                            painterFor = { remember { BitmapPainter(it) } },
-                            contentDescription = "${project.name} logo",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } ?: Image(
-                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
-                        contentDescription = "${project.name} logo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Column {
-                    Text(
-                        project.name,
-                        style = MaterialTheme.typography.subtitle1,
-                        maxLines = 1,
-                        fontWeight = FontWeight.ExtraBold,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append("by ")
-                            }
-                            append(project.author)
-                        },
-                        style = MaterialTheme.typography.subtitle2,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            if (weight < 1) {
-                Column(
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.weight(1 - weight).fillMaxWidth()
-                ) {
-                    Text(
-                        project.description,
-                        style = MaterialTheme.typography.body2,
-                        minLines = 4,
-                        maxLines = 4,
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(UI.mediumLargePadding),
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
-                        ) {
-                            Icon(FeatherIcons.Download, "Downloads", Modifier.size(UI.mediumIconSize))
-                            Text(project.downloads.readable(), style = MaterialTheme.typography.body2)
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
-                        ) {
-                            Icon(FeatherIcons.Calendar, "Last updated", Modifier.size(UI.mediumIconSize))
-                            Text(project.lastUpdated.readable(), style = MaterialTheme.typography.body2)
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = UI.largePadding),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        IconTextButton(
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.surface1),
-                            imageVector = FeatherIcons.Eye,
-                            text = UI.Text.VIEW
-                        )
-
-                        IconTextButton(
-                            onClick = {},
-                            colors = UI.successButtonColors,
-                            imageVector = FeatherIcons.Plus,
-                            text = UI.Text.INSTALL
-                        )
-                    }
-                }
-            }
-
-            if (weight > 0) {
-                Box(modifier = Modifier.weight(weight).fillMaxWidth()) {
-                    project.imageUrl?.let { url ->
-                        AsyncImage(
-                            key = "project/${project.provider.value}/${project.slug}/image",
-                            url = url,
-                            painterFor = { remember { BitmapPainter(it) } },
-                            contentDescription = "${project.name} image",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } ?: Image(
-                        bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
+                project.imageUrl?.let { url ->
+                    AsyncImage(
+                        key = "project/${project.provider.value}/${project.slug}/image",
+                        url = url,
+                        painterFor = { remember { BitmapPainter(it) } },
                         contentDescription = "${project.name} image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
+                } ?: Image(
+                    bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
+                    contentDescription = "${project.name} image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
 
-                    Row(
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(start = 10.dp, end = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(start = 10.dp, end = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProjectChip(
+                        name = "Downloads",
+                        icon = FeatherIcons.Download,
+                        text = project.downloads.readable()
+                    )
+                    ProjectChip(
+                        name = "Last updated",
+                        icon = FeatherIcons.Calendar,
+                        text = project.lastUpdated.readable()
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.background(UI.colors.surface1).align(Alignment.TopCenter)
+                    .fillMaxWidth().animateContentSize().apply { if (isHovered) fillMaxHeight() }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
+                ) {
+                    Surface(
+                        color = UI.colors.surface1,
+                        modifier = Modifier.fillMaxHeight().aspectRatio(1f),
+                        shape = UI.defaultRoundedCornerShape,
+                        elevation = 1.dp
                     ) {
-                        ProjectChip(
-                            name = "Downloads",
-                            icon = FeatherIcons.Download,
-                            text = project.downloads.readable()
+                        project.logoUrl?.let { url ->
+                            AsyncImage(
+                                key = "project/${project.provider.value}/${project.slug}/logo",
+                                url = url,
+                                painterFor = { remember { BitmapPainter(it) } },
+                                contentDescription = "${project.name} logo",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } ?: Image(
+                            bitmap = loadImageBitmap(resourceAsStream("/img/pack.png")),
+                            contentDescription = "${project.name} logo",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
                         )
-                        ProjectChip(
-                            name = "Last updated",
-                            icon = FeatherIcons.Calendar,
-                            text = project.lastUpdated.readable()
+                    }
+                    Column {
+                        Text(
+                            project.name,
+                            style = MaterialTheme.typography.subtitle1,
+                            maxLines = 1,
+                            fontWeight = FontWeight.ExtraBold,
+                            overflow = TextOverflow.Ellipsis
                         )
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("by ")
+                                }
+                                append(project.author)
+                            },
+                            style = MaterialTheme.typography.subtitle2,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                if (isHovered) {
+                    Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.weight(1f).fillMaxWidth()
+                    ) {
+                        Text(
+                            project.description,
+                            style = MaterialTheme.typography.body2,
+                            minLines = 4,
+                            maxLines = 4,
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(UI.mediumLargePadding),
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
+                            ) {
+                                Icon(FeatherIcons.Download, "Downloads", Modifier.size(UI.mediumIconSize))
+                                Text(project.downloads.readable(), style = MaterialTheme.typography.body2)
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
+                            ) {
+                                Icon(FeatherIcons.Calendar, "Last updated", Modifier.size(UI.mediumIconSize))
+                                Text(project.lastUpdated.readable(), style = MaterialTheme.typography.body2)
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = UI.largePadding),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            IconTextButton(
+                                onClick = {},
+                                colors = ButtonDefaults.buttonColors(backgroundColor = UI.colors.surface1),
+                                imageVector = FeatherIcons.Eye,
+                                text = UI.Text.VIEW
+                            )
+
+                            IconTextButton(
+                                onClick = {},
+                                imageVector = FeatherIcons.Plus,
+                                text = UI.Text.INSTALL
+                            )
+                        }
                     }
                 }
             }
@@ -325,7 +324,7 @@ private fun RowScope.FakeModCard() {
                 drawRoundRect(
                     brush = brush,
                     blendMode = BlendMode.SrcIn,
-                    cornerRadius = CornerRadius(22f)
+                    cornerRadius = CornerRadius(5f)
                 )
             }
         },

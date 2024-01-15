@@ -27,14 +27,13 @@ import com.skyecodes.vercors.ui.util.loadSvgPainter
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 import kotlinx.coroutines.launch
-import org.kodein.di.compose.rememberDI
-import org.kodein.di.instance
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CreateInstanceDialog(onClose: () -> Unit) {
-    val mojangService: MojangService by rememberDI { instance() }
-    val instanceService: InstanceService by rememberDI { instance() }
+    val mojangService = koinInject<MojangService>()
+    val instanceService = koinInject<InstanceService>()
     val interactionSource = remember { MutableInteractionSource() }
     var versionManifest: MojangVersionManifest? by remember { mutableStateOf(null) }
     var instanceName by remember { mutableStateOf("") }

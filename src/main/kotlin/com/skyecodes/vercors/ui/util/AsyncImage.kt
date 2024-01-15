@@ -14,8 +14,7 @@ import androidx.compose.ui.unit.Density
 import com.skyecodes.vercors.service.StorageService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.kodein.di.compose.rememberDI
-import org.kodein.di.instance
+import org.koin.compose.koinInject
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.IOException
@@ -36,7 +35,7 @@ fun AsyncImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
 ) {
-    val storageService: StorageService by rememberDI { instance() }
+    val storageService = koinInject<StorageService>()
 
     val image: ImageBitmap? by produceState(defaultImage) {
         value = withContext(Dispatchers.IO) {

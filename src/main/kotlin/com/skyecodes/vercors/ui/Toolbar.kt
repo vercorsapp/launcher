@@ -16,28 +16,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.skyecodes.vercors.APP_NAME
 import com.skyecodes.vercors.APP_VERSION
+import com.skyecodes.vercors.data.app.AppScene
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Minus
 import compose.icons.feathericons.Square
 import compose.icons.feathericons.X
 
 @Composable
-fun Toolbar(onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit) {
-    val tabNavigator = LocalTabNavigator.current
-
+fun Toolbar(currentScene: AppScene, onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Row(
             modifier = Modifier.padding(UI.mediumPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
         ) {
-            Text(APP_NAME)
-            Text("v$APP_VERSION", style = MaterialTheme.typography.caption)
+            Text(APP_NAME, color = MaterialTheme.colors.primary)
+            Text("v$APP_VERSION", color = MaterialTheme.colors.primary, style = MaterialTheme.typography.caption)
             Text("-", modifier = Modifier.padding(horizontal = UI.smallPadding))
-            Text(tabNavigator.current.options.title)
+            Text(currentScene.title)
         }
         Spacer(Modifier.weight(1f))
         Row {

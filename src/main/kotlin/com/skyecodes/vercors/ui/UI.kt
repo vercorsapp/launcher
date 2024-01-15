@@ -25,6 +25,11 @@ object UI {
     val smallPadding = 5.dp
 
     object Text {
+        const val HOME = "Home"
+        const val INSTANCES = "Instances"
+        const val SEARCH = "Search"
+        const val ACCOUNTS = "Accounts"
+        const val SETTINGS = "Settings"
         const val VIEW = "View"
         const val INSTALL = "Install"
         const val NO_INSTANCES_FOUND = "No instances found"

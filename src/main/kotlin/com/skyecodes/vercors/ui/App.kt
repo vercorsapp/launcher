@@ -1,5 +1,7 @@
 package com.skyecodes.vercors.ui
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -14,15 +16,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import cafe.adriel.voyager.navigator.tab.CurrentTab
-import cafe.adriel.voyager.navigator.tab.TabNavigator
+import com.skyecodes.vercors.data.app.AppScene
 import com.skyecodes.vercors.data.app.Configuration
 import com.skyecodes.vercors.data.app.Instance
 import com.skyecodes.vercors.service.ConfigurationService
 import com.skyecodes.vercors.service.InstanceService
-import com.skyecodes.vercors.ui.home.HomeTab
-import org.kodein.di.compose.rememberDI
-import org.kodein.di.instance
+import com.skyecodes.vercors.ui.accounts.AccountsContent
+import com.skyecodes.vercors.ui.home.HomeContent
+import com.skyecodes.vercors.ui.instances.InstancesContent
+import com.skyecodes.vercors.ui.search.SearchContent
+import com.skyecodes.vercors.ui.settings.SettingsContent
+import moe.tlaster.precompose.navigation.NavHost
+import moe.tlaster.precompose.navigation.rememberNavigator
+import moe.tlaster.precompose.navigation.transition.NavTransition
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,10 +40,12 @@ fun WindowScope.App(
 ) {
     var configuration by remember { mutableStateOf(Configuration.DEFAULT) }
     var instances by remember { mutableStateOf(emptyList<Instance>()) }
-    val configurationService: ConfigurationService by rememberDI { instance() }
-    val instanceService: InstanceService by rememberDI { instance() }
+    val configurationService = koinInject<ConfigurationService>()
+    val instanceService = koinInject<InstanceService>()
     var colors by remember { mutableStateOf(UI.colors.material) }
+    var currentScene by remember { mutableStateOf(configuration.defaultScene) }
     val isSystemDarkTheme = isSystemInDarkTheme()
+    val navigator = rememberNavigator()
 
     LaunchedEffect(true) {
         configuration = configurationService.load()
@@ -60,35 +69,51 @@ fun WindowScope.App(
         typography = UI.typography,
         //shapes = UI.shapes
     ) {
-        TabNavigator(HomeTab) {
-            Row {
-                Surface(
-                    modifier = Modifier.fillMaxHeight().background(color = UI.colors.surface0).shadow(4.dp)
-                ) {
-                    Menu()
+        Row {
+            Surface(
+                modifier = Modifier.fillMaxHeight().background(color = UI.colors.surface0).shadow(4.dp)
+            ) {
+                Menu(currentScene) {
+                    currentScene = it
+                    navigator.navigate(it.route)
                 }
-                Column {
-                    WindowDraggableArea(
-                        modifier = Modifier.combinedClickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                            onDoubleClick = onMaximize,
-                            onLongClick = null
+            }
+            Column {
+                WindowDraggableArea(
+                    modifier = Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                        onDoubleClick = onMaximize,
+                        onLongClick = null
+                    )
+                ) {
+                    Surface(
+                        modifier = Modifier.height(40.dp).fillMaxWidth()
+                            .background(color = UI.colors.surface0)
+                    ) {
+                        Toolbar(currentScene, onMinimize, onMaximize, onClose)
+                    }
+                }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = UI.colors.base
+                ) {
+                    NavHost(
+                        navigator = navigator,
+                        initialRoute = configuration.defaultScene.route,
+                        navTransition = NavTransition(
+                            createTransition = fadeIn(),
+                            destroyTransition = fadeOut(),
+                            pauseTransition = fadeOut(),
+                            resumeTransition = fadeIn()
                         )
                     ) {
-                        Surface(
-                            modifier = Modifier.height(40.dp).fillMaxWidth()
-                                .background(color = UI.colors.surface0)
-                        ) {
-                            Toolbar(onMinimize, onMaximize, onClose)
-                        }
-                    }
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = UI.colors.base
-                    ) {
-                        CurrentTab()
+                        scene(AppScene.Home.route) { HomeContent() }
+                        scene(AppScene.Instances.route) { InstancesContent() }
+                        scene(AppScene.Search.route) { SearchContent() }
+                        scene(AppScene.Accounts.route) { AccountsContent() }
+                        scene(AppScene.Settings.route) { SettingsContent() }
                     }
                 }
             }
