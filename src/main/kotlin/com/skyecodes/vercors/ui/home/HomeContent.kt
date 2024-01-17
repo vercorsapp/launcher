@@ -6,49 +6,39 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.data.app.convertCurseforge
-import com.skyecodes.vercors.data.app.convertModrinth
-import com.skyecodes.vercors.service.CurseforgeService
-import com.skyecodes.vercors.service.ModrinthService
+import com.skyecodes.vercors.logic.HomeUiState
+import com.skyecodes.vercors.logic.HomeViewModel
 import com.skyecodes.vercors.ui.UI
-import org.koin.compose.koinInject
 
 
 @Composable
-fun HomeContent() {
-    val modrinthService = koinInject<ModrinthService>()
-    val curseforgeService = koinInject<CurseforgeService>()
+fun HomeContent(viewModel: HomeViewModel) {
+    viewModel.initialize()
+    val state by viewModel.uiState.collectAsState()
 
-    Box(Modifier.padding(start = UI.mediumPadding, end = UI.smallPadding)) {
+    Box(Modifier.padding(start = UI.mediumPadding)) {
         val scrollState = rememberScrollState()
 
         Column(
-            Modifier.fillMaxSize().padding(top = UI.smallPadding, bottom = UI.smallPadding, end = 18.dp)
+            Modifier.fillMaxSize()
+                .padding(top = UI.smallPadding, bottom = UI.smallPadding, end = UI.mediumPadding + 6.dp)
                 .verticalScroll(scrollState)
         ) {
-            HomeSection(
-                "Popular Mods",
-                { modrinthService.getPopularMods().hits.convertModrinth() },
-                { curseforgeService.getPopularMods().data.convertCurseforge() })
-            HomeSection(
-                "Popular Modpacks",
-                { modrinthService.getPopularModpacks().hits.convertModrinth() },
-                { curseforgeService.getPopularModpacks().data.convertCurseforge() })
-            HomeSection(
-                "Popular Resource Packs",
-                { modrinthService.getPopularResourcePacks().hits.convertModrinth() },
-                { curseforgeService.getPopularResourcePacks().data.convertCurseforge() })
-            HomeSection(
-                "Popular Shader Packs",
-                { modrinthService.getPopularShaderPacks().hits.convertModrinth() },
-                { curseforgeService.getPopularShaderPacks().data.convertCurseforge() })
+            state.sections.forEach { (type, section) ->
+                when (section) {
+                    is HomeUiState.Section.Instances -> HomeInstancesSectionContent(type.title, section.instances)
+                    is HomeUiState.Section.Projects -> HomeProjectsSectionContent(type.title, section.projects)
+                }
+            }
         }
 
         VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            modifier = Modifier.align(Alignment.CenterEnd).padding(2.dp).fillMaxHeight(),
             adapter = rememberScrollbarAdapter(scrollState)
         )
     }

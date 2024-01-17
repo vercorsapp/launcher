@@ -3,6 +3,7 @@ package com.skyecodes.vercors.ui
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -10,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.skyecodes.vercors.data.model.app.Configuration
 
 object UI {
     val defaultRoundedCornerShape = RoundedCornerShape(5.dp)
@@ -25,13 +27,18 @@ object UI {
     val smallPadding = 5.dp
 
     object Text {
+        // General
         const val HOME = "Home"
         const val INSTANCES = "Instances"
         const val SEARCH = "Search"
         const val ACCOUNTS = "Accounts"
         const val SETTINGS = "Settings"
+
+        // Home
         const val VIEW = "View"
         const val INSTALL = "Install"
+
+        // Instances
         const val NO_INSTANCES_FOUND = "No instances found"
         const val CREATE_NEW_INSTANCE = "Create new instance"
         const val INSTANCE_NAME = "Instance name"
@@ -41,11 +48,22 @@ object UI {
         const val LOADER_VERSION = "Loader version"
         const val CANCEL = "Cancel"
         const val CREATE = "Create"
+
+        // Settings
+        const val USER_INTERFACE = "User interface"
+        const val THEME = "Theme"
+        const val THEME_DESCRIPTION = "Change the global theme of the launcher."
+        const val SYSTEM_WINDOW = "Use system window frame"
+        const val SYSTEM_WINDOW_DESCRIPTION =
+            "Use the system window frame instead of the custom window frame provided by the launcher."
+        const val DEFAULT_TAB = "Default tab"
+        const val DEFAULT_TAB_DESCRIPTION = "Change the tab that shows up when the launcher is opened."
+        const val PROVIDERS = "Providers"
+        const val PROVIDERS_DESCRIPTION =
+            "Choose which service(s) are fetched to show popular projects on the home tab."
     }
 
-    var colors: Palette = Mocha
-
-    val successButtonColors @Composable get() = ButtonDefaults.buttonColors(backgroundColor = colors.green)
+    val successButtonColors @Composable get() = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.green)
 
     interface Palette {
         val rosewater: Color
@@ -176,3 +194,6 @@ object UI {
         )
     )
 }
+
+val LocalPalette = compositionLocalOf<UI.Palette> { UI.Mocha }
+val LocalConfiguration = compositionLocalOf { Configuration.DEFAULT }

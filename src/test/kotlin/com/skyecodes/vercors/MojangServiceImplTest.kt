@@ -1,8 +1,7 @@
 package com.skyecodes.vercors
 
-import com.skyecodes.vercors.data.mojang.get
-import com.skyecodes.vercors.service.impl.HttpServiceImpl
-import com.skyecodes.vercors.service.impl.MojangServiceImpl
+import com.skyecodes.vercors.data.service.HttpServiceImpl
+import com.skyecodes.vercors.data.service.MojangServiceImpl
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

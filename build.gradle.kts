@@ -12,6 +12,7 @@ version = "0.1.0"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
 }
@@ -28,7 +29,6 @@ dependencies {
     implementation("moe.tlaster:precompose-viewmodel:${property("precompose.version")}")
     implementation("moe.tlaster:precompose-koin:${property("precompose.version")}")
     implementation("br.com.devsrsouza.compose.icons:feather:${property("compose-icons.version")}")
-    implementation("br.com.devsrsouza.compose.icons:simple-icons:${property("compose-icons.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")
     implementation("org.ocpsoft.prettytime:prettytime:${property("prettytime.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
@@ -37,6 +37,7 @@ dependencies {
     implementation("io.insert-koin:koin-compose:${property("koin-compose.version")}")
     implementation("io.insert-koin:koin-logger-slf4j:${property("koin.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
+    implementation("com.github.Dansoftowner:jSystemThemeDetector:${property("jSystemThemeDetector.version")}")
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.10")
 }

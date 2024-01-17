@@ -1,19 +1,24 @@
 package com.skyecodes.vercors
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
-import com.skyecodes.vercors.service.*
-import com.skyecodes.vercors.service.impl.*
-import com.skyecodes.vercors.ui.App
+import androidx.compose.ui.window.application
+import com.skyecodes.vercors.data.model.app.Configuration
+import com.skyecodes.vercors.data.model.app.Instance
+import com.skyecodes.vercors.data.service.*
+import com.skyecodes.vercors.logic.AppViewModel
+import com.skyecodes.vercors.logic.HomeViewModel
+import com.skyecodes.vercors.logic.InstancesViewModel
+import com.skyecodes.vercors.logic.SettingsViewModel
+import com.skyecodes.vercors.ui.AppWindow
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.flow.StateFlow
 import moe.tlaster.precompose.PreComposeApp
+import moe.tlaster.precompose.koin.koinViewModel
+import moe.tlaster.precompose.navigation.Navigator
+import moe.tlaster.precompose.navigation.rememberNavigator
 import org.koin.compose.KoinApplication
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.logger.SLF4JLogger
-import java.awt.Toolkit
 
 const val APP_VERSION = "0.1.0"
 const val APP_NAME = "Vercors"
@@ -23,60 +28,38 @@ private val logger = KotlinLogging.logger {}
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
     application {
-        PreComposeApp {
-            val state = rememberWindowState(size = DpSize(1080.dp, 720.dp))
+        KoinApplication(application = {
+            logger(SLF4JLogger())
+            modules(module {
+                single<ConfigurationService> { ConfigurationServiceImpl(get()) }
+                single<CurseforgeService> { CurseforgeServiceImpl(get()) }
+                single<HttpService> { HttpServiceImpl() }
+                single<InstanceService> { InstanceServiceImpl(get()) }
+                single<ModrinthService> { ModrinthServiceImpl(get()) }
+                single<MojangService> { MojangServiceImpl(get()) }
+                single<StorageService> { StorageServiceImpl() }
+                single<HomeProviderService> { HomeProviderServiceImpl(get(), get()) }
 
-            Window(
-                state = state,
-                onCloseRequest = ::exit,
-                undecorated = true,
-                title = APP_NAME
-            ) {
-                val mode = remember { mutableStateOf(window.placement) }
-                val size = remember { mutableStateOf(window.size) }
-                val pos = remember { mutableStateOf(state.position) }
-
-                KoinApplication(application = {
-                    logger(SLF4JLogger())
-                    modules(module {
-                        single<ConfigurationService> { ConfigurationServiceImpl(get<StorageService>()) }
-                        single<CurseforgeService> { CurseforgeServiceImpl(get<HttpService>()) }
-                        single<HttpService> { HttpServiceImpl() }
-                        single<InstanceService> { InstanceServiceImpl(get<StorageService>()) }
-                        single<ModrinthService> { ModrinthServiceImpl(get<HttpService>()) }
-                        single<MojangService> { MojangServiceImpl(get<HttpService>()) }
-                        single<StorageService> { StorageServiceImpl() }
-                    })
-                }) {
-                    App(
-                        onMinimize = { state.isMinimized = true },
-                        onMaximize = {
-                            mode.value = if (mode.value == WindowPlacement.Floating) {
-                                size.value = window.size
-                                pos.value = state.position
-                                val insets = Toolkit.getDefaultToolkit().getScreenInsets(window.graphicsConfiguration)
-                                val screenBounds = window.graphicsConfiguration.bounds
-                                window.setSize(
-                                    screenBounds.width - (insets.left + insets.right),
-                                    screenBounds.height - (insets.top + insets.bottom)
-                                )
-                                window.setLocation(screenBounds.x + insets.left, screenBounds.y + insets.top)
-                                WindowPlacement.Maximized
-                            } else {
-                                window.size = size.value
-                                state.position = pos.value
-                                WindowPlacement.Floating
-                            }
-                        },
-                        onClose = ::exit
+                single(createdAtStart = false) { (navigator: Navigator) -> AppViewModel(get(), get(), navigator) }
+                single(createdAtStart = false) { (configuration: StateFlow<Configuration?>, instances: StateFlow<List<Instance>?>) ->
+                    HomeViewModel(
+                        get(),
+                        configuration,
+                        instances
                     )
                 }
+                single(createdAtStart = false) { (instances: StateFlow<List<Instance>?>) -> InstancesViewModel(instances) }
+                single(createdAtStart = false) { (onConfigChange: (Configuration) -> Unit) ->
+                    SettingsViewModel(
+                        onConfigChange
+                    )
+                }
+            })
+        }) {
+            PreComposeApp {
+                val navigator = rememberNavigator()
+                AppWindow(koinViewModel { parametersOf(navigator) })
             }
         }
     }
-}
-
-private fun ApplicationScope.exit() {
-    exitApplication()
-    logger.info { "Goodbye!" }
 }

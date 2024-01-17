@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.data.app.AppScene
+import com.skyecodes.vercors.data.model.app.AppScene
 
 @Composable
 fun Menu(currentScene: AppScene, onNavigate: (AppScene) -> Unit) {
@@ -42,7 +42,7 @@ private fun TabNavigationItem(scene: AppScene, currentScene: AppScene, onNavigat
         Button(
             modifier = Modifier.size(50.dp),
             elevation = if (currentScene === scene) ButtonDefaults.elevation() else null,
-            colors = if (currentScene === scene) ButtonDefaults.buttonColors(backgroundColor = UI.colors.surface1)
+            colors = if (currentScene === scene) ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
             else ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colors.onSurface),
             contentPadding = PaddingValues(12.dp),
             shape = UI.largeRoundedCornerShape,
@@ -56,7 +56,7 @@ private fun TabNavigationItem(scene: AppScene, currentScene: AppScene, onNavigat
 @Composable
 private fun TabTooltip(sceneName: String) {
     Surface(
-        color = UI.colors.surface1,
+        color = LocalPalette.current.surface1,
         modifier = Modifier.shadow(4.dp),
         shape = UI.largeRoundedCornerShape
     ) {

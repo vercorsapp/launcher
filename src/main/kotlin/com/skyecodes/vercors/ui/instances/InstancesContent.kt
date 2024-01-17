@@ -11,19 +11,21 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.skyecodes.vercors.ui.Data
+import com.skyecodes.vercors.logic.InstancesViewModel
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.util.IconTextButton
+import com.skyecodes.vercors.ui.common.IconTextButton
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Plus
 
 
 @Composable
-fun InstancesContent() {
+fun InstancesContent(
+    viewModel: InstancesViewModel
+) {
     var openDialog by remember { mutableStateOf(false) }
-    val instances = Data.instances.current
+    val instances = viewModel.instances.collectAsState()
 
-    if (instances.isEmpty()) {
+    if (instances.value!!.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(UI.largePadding, Alignment.CenterVertically),
@@ -40,15 +42,15 @@ fun InstancesContent() {
                 text = UI.Text.CREATE_NEW_INSTANCE
             )
         }
-
-        AnimatedVisibility(openDialog, enter = fadeIn(), exit = fadeOut()) {
-            CreateInstanceDialog(
-                onClose = { openDialog = false }
-            )
-        }
     } else {
-        Column {
-            instances.forEach { Text(it.name) }
+        Column(Modifier.fillMaxSize()) {
+            instances.value!!.forEach { Text(it.name) }
         }
+    }
+
+    AnimatedVisibility(openDialog, enter = fadeIn(), exit = fadeOut()) {
+        CreateInstanceDialogContent(
+            onClose = { openDialog = false }
+        )
     }
 }

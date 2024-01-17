@@ -16,32 +16,59 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.APP_NAME
-import com.skyecodes.vercors.APP_VERSION
-import com.skyecodes.vercors.data.app.AppScene
+import com.skyecodes.vercors.data.model.app.AppScene
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Minus
-import compose.icons.feathericons.Square
-import compose.icons.feathericons.X
+import compose.icons.feathericons.*
 
 @Composable
-fun Toolbar(currentScene: AppScene, onMinimize: () -> Unit, onMaximize: () -> Unit, onClose: () -> Unit) {
+fun Toolbar(
+    currentScene: AppScene,
+    onNextScene: () -> Unit,
+    onPreviousScene: () -> Unit,
+    onRefreshScene: () -> Unit,
+    onMinimize: () -> Unit,
+    onMaximize: () -> Unit,
+    onClose: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Row(
             modifier = Modifier.padding(UI.mediumPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
         ) {
-            Text(APP_NAME, color = MaterialTheme.colors.primary)
+            /*Text(APP_NAME, color = MaterialTheme.colors.primary)
             Text("v$APP_VERSION", color = MaterialTheme.colors.primary, style = MaterialTheme.typography.caption)
-            Text("-", modifier = Modifier.padding(horizontal = UI.smallPadding))
+            Spacer(modifier = Modifier.padding(horizontal = UI.smallPadding))*/
+            Icon(
+                FeatherIcons.ChevronLeft,
+                "Previous",
+                modifier = Modifier.size(UI.mediumIconSize)
+                    .clickable(interactionSource = interactionSource, indication = null) { onPreviousScene() }
+            )
+            Icon(
+                FeatherIcons.ChevronRight,
+                "Next",
+                modifier = Modifier.size(UI.mediumIconSize)
+                    .clickable(interactionSource = interactionSource, indication = null) { onNextScene() }
+            )
             Text(currentScene.title)
+            Spacer(modifier = Modifier)
+            Icon(
+                FeatherIcons.RefreshCw,
+                "Refresh",
+                modifier = Modifier.size(UI.mediumIconSize)
+                    .clickable(interactionSource = interactionSource, indication = null) { onRefreshScene() }
+            )
         }
-        Spacer(Modifier.weight(1f))
-        Row {
-            WindowButton(FeatherIcons.Minus, "Minimize Window", onMinimize)
-            WindowButton(FeatherIcons.Square, "Maximize Window", onMaximize)
-            WindowButton(FeatherIcons.X, "Close Window", onClose, true)
+        if (!LocalConfiguration.current.useSystemWindowFrame) {
+            Spacer(Modifier.weight(1f))
+            Row {
+                WindowButton(FeatherIcons.Minus, "Minimize Window", onMinimize)
+                WindowButton(FeatherIcons.Square, "Maximize Window", onMaximize)
+                WindowButton(FeatherIcons.X, "Close Window", onClose, true)
+            }
         }
     }
 }

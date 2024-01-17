@@ -1,122 +1,184 @@
 package com.skyecodes.vercors.ui
 
+import androidx.compose.animation.core.Spring.StiffnessMedium
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowScope
-import com.skyecodes.vercors.data.app.AppScene
-import com.skyecodes.vercors.data.app.Configuration
-import com.skyecodes.vercors.data.app.Instance
-import com.skyecodes.vercors.service.ConfigurationService
-import com.skyecodes.vercors.service.InstanceService
+import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.rememberWindowState
+import com.skyecodes.vercors.APP_NAME
+import com.skyecodes.vercors.data.model.app.AppScene
+import com.skyecodes.vercors.data.model.app.Configuration
+import com.skyecodes.vercors.logic.AppViewModel
 import com.skyecodes.vercors.ui.accounts.AccountsContent
 import com.skyecodes.vercors.ui.home.HomeContent
 import com.skyecodes.vercors.ui.instances.InstancesContent
 import com.skyecodes.vercors.ui.search.SearchContent
 import com.skyecodes.vercors.ui.settings.SettingsContent
+import io.github.oshai.kotlinlogging.KotlinLogging
+import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
-import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.navigation.transition.NavTransition
-import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
+
+private val logger = KotlinLogging.logger {}
+
+@Composable
+fun ApplicationScope.AppWindow(
+    viewModel: AppViewModel,
+) {
+    viewModel.initialize(rememberWindowState(size = DpSize(1080.dp, 720.dp)))
+    val configuration by viewModel.configuration.collectAsState()
+
+    configuration?.let { safeConfiguration ->
+        if (safeConfiguration.useSystemWindowFrame) {
+            Window(
+                state = viewModel.windowState,
+                onCloseRequest = ::onClose,
+                undecorated = false,
+                title = APP_NAME,
+            ) {
+                AppContent(viewModel, safeConfiguration, ::onClose)
+            }
+        } else {
+            Window(
+                state = viewModel.windowState,
+                onCloseRequest = ::onClose,
+                undecorated = true,
+                title = APP_NAME,
+            ) {
+                AppContent(viewModel, safeConfiguration, ::onClose)
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WindowScope.App(
-    onMinimize: () -> Unit,
-    onMaximize: () -> Unit,
+private fun FrameWindowScope.AppContent(
+    viewModel: AppViewModel,
+    configuration: Configuration,
     onClose: () -> Unit
 ) {
-    var configuration by remember { mutableStateOf(Configuration.DEFAULT) }
-    var instances by remember { mutableStateOf(emptyList<Instance>()) }
-    val configurationService = koinInject<ConfigurationService>()
-    val instanceService = koinInject<InstanceService>()
-    var colors by remember { mutableStateOf(UI.colors.material) }
-    var currentScene by remember { mutableStateOf(configuration.defaultScene) }
-    val isSystemDarkTheme = isSystemInDarkTheme()
-    val navigator = rememberNavigator()
+    viewModel.initializeWindow(window)
 
-    LaunchedEffect(true) {
-        configuration = configurationService.load()
-    }
+    val uiState by viewModel.uiState.collectAsState()
+    val currentScene by viewModel.currentScene.collectAsState()
 
-    LaunchedEffect(true) {
-        instances = instanceService.loadInstances(this)
-    }
-
-    LaunchedEffect(configuration) {
-        UI.colors = when (configuration.theme) {
-            Configuration.Theme.DARK -> UI.Mocha
-            Configuration.Theme.LIGHT -> UI.Latte
-            else -> if (isSystemDarkTheme) UI.Mocha else UI.Latte
-        }
-        colors = UI.colors.material
-    }
-
-    MaterialTheme(
-        colors = colors,
-        typography = UI.typography,
-        //shapes = UI.shapes
+    CompositionLocalProvider(
+        LocalPalette provides uiState.palette,
+        LocalConfiguration provides configuration
     ) {
-        Row {
-            Surface(
-                modifier = Modifier.fillMaxHeight().background(color = UI.colors.surface0).shadow(4.dp)
-            ) {
-                Menu(currentScene) {
-                    currentScene = it
-                    navigator.navigate(it.route)
-                }
-            }
-            Column {
-                WindowDraggableArea(
-                    modifier = Modifier.combinedClickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {},
-                        onDoubleClick = onMaximize,
-                        onLongClick = null
-                    )
-                ) {
-                    Surface(
-                        modifier = Modifier.height(40.dp).fillMaxWidth()
-                            .background(color = UI.colors.surface0)
-                    ) {
-                        Toolbar(currentScene, onMinimize, onMaximize, onClose)
-                    }
-                }
+        MaterialTheme(
+            colors = LocalPalette.current.material,
+            typography = UI.typography,
+            //shapes = UI.shapes
+        ) {
+            Row {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = UI.colors.base
+                    modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0).shadow(4.dp)
                 ) {
-                    NavHost(
-                        navigator = navigator,
-                        initialRoute = configuration.defaultScene.route,
-                        navTransition = NavTransition(
-                            createTransition = fadeIn(),
-                            destroyTransition = fadeOut(),
-                            pauseTransition = fadeOut(),
-                            resumeTransition = fadeIn()
+                    Menu(currentScene) { viewModel.navigate(it) }
+                }
+                Column {
+                    WindowDraggableArea(
+                        modifier = Modifier.combinedClickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {},
+                            onDoubleClick = viewModel::onMaximize,
+                            onLongClick = null,
+                            enabled = configuration.useSystemWindowFrame
                         )
                     ) {
-                        scene(AppScene.Home.route) { HomeContent() }
-                        scene(AppScene.Instances.route) { InstancesContent() }
-                        scene(AppScene.Search.route) { SearchContent() }
-                        scene(AppScene.Accounts.route) { AccountsContent() }
-                        scene(AppScene.Settings.route) { SettingsContent() }
+                        Surface(
+                            modifier = Modifier.height(40.dp).fillMaxWidth()
+                                .background(color = LocalPalette.current.surface0)
+                        ) {
+                            Toolbar(
+                                currentScene,
+                                viewModel::onNextScene,
+                                viewModel::onPreviousScene,
+                                viewModel::onRefresh,
+                                viewModel::onMinimize,
+                                viewModel::onMaximize,
+                                onClose
+                            )
+                        }
+                    }
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = LocalPalette.current.surface0
+                        ) {}
+                        Surface(
+                            modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
+                            color = LocalPalette.current.base
+                        ) {
+                            NavHost(
+                                navigator = viewModel.navigator,
+                                initialRoute = LocalConfiguration.current.defaultScene.route,
+                                navTransition = NavTransition(
+                                    createTransition = fadeIn(spring(stiffness = StiffnessMedium)),
+                                    destroyTransition = fadeOut(spring(stiffness = StiffnessMedium)),
+                                    pauseTransition = fadeOut(spring(stiffness = StiffnessMedium)),
+                                    resumeTransition = fadeIn(spring(stiffness = StiffnessMedium))
+                                )
+                            ) {
+                                scene(AppScene.Home.route) {
+                                    HomeContent(koinViewModel {
+                                        parametersOf(
+                                            viewModel.configuration,
+                                            viewModel.instances
+                                        )
+                                    })
+                                }
+                                scene(AppScene.Instances.route) {
+                                    InstancesContent(koinViewModel { parametersOf(viewModel.instances) })
+                                }
+                                scene(AppScene.Search.route) {
+                                    SearchContent()
+                                }
+                                scene(AppScene.Accounts.route) {
+                                    AccountsContent()
+                                }
+                                scene(AppScene.Settings.route) {
+                                    SettingsContent(koinViewModel {
+                                        parametersOf({ c: Configuration ->
+                                            viewModel.updateConfiguration(
+                                                c
+                                            )
+                                        })
+                                    })
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun ApplicationScope.onClose() {
+    exitApplication()
+    logger.info { "Goodbye!" }
 }

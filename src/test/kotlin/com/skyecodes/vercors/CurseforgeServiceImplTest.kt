@@ -1,7 +1,7 @@
 package com.skyecodes.vercors
 
-import com.skyecodes.vercors.service.impl.CurseforgeServiceImpl
-import com.skyecodes.vercors.service.impl.HttpServiceImpl
+import com.skyecodes.vercors.data.service.CurseforgeServiceImpl
+import com.skyecodes.vercors.data.service.HttpServiceImpl
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
