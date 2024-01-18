@@ -5,5 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import moe.tlaster.precompose.viewmodel.ViewModel
 
 class InstancesViewModel(
-    val instances: StateFlow<List<Instance>?>
+    val instances: StateFlow<List<Instance>?>,
+    val openNewInstanceDialog: () -> Unit,
+    val closeNewInstanceDialog: () -> Unit
 ) : ViewModel()

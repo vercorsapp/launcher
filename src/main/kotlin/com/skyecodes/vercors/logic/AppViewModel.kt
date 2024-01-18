@@ -37,7 +37,7 @@ class AppViewModel(
     private lateinit var savedSize: Dimension
     private val detector = OsThemeDetector.getDetector()
 
-    private val _uiState = MutableStateFlow(AppUiState(UI.Mocha))
+    private val _uiState = MutableStateFlow(AppUiState(UI.Mocha, false))
     val uiState = _uiState.asStateFlow()
     private val _configuration = MutableStateFlow<Configuration?>(null)
     val configuration = _configuration.asStateFlow()
@@ -95,7 +95,7 @@ class AppViewModel(
         isWindowInitialized = true
         logger.info { "Initializing window" }
         this.window = window
-        window.minimumSize = Dimension(1024, 576)
+        window.minimumSize = Dimension(1280, 720)
         savedWindowMode = window.placement
         savedSize = window.size
         savedPos = windowState.position
@@ -158,6 +158,14 @@ class AppViewModel(
     fun onRefresh() {
         logger.info { "Refreshing scene" }
     }
+
+    fun openNewInstanceDialog() = updateNewInstanceDialog(true)
+
+    fun closeNewInstanceDialog() = updateNewInstanceDialog(false)
+
+    private fun updateNewInstanceDialog(showNewInstanceDialog: Boolean) {
+        _uiState.update { it.copy(showNewInstanceDialog = showNewInstanceDialog) }
+    }
 }
 
-data class AppUiState(val palette: UI.Palette)
+data class AppUiState(val palette: UI.Palette, val showNewInstanceDialog: Boolean)

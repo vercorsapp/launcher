@@ -1,15 +1,16 @@
 package com.skyecodes.vercors.ui
 
-import androidx.compose.animation.core.Spring.StiffnessMedium
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
@@ -28,6 +29,7 @@ import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.logic.AppViewModel
 import com.skyecodes.vercors.ui.accounts.AccountsContent
 import com.skyecodes.vercors.ui.home.HomeContent
+import com.skyecodes.vercors.ui.instances.CreateInstanceDialogContent
 import com.skyecodes.vercors.ui.instances.InstancesContent
 import com.skyecodes.vercors.ui.search.SearchContent
 import com.skyecodes.vercors.ui.settings.SettingsContent
@@ -43,7 +45,7 @@ private val logger = KotlinLogging.logger {}
 fun ApplicationScope.AppWindow(
     viewModel: AppViewModel,
 ) {
-    viewModel.initialize(rememberWindowState(size = DpSize(1080.dp, 720.dp)))
+    viewModel.initialize(rememberWindowState(size = DpSize(1280.dp, 720.dp)))
     val configuration by viewModel.configuration.collectAsState()
 
     configuration?.let { safeConfiguration ->
@@ -90,90 +92,145 @@ private fun FrameWindowScope.AppContent(
             typography = UI.typography,
             //shapes = UI.shapes
         ) {
-            Row {
-                Surface(
-                    modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0).shadow(4.dp)
-                ) {
-                    Menu(currentScene) { viewModel.navigate(it) }
-                }
-                Column {
-                    WindowDraggableArea(
-                        modifier = Modifier.combinedClickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                            onDoubleClick = viewModel::onMaximize,
-                            onLongClick = null,
-                            enabled = configuration.useSystemWindowFrame
-                        )
+            Box(modifier = Modifier.fillMaxSize()) {
+                Row {
+                    Surface(
+                        modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0)
+                            .shadow(4.dp)
                     ) {
-                        Surface(
-                            modifier = Modifier.height(40.dp).fillMaxWidth()
-                                .background(color = LocalPalette.current.surface0)
-                        ) {
-                            Toolbar(
-                                currentScene,
-                                viewModel::onNextScene,
-                                viewModel::onPreviousScene,
-                                viewModel::onRefresh,
-                                viewModel::onMinimize,
-                                viewModel::onMaximize,
-                                onClose
-                            )
-                        }
+                        Menu(currentScene) { viewModel.navigate(it) }
                     }
-                    BoxWithConstraints(
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = LocalPalette.current.surface0
-                        ) {}
-                        Surface(
-                            modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
-                            color = LocalPalette.current.base
+                    Column {
+                        WindowDraggableArea(
+                            modifier = Modifier.combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                                onDoubleClick = viewModel::onMaximize,
+                                onLongClick = null,
+                                enabled = !configuration.useSystemWindowFrame
+                            )
                         ) {
-                            NavHost(
-                                navigator = viewModel.navigator,
-                                initialRoute = LocalConfiguration.current.defaultScene.route,
-                                navTransition = NavTransition(
-                                    createTransition = fadeIn(spring(stiffness = StiffnessMedium)),
-                                    destroyTransition = fadeOut(spring(stiffness = StiffnessMedium)),
-                                    pauseTransition = fadeOut(spring(stiffness = StiffnessMedium)),
-                                    resumeTransition = fadeIn(spring(stiffness = StiffnessMedium))
-                                )
+                            Surface(
+                                modifier = Modifier.height(40.dp).fillMaxWidth()
+                                    .background(color = LocalPalette.current.surface0)
                             ) {
-                                scene(AppScene.Home.route) {
-                                    HomeContent(koinViewModel {
-                                        parametersOf(
-                                            viewModel.configuration,
-                                            viewModel.instances
+                                Toolbar(
+                                    currentScene,
+                                    viewModel::onNextScene,
+                                    viewModel::onPreviousScene,
+                                    viewModel::onRefresh,
+                                    viewModel::onMinimize,
+                                    viewModel::onMaximize,
+                                    onClose
+                                )
+                            }
+                        }
+                        BoxWithConstraints(
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = LocalPalette.current.surface0
+                            ) {}
+                            Surface(
+                                modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
+                                color = LocalPalette.current.base
+                            ) {
+                                NavHost(
+                                    navigator = viewModel.navigator,
+                                    initialRoute = LocalConfiguration.current.defaultScene.route,
+                                    navTransition = if (LocalConfiguration.current.animations) remember {
+                                        NavTransition(
+                                            createTransition = UI.transitionIn,
+                                            destroyTransition = UI.transitionOut,
+                                            pauseTransition = UI.transitionOut,
+                                            resumeTransition = UI.transitionIn
                                         )
-                                    })
-                                }
-                                scene(AppScene.Instances.route) {
-                                    InstancesContent(koinViewModel { parametersOf(viewModel.instances) })
-                                }
-                                scene(AppScene.Search.route) {
-                                    SearchContent()
-                                }
-                                scene(AppScene.Accounts.route) {
-                                    AccountsContent()
-                                }
-                                scene(AppScene.Settings.route) {
-                                    SettingsContent(koinViewModel {
-                                        parametersOf({ c: Configuration ->
-                                            viewModel.updateConfiguration(
-                                                c
+                                    } else remember {
+                                        NavTransition(
+                                            createTransition = EnterTransition.None,
+                                            destroyTransition = ExitTransition.None,
+                                            pauseTransition = ExitTransition.None,
+                                            resumeTransition = EnterTransition.None
+                                        )
+                                    }
+                                ) {
+                                    scene(AppScene.Home.route) {
+                                        HomeContent(koinViewModel {
+                                            parametersOf(
+                                                viewModel.configuration,
+                                                viewModel.instances
                                             )
                                         })
-                                    })
+                                    }
+                                    scene(AppScene.Instances.route) {
+                                        InstancesContent(koinViewModel {
+                                            parametersOf(
+                                                viewModel.instances,
+                                                viewModel::openNewInstanceDialog,
+                                                viewModel::closeNewInstanceDialog
+                                            )
+                                        })
+                                    }
+                                    scene(AppScene.Search.route) {
+                                        SearchContent()
+                                    }
+                                    scene(AppScene.Accounts.route) {
+                                        AccountsContent()
+                                    }
+                                    scene(AppScene.Settings.route) {
+                                        SettingsContent(koinViewModel {
+                                            parametersOf({ c: Configuration ->
+                                                viewModel.updateConfiguration(c)
+                                            })
+                                        })
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                AppDialog(uiState.showNewInstanceDialog, viewModel::closeNewInstanceDialog) {
+                    CreateInstanceDialogContent(viewModel::closeNewInstanceDialog)
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun AppDialog(visible: Boolean, onClose: () -> Unit, content: @Composable () -> Unit) {
+    if (LocalConfiguration.current.animations) {
+        AnimatedVisibility(visible, enter = UI.transitionIn, exit = UI.transitionOut) {
+            AppDialogContent(onClose, content)
+        }
+    } else if (visible) {
+        AppDialogContent(onClose, content)
+    }
+}
+
+@Composable
+private fun AppDialogContent(onClose: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(LocalPalette.current.transparentOverlay)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClose
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(0.5f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                )
+        ) {
+            content()
         }
     }
 }

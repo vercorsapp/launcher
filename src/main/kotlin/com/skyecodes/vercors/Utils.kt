@@ -33,3 +33,5 @@ fun Long.readable(decimals: Int = 1): String {
 private val prettyTime = PrettyTime()
 
 fun Instant.readable(): String = prettyTime.format(this)
+
+fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this

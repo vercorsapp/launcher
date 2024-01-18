@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -30,9 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.data.model.app.Project
 import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.resourceAsStream
+import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AsyncImage
@@ -54,7 +57,7 @@ fun HomeProjectsSectionContent(title: String, projects: List<Project>?) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(UI.largePadding),
             modifier = Modifier.fillMaxWidth().onGloballyPositioned {
-                rowSize = localDensity.run { ((it.size.width.toDp() - 80.dp) / 320.dp).roundToInt() }
+                rowSize = localDensity.run { ((it.size.width.toDp() - 80.dp) / 400.dp).roundToInt() }
             }
         ) {
             if (projects == null) {
@@ -73,13 +76,22 @@ fun HomeProjectsSectionContent(title: String, projects: List<Project>?) {
 }
 
 @Composable
+private fun RowScope.HomeCard(
+    modifier: Modifier,
+    shape: Shape = MaterialTheme.shapes.medium,
+    content: @Composable () -> Unit
+) {
+    Card(modifier = modifier.weight(1f).aspectRatio(1.5f), shape = shape) {
+        content()
+    }
+}
+
+@Composable
 private fun RowScope.ProjectCard(project: Project) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    Card(
-        modifier = Modifier.weight(1f).aspectRatio(1.1f).hoverable(interactionSource)
-    ) {
+    HomeCard(modifier = Modifier.hoverable(interactionSource)) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
                 project.imageUrl?.let { url ->
@@ -117,8 +129,9 @@ private fun RowScope.ProjectCard(project: Project) {
             }
 
             Column(
-                modifier = Modifier.background(LocalPalette.current.surface1).align(Alignment.TopCenter)
-                    .fillMaxWidth().animateContentSize().apply { if (isHovered) fillMaxHeight() }
+                modifier = Modifier.background(LocalPalette.current.surface1).align(Alignment.TopCenter).fillMaxWidth()
+                    .applyIf(LocalConfiguration.current.animations) { animateContentSize() }
+                    .applyIf(isHovered) { fillMaxHeight() }
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),
@@ -126,7 +139,7 @@ private fun RowScope.ProjectCard(project: Project) {
                     horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
                 ) {
                     Surface(
-                        color = LocalPalette.current.surface1,
+                        color = LocalPalette.current.surface2,
                         modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                         shape = UI.defaultRoundedCornerShape,
                         elevation = 1.dp
@@ -182,7 +195,7 @@ private fun RowScope.ProjectCard(project: Project) {
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        Row(
+                        /*Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
@@ -200,7 +213,7 @@ private fun RowScope.ProjectCard(project: Project) {
                                 Icon(FeatherIcons.Calendar, "Last updated", Modifier.size(UI.mediumIconSize))
                                 Text(project.lastUpdated.readable(), style = MaterialTheme.typography.body2)
                             }
-                        }
+                        }*/
 
                         Row(
                             modifier = Modifier.fillMaxSize().padding(bottom = UI.largePadding),
@@ -266,8 +279,8 @@ private fun RowScope.FakeProjectCard() {
         )
     )
 
-    Card(
-        modifier = Modifier.weight(1f).aspectRatio(1.1f).drawWithCache {
+    HomeCard(
+        modifier = Modifier.drawWithCache {
             val width = size.width
             val height = size.height
 

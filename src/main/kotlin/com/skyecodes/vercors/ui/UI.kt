@@ -1,8 +1,14 @@
 package com.skyecodes.vercors.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material.Colors
+import androidx.compose.material.Typography
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -56,14 +62,14 @@ object UI {
         const val SYSTEM_WINDOW = "Use system window frame"
         const val SYSTEM_WINDOW_DESCRIPTION =
             "Use the system window frame instead of the custom window frame provided by the launcher."
+        const val ANIMATIONS = "Animations"
+        const val ANIMATIONS_DESCRIPTION = "Enables UI animations such as fade in, smooth element size change, etc."
         const val DEFAULT_TAB = "Default tab"
         const val DEFAULT_TAB_DESCRIPTION = "Change the tab that shows up when the launcher is opened."
         const val PROVIDERS = "Providers"
         const val PROVIDERS_DESCRIPTION =
-            "Choose which service(s) are fetched to show popular projects on the home tab."
+            "Choose which service(s) provide popular projects on the home tab."
     }
-
-    val successButtonColors @Composable get() = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.green)
 
     interface Palette {
         val rosewater: Color
@@ -93,6 +99,7 @@ object UI {
         val mantle: Color
         val crust: Color
 
+        val transparentOverlay: Color
         val material: Colors
     }
 
@@ -124,6 +131,7 @@ object UI {
         override val mantle = Color(0xffe6e9ef)
         override val crust = Color(0xffdce0e8)
 
+        override val transparentOverlay = Color(0x7f000000)
         override val material = lightColors(
             primary = mauve,
             primaryVariant = mauve,
@@ -144,9 +152,9 @@ object UI {
         override val maroon = Color(0xffeba0ac)
         override val peach = Color(0xfffab387)
         override val yellow = Color(0xfff9e2af)
+        override val green = Color(0xffa6e3a1)
 
-        //override val green = Color(0xffa6e3a1)
-        override val green = Color(0xff508e54)
+        //override val green = Color(0xff508e54)
         override val teal = Color(0xff94e2d5)
         override val sky = Color(0xff89dceb)
         override val sapphire = Color(0xff74c7ec)
@@ -165,6 +173,7 @@ object UI {
         override val mantle = Color(0xff181825)
         override val crust = Color(0xff11111b)
 
+        override val transparentOverlay = Color(0x7f000000)
         override val material = darkColors(
             primary = mauve,
             primaryVariant = mauve,
@@ -193,6 +202,9 @@ object UI {
             letterSpacing = 0.5.sp
         )
     )
+
+    val transitionIn = fadeIn(spring(stiffness = Spring.StiffnessMedium))
+    val transitionOut = fadeOut(spring(stiffness = Spring.StiffnessMedium))
 }
 
 val LocalPalette = compositionLocalOf<UI.Palette> { UI.Mocha }

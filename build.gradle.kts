@@ -38,6 +38,8 @@ dependencies {
     implementation("io.insert-koin:koin-logger-slf4j:${property("koin.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
     implementation("com.github.Dansoftowner:jSystemThemeDetector:${property("jSystemThemeDetector.version")}")
+    implementation("com.svenjacobs.reveal:reveal-core:${property("reveal.version")}")
+    implementation("io.github.theapache64:rebugger:1.0.0-rc02")
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.10")
 }

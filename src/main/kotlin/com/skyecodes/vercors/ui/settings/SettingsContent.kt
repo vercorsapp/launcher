@@ -72,6 +72,13 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                             )
                         }
 
+                        Setting(UI.Text.ANIMATIONS, UI.Text.ANIMATIONS_DESCRIPTION) {
+                            Switch(
+                                checked = configuration.animations,
+                                onCheckedChange = { viewModel.onConfigChange(configuration.copy(animations = it)) }
+                            )
+                        }
+
                         Setting(UI.Text.DEFAULT_TAB, UI.Text.DEFAULT_TAB_DESCRIPTION) {
                             var isDefaultTabDropdownMenuExpanded by remember { mutableStateOf(false) }
 

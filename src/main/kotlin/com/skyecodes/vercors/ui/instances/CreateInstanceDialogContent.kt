@@ -12,7 +12,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.data.model.mojang.MojangReleaseType
 import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
@@ -62,187 +61,180 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
             versionManifest?.latestRelease
     }
 
-    Dialog(
-        onDismissRequest = onClose
+    Column(
+        modifier = Modifier.padding(UI.largePadding),
+        verticalArrangement = Arrangement.spacedBy(UI.largePadding)
     ) {
-        Card {
-            Column(
-                modifier = Modifier.padding(UI.largePadding),
-                verticalArrangement = Arrangement.spacedBy(UI.largePadding)
+        Text(
+            text = UI.Text.CREATE_NEW_INSTANCE,
+            style = MaterialTheme.typography.h6
+        )
+
+        FormField(UI.Text.INSTANCE_NAME) {
+            OutlinedTextField(
+                value = instanceName,
+                onValueChange = { instanceName = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        FormField(UI.Text.MINECRAFT_VERSION) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = UI.Text.CREATE_NEW_INSTANCE,
-                    style = MaterialTheme.typography.h6
-                )
-
-                FormField(UI.Text.INSTANCE_NAME) {
+                ExposedDropdownMenuBox(
+                    expanded = isMinecraftVersionDropdownMenuExpanded,
+                    onExpandedChange = { isMinecraftVersionDropdownMenuExpanded = it },
+                    modifier = Modifier.weight(1f)
+                ) {
                     OutlinedTextField(
-                        value = instanceName,
-                        onValueChange = { instanceName = it },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                FormField(UI.Text.MINECRAFT_VERSION) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        ExposedDropdownMenuBox(
-                            expanded = isMinecraftVersionDropdownMenuExpanded,
-                            onExpandedChange = { isMinecraftVersionDropdownMenuExpanded = it },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            OutlinedTextField(
-                                value = minecraftVersionDisplay,
-                                onValueChange = {},
-                                readOnly = true,
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Default, overrideDescendants = true)
-                                    .fillMaxWidth(),
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = if (isMinecraftVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                        contentDescription = "Show options"
-                                    )
-                                }
+                        value = minecraftVersionDisplay,
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Default, overrideDescendants = true)
+                            .fillMaxWidth(),
+                        trailingIcon = {
+                            Icon(
+                                imageVector = if (isMinecraftVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                contentDescription = "Show options"
                             )
+                        }
+                    )
 
-                            ScrollableExposedDropdownMenu(
-                                expanded = isMinecraftVersionDropdownMenuExpanded,
-                                onDismissRequest = { isMinecraftVersionDropdownMenuExpanded = false }
-                            ) {
-                                versionManifest?.let { manifest ->
-                                    manifest.versions
-                                        .filter { version -> version.type == MojangReleaseType.Release || includeSnapshots }
-                                        .forEach { version ->
-                                            DropdownMenuItem(
-                                                onClick = {
-                                                    isMinecraftVersionDropdownMenuExpanded = false
-                                                    minecraftVersion = version
-                                                },
-                                                contentPadding = PaddingValues(horizontal = 10.dp)
-                                            ) {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.fillMaxWidth()
-                                                ) {
-                                                    Text(getVersionText(manifest, version))
-                                                    getVersionIcon(manifest, version)?.let {
-                                                        Icon(
-                                                            it,
-                                                            null,
-                                                            Modifier.size(UI.mediumIconSize)
-                                                        )
-                                                    }
-                                                }
+                    ScrollableExposedDropdownMenu(
+                        expanded = isMinecraftVersionDropdownMenuExpanded,
+                        onDismissRequest = { isMinecraftVersionDropdownMenuExpanded = false }
+                    ) {
+                        versionManifest?.let { manifest ->
+                            manifest.versions
+                                .filter { version -> version.type == MojangReleaseType.Release || includeSnapshots }
+                                .forEach { version ->
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            isMinecraftVersionDropdownMenuExpanded = false
+                                            minecraftVersion = version
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 10.dp)
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(getVersionText(manifest, version))
+                                            getVersionIcon(manifest, version)?.let {
+                                                Icon(
+                                                    it,
+                                                    null,
+                                                    Modifier.size(UI.mediumIconSize)
+                                                )
                                             }
                                         }
-                                }
-                            }
-                        }
-
-                        Checkbox(
-                            modifier = Modifier.padding(start = UI.smallPadding),
-                            checked = includeSnapshots,
-                            onCheckedChange = { includeSnapshots = it },
-                        )
-                        Text(
-                            modifier = Modifier.clickable(
-                                interactionSource = interactionSource,
-                                indication = null,
-                                onClick = { includeSnapshots = !includeSnapshots }
-                            ),
-                            text = UI.Text.INCLUDE_SNAPSHOTS,
-                            style = MaterialTheme.typography.subtitle2
-                        )
-                    }
-                }
-
-                FormField(UI.Text.LOADER) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
-                        LoaderChip(null, loader == null) { loader = null }
-                        Loader.entries.forEach {
-                            LoaderChip(it, loader == it) { loader = it }
-                        }
-                    }
-                }
-
-                if (loader != null) {
-                    FormField(UI.Text.LOADER_VERSION) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            ExposedDropdownMenuBox(
-                                expanded = isLoaderVersionDropdownMenuExpanded,
-                                onExpandedChange = { isLoaderVersionDropdownMenuExpanded = it },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                OutlinedTextField(
-                                    value = loaderVersionDisplay,
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Default,
-                                        overrideDescendants = true
-                                    ).fillMaxWidth(),
-                                    trailingIcon = {
-                                        Icon(
-                                            imageVector = if (isLoaderVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                            contentDescription = "Show options"
-                                        )
                                     }
-                                )
-
-                                ScrollableExposedDropdownMenu(
-                                    expanded = isLoaderVersionDropdownMenuExpanded,
-                                    onDismissRequest = { isLoaderVersionDropdownMenuExpanded = false }
-                                ) {
-
                                 }
-                            }
                         }
                     }
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.End),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(
-                        onClick = onClose
-                    ) {
-                        Icon(
-                            imageVector = FeatherIcons.X,
-                            contentDescription = null,
-                            modifier = Modifier.size(UI.mediumIconSize)
-                        )
-                        Text(
-                            text = UI.Text.CANCEL,
-                            modifier = Modifier.padding(start = UI.mediumPadding)
-                        )
-                    }
+                Checkbox(
+                    modifier = Modifier.padding(start = UI.smallPadding),
+                    checked = includeSnapshots,
+                    onCheckedChange = { includeSnapshots = it },
+                )
+                Text(
+                    modifier = Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { includeSnapshots = !includeSnapshots }
+                    ),
+                    text = UI.Text.INCLUDE_SNAPSHOTS,
+                    style = MaterialTheme.typography.subtitle2
+                )
+            }
+        }
 
-                    IconTextButton(
-                        enabled = instanceName.isNotBlank() && minecraftVersion != null && (loader == null || !loaderVersion.isNullOrBlank()),
-                        onClick = {
-                            scope.launch {
-                                instanceService.createInstance(
-                                    instanceName,
-                                    minecraftVersion!!,
-                                    loader,
-                                    loaderVersion
-                                )
-                            }
-                            onClose()
-                        },
-                        imageVector = FeatherIcons.Plus,
-                        text = UI.Text.CREATE,
-                        colors = UI.successButtonColors
-                    )
+        FormField(UI.Text.LOADER) {
+            Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
+                LoaderChip(null, loader == null) { loader = null }
+                Loader.entries.forEach {
+                    LoaderChip(it, loader == it) { loader = it }
                 }
             }
+        }
+
+        if (loader != null) {
+            FormField(UI.Text.LOADER_VERSION) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = isLoaderVersionDropdownMenuExpanded,
+                        onExpandedChange = { isLoaderVersionDropdownMenuExpanded = it },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = loaderVersionDisplay,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.pointerHoverIcon(
+                                PointerIcon.Default,
+                                overrideDescendants = true
+                            ).fillMaxWidth(),
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = if (isLoaderVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                    contentDescription = "Show options"
+                                )
+                            }
+                        )
+
+                        ScrollableExposedDropdownMenu(
+                            expanded = isLoaderVersionDropdownMenuExpanded,
+                            onDismissRequest = { isLoaderVersionDropdownMenuExpanded = false }
+                        ) {
+
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.End),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = onClose
+            ) {
+                Icon(
+                    imageVector = FeatherIcons.X,
+                    contentDescription = null,
+                    modifier = Modifier.size(UI.mediumIconSize)
+                )
+                Text(
+                    text = UI.Text.CANCEL,
+                    modifier = Modifier.padding(start = UI.mediumPadding)
+                )
+            }
+
+            IconTextButton(
+                enabled = instanceName.isNotBlank() && minecraftVersion != null && (loader == null || !loaderVersion.isNullOrBlank()),
+                onClick = {
+                    scope.launch {
+                        instanceService.createInstance(
+                            instanceName,
+                            minecraftVersion!!,
+                            loader,
+                            loaderVersion
+                        )
+                    }
+                    onClose()
+                },
+                imageVector = FeatherIcons.Plus,
+                text = UI.Text.CREATE
+            )
         }
     }
 }

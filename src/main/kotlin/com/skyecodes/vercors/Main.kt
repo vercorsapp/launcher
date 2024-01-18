@@ -41,14 +41,19 @@ fun main() {
                 single<HomeProviderService> { HomeProviderServiceImpl(get(), get()) }
 
                 single(createdAtStart = false) { (navigator: Navigator) -> AppViewModel(get(), get(), navigator) }
-                single(createdAtStart = false) { (configuration: StateFlow<Configuration?>, instances: StateFlow<List<Instance>?>) ->
-                    HomeViewModel(
-                        get(),
-                        configuration,
-                        instances
-                    )
+                single(createdAtStart = false) { (
+                                                     configuration: StateFlow<Configuration?>,
+                                                     instances: StateFlow<List<Instance>?>
+                                                 ) ->
+                    HomeViewModel(get(), configuration, instances)
                 }
-                single(createdAtStart = false) { (instances: StateFlow<List<Instance>?>) -> InstancesViewModel(instances) }
+                single(createdAtStart = false) { (
+                                                     instances: StateFlow<List<Instance>?>,
+                                                     openNewInstanceDialog: () -> Unit,
+                                                     closeNewInstanceDialog: () -> Unit
+                                                 ) ->
+                    InstancesViewModel(instances, openNewInstanceDialog, closeNewInstanceDialog)
+                }
                 single(createdAtStart = false) { (onConfigChange: (Configuration) -> Unit) ->
                     SettingsViewModel(
                         onConfigChange
