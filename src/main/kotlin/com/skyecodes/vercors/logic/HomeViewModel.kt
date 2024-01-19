@@ -1,36 +1,42 @@
 package com.skyecodes.vercors.logic
 
-import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.data.model.app.HomeSectionType
-import com.skyecodes.vercors.data.model.app.Instance
-import com.skyecodes.vercors.data.model.app.Project
-import com.skyecodes.vercors.data.service.HomeProviderService
-import io.github.oshai.kotlinlogging.KotlinLogging
+import com.skyecodes.vercors.data.model.app.*
+import com.skyecodes.vercors.data.service.CurseforgeService
+import com.skyecodes.vercors.data.service.ModrinthService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.stateholder.SavedStateHolder
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
-private val logger = KotlinLogging.logger {}
-
 class HomeViewModel(
-    private val homeProviderService: HomeProviderService,
+    private val modrinthService: ModrinthService,
+    private val curseforgeService: CurseforgeService,
     private val configuration: StateFlow<Configuration?>,
-    private val instances: StateFlow<List<Instance>?>
+    private val instances: StateFlow<List<Instance>?>,
+    savedStateHolder: SavedStateHolder
 ) : ViewModel() {
-    private var isInitialized = false
     private val _uiState = MutableStateFlow(HomeUiState(emptyMap()))
     val uiState = _uiState.asStateFlow()
-    private val cachedSectionData = mutableMapOf<HomeSectionType, HomeUiState.Section>()
+
+    @Suppress("unchecked_cast")
+    private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> =
+        savedStateHolder.consumeRestored("cachedProjectsData") as MutableMap<Pair<HomeSectionType, Provider>, List<Project>>?
+            ?: mutableMapOf()
+
+    init {
+        savedStateHolder.registerProvider("cachedProjectsData") { cachedProjectsData }
+    }
 
     fun initialize() {
-        if (isInitialized) return
-        isInitialized = true
         viewModelScope.launch {
             instances.filterNotNull().collect { updateInstances(it) }
         }
-        invalidateCacheOnChange { it?.homeProviders }
-        invalidateCacheOnChange { it?.homeSections }
+        viewModelScope.launch {
+            configuration.filterNotNull().collect { updateAll(it) }
+        }
     }
 
     private fun updateInstances(instances: List<Instance>) {
@@ -48,7 +54,7 @@ class HomeViewModel(
         _uiState.update { HomeUiState(configuration.homeSections.associateWith { emptySectionData(it) }) }
         configuration.homeSections.forEach { type ->
             viewModelScope.launch {
-                val section = cachedSectionData.getOrPut(type) { fetchSectionData(type, configuration) }
+                val section = getSectionData(type, configuration.homeProviders)
                 _uiState.update {
                     HomeUiState(it.sections.mapValues { (mapType, mapSection) ->
                         if (mapType === type) section else mapSection
@@ -58,55 +64,58 @@ class HomeViewModel(
         }
     }
 
-    private fun <T> invalidateCacheOnChange(transform: (Configuration?) -> T) {
-        viewModelScope.launch {
-            configuration.map(transform).collect {
-                cachedSectionData.clear()
-                updateAll(configuration.value!!)
-            }
-        }
-    }
-
     private fun emptySectionData(sectionType: HomeSectionType) = when (sectionType) {
         HomeSectionType.JumpBackIn -> HomeUiState.Section.Instances(null)
         else -> HomeUiState.Section.Projects(null)
     }
 
-    private suspend fun fetchSectionData(
-        sectionType: HomeSectionType,
-        configuration: Configuration
-    ): HomeUiState.Section = when (sectionType) {
-        HomeSectionType.JumpBackIn -> HomeUiState.Section.Instances(instances.value!!.sortedByDescending {
+    private suspend fun getSectionData(sectionType: HomeSectionType, providers: List<Provider>): HomeUiState.Section =
+        if (sectionType === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances.value!!.sortedByDescending {
             it.lastLaunched ?: it.created
         })
+        else HomeUiState.Section.Projects(providers.map { viewModelScope.async { getProjectsData(sectionType, it) } }
+            .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
+                buildList {
+                    if (lists.isNotEmpty()) {
+                        var curListIdx = 0
+                        while (size < 10) {
+                            val v = lists[curListIdx].removeFirst()
+                            if (none { it.name == v.name }) {
+                                add(v)
+                                curListIdx++
+                                if (curListIdx == lists.size) curListIdx = 0
+                            }
+                        }
+                    }
+                }
+            })
 
-        HomeSectionType.PopularMods -> HomeUiState.Section.Projects(
-            homeProviderService.getPopularMods(
-                viewModelScope,
-                configuration.homeProviders
-            )
-        )
+    private suspend fun getProjectsData(sectionType: HomeSectionType, provider: Provider): List<Project> =
+        cachedProjectsData.getOrPut(sectionType to provider) { fetchProjectsData(sectionType, provider) }
 
-        HomeSectionType.PopularModpacks -> HomeUiState.Section.Projects(
-            homeProviderService.getPopularModpacks(
-                viewModelScope,
-                configuration.homeProviders
-            )
-        )
+    private suspend fun fetchProjectsData(sectionType: HomeSectionType, provider: Provider): List<Project> =
+        when (sectionType) {
+            HomeSectionType.PopularMods -> when (provider) {
+                Provider.Modrinth -> modrinthService.getPopularMods().hits.convertModrinth()
+                Provider.Curseforge -> curseforgeService.getPopularMods().data.convertCurseforge()
+            }
 
-        HomeSectionType.PopularResourcePacks -> HomeUiState.Section.Projects(
-            homeProviderService.getPopularResourcePacks(
-                viewModelScope,
-                configuration.homeProviders
-            )
-        )
+            HomeSectionType.PopularModpacks -> when (provider) {
+                Provider.Modrinth -> modrinthService.getPopularModpacks().hits.convertModrinth()
+                Provider.Curseforge -> curseforgeService.getPopularModpacks().data.convertCurseforge()
+            }
 
-        HomeSectionType.PopularShaderPacks -> HomeUiState.Section.Projects(
-            homeProviderService.getPopularShaderPacks(
-                viewModelScope,
-                configuration.homeProviders
-            )
-        )
+            HomeSectionType.PopularResourcePacks -> when (provider) {
+                Provider.Modrinth -> modrinthService.getPopularResourcePacks().hits.convertModrinth()
+                Provider.Curseforge -> curseforgeService.getPopularResourcePacks().data.convertCurseforge()
+            }
+
+            HomeSectionType.PopularShaderPacks -> when (provider) {
+                Provider.Modrinth -> modrinthService.getPopularShaderPacks().hits.convertModrinth()
+                Provider.Curseforge -> curseforgeService.getPopularShaderPacks().data.convertCurseforge()
+            }
+
+            else -> emptyList()
     }
 }
 

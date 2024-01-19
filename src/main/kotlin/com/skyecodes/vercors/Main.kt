@@ -15,6 +15,7 @@ import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.rememberNavigator
+import moe.tlaster.precompose.stateholder.SavedStateHolder
 import org.koin.compose.KoinApplication
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
@@ -38,27 +39,15 @@ fun main() {
                 single<ModrinthService> { ModrinthServiceImpl(get()) }
                 single<MojangService> { MojangServiceImpl(get()) }
                 single<StorageService> { StorageServiceImpl() }
-                single<HomeProviderService> { HomeProviderServiceImpl(get(), get()) }
 
-                single(createdAtStart = false) { (navigator: Navigator) -> AppViewModel(get(), get(), navigator) }
-                single(createdAtStart = false) { (
-                                                     configuration: StateFlow<Configuration?>,
-                                                     instances: StateFlow<List<Instance>?>
-                                                 ) ->
-                    HomeViewModel(get(), configuration, instances)
+                factory { (navigator: Navigator) -> AppViewModel(get(), get(), navigator) }
+                factory { (configuration: StateFlow<Configuration?>, instances: StateFlow<List<Instance>?>, savedStateHolder: SavedStateHolder) ->
+                    HomeViewModel(get(), get(), configuration, instances, savedStateHolder)
                 }
-                single(createdAtStart = false) { (
-                                                     instances: StateFlow<List<Instance>?>,
-                                                     openNewInstanceDialog: () -> Unit,
-                                                     closeNewInstanceDialog: () -> Unit
-                                                 ) ->
+                factory { (instances: StateFlow<List<Instance>?>, openNewInstanceDialog: () -> Unit, closeNewInstanceDialog: () -> Unit) ->
                     InstancesViewModel(instances, openNewInstanceDialog, closeNewInstanceDialog)
                 }
-                single(createdAtStart = false) { (onConfigChange: (Configuration) -> Unit) ->
-                    SettingsViewModel(
-                        onConfigChange
-                    )
-                }
+                factory { (onConfigChange: (Configuration) -> Unit) -> SettingsViewModel(onConfigChange) }
             })
         }) {
             PreComposeApp {

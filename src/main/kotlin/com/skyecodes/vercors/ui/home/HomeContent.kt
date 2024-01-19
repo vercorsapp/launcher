@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,7 +19,7 @@ import com.skyecodes.vercors.ui.UI
 
 @Composable
 fun HomeContent(viewModel: HomeViewModel) {
-    viewModel.initialize()
+    LaunchedEffect(viewModel) { viewModel.initialize() }
     val state by viewModel.uiState.collectAsState()
 
     Box(Modifier.padding(start = UI.mediumPadding)) {

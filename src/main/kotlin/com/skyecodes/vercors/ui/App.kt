@@ -37,6 +37,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import moe.tlaster.precompose.koin.koinViewModel
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.transition.NavTransition
+import moe.tlaster.precompose.stateholder.LocalSavedStateHolder
 import org.koin.core.parameter.parametersOf
 
 private val logger = KotlinLogging.logger {}
@@ -45,7 +46,11 @@ private val logger = KotlinLogging.logger {}
 fun ApplicationScope.AppWindow(
     viewModel: AppViewModel,
 ) {
-    viewModel.initialize(rememberWindowState(size = DpSize(1280.dp, 720.dp)))
+    val windowState = rememberWindowState(size = DpSize(1280.dp, 720.dp))
+    LaunchedEffect(viewModel) {
+        viewModel.initialize(windowState)
+    }
+
     val configuration by viewModel.configuration.collectAsState()
 
     configuration?.let { safeConfiguration ->
@@ -78,10 +83,13 @@ private fun FrameWindowScope.AppContent(
     configuration: Configuration,
     onClose: () -> Unit
 ) {
-    viewModel.initializeWindow(window)
+    LaunchedEffect(viewModel) {
+        viewModel.initializeWindow(window)
+    }
 
     val uiState by viewModel.uiState.collectAsState()
     val currentScene by viewModel.currentScene.collectAsState()
+    val savedStateHolder = LocalSavedStateHolder.current
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -160,7 +168,8 @@ private fun FrameWindowScope.AppContent(
                                         HomeContent(koinViewModel {
                                             parametersOf(
                                                 viewModel.configuration,
-                                                viewModel.instances
+                                                viewModel.instances,
+                                                savedStateHolder
                                             )
                                         })
                                     }
