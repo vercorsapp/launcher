@@ -1,46 +1,46 @@
-package com.skyecodes.vercors.logic
+package com.skyecodes.vercors.component
 
+import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.skyecodes.vercors.data.model.app.*
 import com.skyecodes.vercors.data.service.CurseforgeService
 import com.skyecodes.vercors.data.service.ModrinthService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.stateholder.SavedStateHolder
-import moe.tlaster.precompose.viewmodel.ViewModel
-import moe.tlaster.precompose.viewmodel.viewModelScope
 
-class HomeViewModel(
-    private val modrinthService: ModrinthService,
-    private val curseforgeService: CurseforgeService,
+interface HomeComponent {
+    val uiState: StateFlow<HomeUiState>
+}
+
+class DefaultHomeComponent(
+    componentContext: AppComponentContext,
     private val configuration: StateFlow<Configuration?>,
     private val instances: StateFlow<List<Instance>?>,
-    savedStateHolder: SavedStateHolder
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState(emptyMap()))
-    val uiState = _uiState.asStateFlow()
-
-    @Suppress("unchecked_cast")
-    private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> =
-        savedStateHolder.consumeRestored("cachedProjectsData") as MutableMap<Pair<HomeSectionType, Provider>, List<Project>>?
-            ?: mutableMapOf()
+    private val modrinthService: ModrinthService = componentContext.koin.get(),
+    private val curseforgeService: CurseforgeService = componentContext.koin.get()
+) : AppComponentContext by componentContext, HomeComponent {
+    override val uiState = MutableStateFlow(HomeUiState(emptyMap()))
+    private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()
 
     init {
-        savedStateHolder.registerProvider("cachedProjectsData") { cachedProjectsData }
+        lifecycle.doOnCreate { initialize() }
     }
 
-    fun initialize() {
-        viewModelScope.launch {
+    private fun initialize() {
+        scope.launch {
             instances.filterNotNull().collect { updateInstances(it) }
         }
-        viewModelScope.launch {
+        scope.launch {
             configuration.filterNotNull().collect { updateAll(it) }
         }
     }
 
     private fun updateInstances(instances: List<Instance>) {
-        _uiState.update { state ->
+        uiState.update { state ->
             state.copy(
                 sections = state.sections.mapValues { (type, section) ->
                     if (type === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances)
@@ -51,11 +51,11 @@ class HomeViewModel(
     }
 
     private fun updateAll(configuration: Configuration) {
-        _uiState.update { HomeUiState(configuration.homeSections.associateWith { emptySectionData(it) }) }
+        uiState.update { HomeUiState(configuration.homeSections.associateWith { emptySectionData(it) }) }
         configuration.homeSections.forEach { type ->
-            viewModelScope.launch {
+            scope.launch {
                 val section = getSectionData(type, configuration.homeProviders)
-                _uiState.update {
+                uiState.update {
                     HomeUiState(it.sections.mapValues { (mapType, mapSection) ->
                         if (mapType === type) section else mapSection
                     })
@@ -70,10 +70,10 @@ class HomeViewModel(
     }
 
     private suspend fun getSectionData(sectionType: HomeSectionType, providers: List<Provider>): HomeUiState.Section =
-        if (sectionType === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances.value!!.sortedByDescending {
+        if (sectionType === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances.value?.sortedByDescending {
             it.lastLaunched ?: it.created
         })
-        else HomeUiState.Section.Projects(providers.map { viewModelScope.async { getProjectsData(sectionType, it) } }
+        else HomeUiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {
                     if (lists.isNotEmpty()) {

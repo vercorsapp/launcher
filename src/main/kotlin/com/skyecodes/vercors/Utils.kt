@@ -1,16 +1,20 @@
 package com.skyecodes.vercors
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
 import java.awt.Desktop
 import java.net.URI
 import java.time.Instant
+import javax.swing.SwingUtilities
 
 private class Utils
 
+@OptIn(ExperimentalSerializationApi::class)
 val appJson = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
+    explicitNulls = false
 }
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
@@ -35,3 +39,25 @@ private val prettyTime = PrettyTime()
 fun Instant.readable(): String = prettyTime.format(this)
 
 fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this
+
+fun <T> runOnUiThread(block: () -> T): T {
+    if (SwingUtilities.isEventDispatchThread()) {
+        return block()
+    }
+
+    var error: Throwable? = null
+    var result: T? = null
+
+    SwingUtilities.invokeAndWait {
+        try {
+            result = block()
+        } catch (e: Throwable) {
+            error = e
+        }
+    }
+
+    error?.also { throw it }
+
+    @Suppress("UNCHECKED_CAST")
+    return result as T
+}

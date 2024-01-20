@@ -12,14 +12,13 @@ import kotlinx.serialization.Serializable
 enum class AppScene(
     val title: String,
     val icon: ImageVector,
-    override val value: String,
-    val route: String
+    override val value: String
 ) : StringEnumerable {
-    Home(UI.Text.HOME, FeatherIcons.Home, "home", "/home"),
-    Instances(UI.Text.INSTANCES, FeatherIcons.Box, "instances", "/instances"),
-    Search(UI.Text.SEARCH, FeatherIcons.Search, "search", "/search"),
-    Accounts(UI.Text.ACCOUNTS, FeatherIcons.Users, "accounts", "/accounts"),
-    Settings(UI.Text.SETTINGS, FeatherIcons.Settings, "settings", "/settings");
+    Home(UI.Text.HOME, FeatherIcons.Home, "home"),
+    Instances(UI.Text.INSTANCES, FeatherIcons.Box, "instances"),
+    Search(UI.Text.SEARCH, FeatherIcons.Search, "search"),
+    Accounts(UI.Text.ACCOUNTS, FeatherIcons.Users, "accounts"),
+    Settings(UI.Text.SETTINGS, FeatherIcons.Settings, "settings");
 }
 
 private class AppSceneSerializer : StringEnumerableSerializer<AppScene>(AppScene.entries)

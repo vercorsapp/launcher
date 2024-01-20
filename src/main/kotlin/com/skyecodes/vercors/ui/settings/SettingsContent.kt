@@ -15,10 +15,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.skyecodes.vercors.component.SettingsComponent
 import com.skyecodes.vercors.data.model.app.AppScene
 import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Provider
-import com.skyecodes.vercors.logic.SettingsViewModel
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.UI
@@ -31,7 +31,7 @@ import compose.icons.feathericons.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SettingsContent(viewModel: SettingsViewModel) {
+fun SettingsContent(component: SettingsComponent) {
     val configuration = LocalConfiguration.current
 
     Box(Modifier.padding(start = UI.mediumPadding)) {
@@ -54,7 +54,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                                     SelectIconChip(
                                         selected = it === configuration.theme,
                                         onClick = {
-                                            if (it !== configuration.theme) viewModel.onConfigChange(
+                                            if (it !== configuration.theme) component.onConfigChange(
                                                 configuration.copy(theme = it)
                                             )
                                         },
@@ -68,14 +68,14 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                         Setting(UI.Text.SYSTEM_WINDOW, UI.Text.SYSTEM_WINDOW_DESCRIPTION) {
                             Switch(
                                 checked = configuration.useSystemWindowFrame,
-                                onCheckedChange = { viewModel.onConfigChange(configuration.copy(useSystemWindowFrame = it)) }
+                                onCheckedChange = { component.onConfigChange(configuration.copy(useSystemWindowFrame = it)) }
                             )
                         }
 
                         Setting(UI.Text.ANIMATIONS, UI.Text.ANIMATIONS_DESCRIPTION) {
                             Switch(
                                 checked = configuration.animations,
-                                onCheckedChange = { viewModel.onConfigChange(configuration.copy(animations = it)) }
+                                onCheckedChange = { component.onConfigChange(configuration.copy(animations = it)) }
                             )
                         }
 
@@ -111,7 +111,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                                         DropdownMenuItem(
                                             onClick = {
                                                 isDefaultTabDropdownMenuExpanded = false
-                                                viewModel.onConfigChange(configuration.copy(defaultScene = it))
+                                                component.onConfigChange(configuration.copy(defaultScene = it))
                                             },
                                             contentPadding = PaddingValues(horizontal = 10.dp)
                                         ) {
@@ -134,7 +134,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                                 Provider.entries.forEach {
                                     SelectIconChip(
                                         selected = it in configuration.homeProviders,
-                                        onClick = { viewModel.onHomeProviderChanged(it, configuration) },
+                                        onClick = { component.onHomeProviderChanged(it, configuration) },
                                         text = it.text,
                                         painter = loadSvgPainter(
                                             resourceAsStream("/icon/svg/${it.value}.svg"),

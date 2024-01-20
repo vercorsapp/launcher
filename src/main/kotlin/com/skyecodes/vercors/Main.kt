@@ -1,23 +1,15 @@
 package com.skyecodes.vercors
 
 import androidx.compose.ui.window.application
-import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.data.model.app.Instance
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import com.skyecodes.vercors.component.DefaultAppComponentContext
+import com.skyecodes.vercors.component.DefaultRootComponent
 import com.skyecodes.vercors.data.service.*
-import com.skyecodes.vercors.logic.AppViewModel
-import com.skyecodes.vercors.logic.HomeViewModel
-import com.skyecodes.vercors.logic.InstancesViewModel
-import com.skyecodes.vercors.logic.SettingsViewModel
 import com.skyecodes.vercors.ui.AppWindow
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.StateFlow
-import moe.tlaster.precompose.PreComposeApp
-import moe.tlaster.precompose.koin.koinViewModel
-import moe.tlaster.precompose.navigation.Navigator
-import moe.tlaster.precompose.navigation.rememberNavigator
-import moe.tlaster.precompose.stateholder.SavedStateHolder
 import org.koin.compose.KoinApplication
-import org.koin.core.parameter.parametersOf
+import org.koin.compose.getKoin
 import org.koin.dsl.module
 import org.koin.logger.SLF4JLogger
 
@@ -39,21 +31,16 @@ fun main() {
                 single<ModrinthService> { ModrinthServiceImpl(get()) }
                 single<MojangService> { MojangServiceImpl(get()) }
                 single<StorageService> { StorageServiceImpl() }
-
-                factory { (navigator: Navigator) -> AppViewModel(get(), get(), navigator) }
-                factory { (configuration: StateFlow<Configuration?>, instances: StateFlow<List<Instance>?>, savedStateHolder: SavedStateHolder) ->
-                    HomeViewModel(get(), get(), configuration, instances, savedStateHolder)
-                }
-                factory { (instances: StateFlow<List<Instance>?>, openNewInstanceDialog: () -> Unit, closeNewInstanceDialog: () -> Unit) ->
-                    InstancesViewModel(instances, openNewInstanceDialog, closeNewInstanceDialog)
-                }
-                factory { (onConfigChange: (Configuration) -> Unit) -> SettingsViewModel(onConfigChange) }
             })
         }) {
-            PreComposeApp {
-                val navigator = rememberNavigator()
-                AppWindow(koinViewModel { parametersOf(navigator) })
+            val lifecycle = LifecycleRegistry()
+            val koin = getKoin()
+            val root = runOnUiThread {
+                DefaultRootComponent(
+                    componentContext = DefaultAppComponentContext(DefaultComponentContext(lifecycle), koin)
+                )
             }
+            AppWindow(root, lifecycle)
         }
     }
 }

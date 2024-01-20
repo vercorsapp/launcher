@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.skyecodes.vercors.logic.InstancesViewModel
+import com.skyecodes.vercors.component.InstancesComponent
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
 import compose.icons.FeatherIcons
@@ -18,9 +18,9 @@ import compose.icons.feathericons.Plus
 
 @Composable
 fun InstancesContent(
-    viewModel: InstancesViewModel
+    component: InstancesComponent
 ) {
-    val instances = viewModel.instances.collectAsState()
+    val instances = component.instances.collectAsState()
     Column {
         Column {
             instances.value!!.forEach { Text(it.name) }
@@ -36,7 +36,7 @@ fun InstancesContent(
             )
 
             IconTextButton(
-                onClick = viewModel.openNewInstanceDialog,
+                onClick = component.openNewInstanceDialog,
                 imageVector = FeatherIcons.Plus,
                 text = UI.Text.CREATE_NEW_INSTANCE
             )

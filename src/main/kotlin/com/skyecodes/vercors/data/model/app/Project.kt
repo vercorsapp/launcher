@@ -2,9 +2,11 @@ package com.skyecodes.vercors.data.model.app
 
 import com.skyecodes.vercors.data.model.curseforge.CurseforgeProject
 import com.skyecodes.vercors.data.model.modrinth.ModrinthProjectResult
+import kotlinx.serialization.Serializable
 import java.time.Instant
 
-interface Project {
+@Serializable
+sealed interface Project {
     val provider: Provider
     val id: String
     val slug: String

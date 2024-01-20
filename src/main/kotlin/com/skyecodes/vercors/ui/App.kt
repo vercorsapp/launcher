@@ -1,8 +1,6 @@
 package com.skyecodes.vercors.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,10 +21,15 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.skyecodes.vercors.APP_NAME
-import com.skyecodes.vercors.data.model.app.AppScene
+import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.logic.AppViewModel
 import com.skyecodes.vercors.ui.accounts.AccountsContent
 import com.skyecodes.vercors.ui.home.HomeContent
 import com.skyecodes.vercors.ui.instances.CreateInstanceDialogContent
@@ -34,44 +37,44 @@ import com.skyecodes.vercors.ui.instances.InstancesContent
 import com.skyecodes.vercors.ui.search.SearchContent
 import com.skyecodes.vercors.ui.settings.SettingsContent
 import io.github.oshai.kotlinlogging.KotlinLogging
-import moe.tlaster.precompose.koin.koinViewModel
-import moe.tlaster.precompose.navigation.NavHost
-import moe.tlaster.precompose.navigation.transition.NavTransition
-import moe.tlaster.precompose.stateholder.LocalSavedStateHolder
-import org.koin.core.parameter.parametersOf
 
 private val logger = KotlinLogging.logger {}
 
+@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 fun ApplicationScope.AppWindow(
-    viewModel: AppViewModel,
+    component: RootComponent,
+    lifecycle: LifecycleRegistry
 ) {
     val windowState = rememberWindowState(size = DpSize(1280.dp, 720.dp))
-    LaunchedEffect(viewModel) {
-        viewModel.initialize(windowState)
+    LifecycleController(lifecycle, windowState)
+    LaunchedEffect(component) {
+        component.initializeWindowState(windowState)
     }
 
-    val configuration by viewModel.configuration.collectAsState()
-
+    val configuration by component.configuration.collectAsState()
+    val instances by component.instances.collectAsState()
     configuration?.let { safeConfiguration ->
+        instances?.let {
         if (safeConfiguration.useSystemWindowFrame) {
             Window(
-                state = viewModel.windowState,
+                state = windowState,
                 onCloseRequest = ::onClose,
                 undecorated = false,
                 title = APP_NAME,
             ) {
-                AppContent(viewModel, safeConfiguration, ::onClose)
+                AppContent(component, safeConfiguration, ::onClose)
             }
         } else {
             Window(
-                state = viewModel.windowState,
+                state = windowState,
                 onCloseRequest = ::onClose,
                 undecorated = true,
                 title = APP_NAME,
             ) {
-                AppContent(viewModel, safeConfiguration, ::onClose)
+                AppContent(component, safeConfiguration, ::onClose)
             }
+        }
         }
     }
 }
@@ -79,17 +82,16 @@ fun ApplicationScope.AppWindow(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FrameWindowScope.AppContent(
-    viewModel: AppViewModel,
+    component: RootComponent,
     configuration: Configuration,
     onClose: () -> Unit
 ) {
-    LaunchedEffect(viewModel) {
-        viewModel.initializeWindow(window)
+    LaunchedEffect(component) {
+        component.initializeWindow(window)
     }
 
-    val uiState by viewModel.uiState.collectAsState()
-    val currentScene by viewModel.currentScene.collectAsState()
-    val savedStateHolder = LocalSavedStateHolder.current
+    val uiState by component.uiState.collectAsState()
+    val currentScene by component.currentScene.collectAsState()
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -106,7 +108,7 @@ private fun FrameWindowScope.AppContent(
                         modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0)
                             .shadow(4.dp)
                     ) {
-                        Menu(currentScene) { viewModel.navigate(it) }
+                        Menu(currentScene) { component.navigate(it) }
                     }
                     Column {
                         WindowDraggableArea(
@@ -114,7 +116,7 @@ private fun FrameWindowScope.AppContent(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {},
-                                onDoubleClick = viewModel::onMaximize,
+                                onDoubleClick = component::onMaximize,
                                 onLongClick = null,
                                 enabled = !configuration.useSystemWindowFrame
                             )
@@ -125,11 +127,11 @@ private fun FrameWindowScope.AppContent(
                             ) {
                                 Toolbar(
                                     currentScene,
-                                    viewModel::onNextScene,
-                                    viewModel::onPreviousScene,
-                                    viewModel::onRefresh,
-                                    viewModel::onMinimize,
-                                    viewModel::onMaximize,
+                                    component::onNextScene,
+                                    component::onPreviousScene,
+                                    component::onRefresh,
+                                    component::onMinimize,
+                                    component::onMaximize,
                                     onClose
                                 )
                             }
@@ -145,63 +147,25 @@ private fun FrameWindowScope.AppContent(
                                 modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
                                 color = LocalPalette.current.base
                             ) {
-                                NavHost(
-                                    navigator = viewModel.navigator,
-                                    initialRoute = LocalConfiguration.current.defaultScene.route,
-                                    navTransition = if (LocalConfiguration.current.animations) remember {
-                                        NavTransition(
-                                            createTransition = UI.transitionIn,
-                                            destroyTransition = UI.transitionOut,
-                                            pauseTransition = UI.transitionOut,
-                                            resumeTransition = UI.transitionIn
-                                        )
-                                    } else remember {
-                                        NavTransition(
-                                            createTransition = EnterTransition.None,
-                                            destroyTransition = ExitTransition.None,
-                                            pauseTransition = ExitTransition.None,
-                                            resumeTransition = EnterTransition.None
-                                        )
-                                    }
+                                Children(
+                                    stack = component.childStack,
+                                    modifier = Modifier,
+                                    animation = if (configuration.animations) stackAnimation(fade()) else null
                                 ) {
-                                    scene(AppScene.Home.route) {
-                                        HomeContent(koinViewModel {
-                                            parametersOf(
-                                                viewModel.configuration,
-                                                viewModel.instances,
-                                                savedStateHolder
-                                            )
-                                        })
-                                    }
-                                    scene(AppScene.Instances.route) {
-                                        InstancesContent(koinViewModel {
-                                            parametersOf(
-                                                viewModel.instances,
-                                                viewModel::openNewInstanceDialog,
-                                                viewModel::closeNewInstanceDialog
-                                            )
-                                        })
-                                    }
-                                    scene(AppScene.Search.route) {
-                                        SearchContent()
-                                    }
-                                    scene(AppScene.Accounts.route) {
-                                        AccountsContent()
-                                    }
-                                    scene(AppScene.Settings.route) {
-                                        SettingsContent(koinViewModel {
-                                            parametersOf({ c: Configuration ->
-                                                viewModel.updateConfiguration(c)
-                                            })
-                                        })
+                                    when (val child = it.instance) {
+                                        is RootComponent.NavChild.Home -> HomeContent(child.component)
+                                        is RootComponent.NavChild.Instances -> InstancesContent(child.component)
+                                        is RootComponent.NavChild.Search -> SearchContent(child.component)
+                                        is RootComponent.NavChild.Accounts -> AccountsContent(child.component)
+                                        is RootComponent.NavChild.Settings -> SettingsContent(child.component)
                                     }
                                 }
                             }
                         }
                     }
                 }
-                AppDialog(uiState.showNewInstanceDialog, viewModel::closeNewInstanceDialog) {
-                    CreateInstanceDialogContent(viewModel::closeNewInstanceDialog)
+                AppDialog(uiState.showNewInstanceDialog, component::closeNewInstanceDialog) {
+                    CreateInstanceDialogContent(component::closeNewInstanceDialog)
                 }
             }
         }
