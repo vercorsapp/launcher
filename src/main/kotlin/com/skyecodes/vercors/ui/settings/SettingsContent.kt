@@ -1,10 +1,7 @@
 package com.skyecodes.vercors.ui.settings
 
-import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,11 +13,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.screen.SettingsComponent
+import com.skyecodes.vercors.data.model.app.AppColor
 import com.skyecodes.vercors.data.model.app.AppTab
 import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Provider
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
+import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.SectionContent
 import com.skyecodes.vercors.ui.common.SelectIconChip
@@ -65,6 +64,64 @@ fun SettingsContent(component: SettingsComponent) {
                             }
                         }
 
+                        Setting(UI.Text.ACCENT_COLOR, UI.Text.ACCENT_COLOR_DESCRIPTION) {
+                            var expanded by remember { mutableStateOf(false) }
+
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = configuration.accentColor.title,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    modifier = Modifier.pointerHoverIcon(
+                                        PointerIcon.Default,
+                                        overrideDescendants = true
+                                    ),
+                                    leadingIcon = {
+                                        Box(
+                                            Modifier.size(UI.mediumIconSize)
+                                                .background(configuration.accentColor.color(LocalPalette.current))
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        Icon(
+                                            imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                            contentDescription = "Show options"
+                                        )
+                                    }
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    AppColor.entries.forEach {
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                expanded = false
+                                                component.onConfigChange(configuration.copy(accentColor = it))
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 10.dp)
+                                        ) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Box(
+                                                    Modifier.size(UI.mediumIconSize)
+                                                        .background(it.color(LocalPalette.current))
+                                                )
+                                                Text(it.title)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Setting(UI.Text.SYSTEM_WINDOW, UI.Text.SYSTEM_WINDOW_DESCRIPTION) {
                             Switch(
                                 checked = configuration.useSystemWindowFrame,
@@ -80,11 +137,11 @@ fun SettingsContent(component: SettingsComponent) {
                         }
 
                         Setting(UI.Text.DEFAULT_TAB, UI.Text.DEFAULT_TAB_DESCRIPTION) {
-                            var isDefaultTabDropdownMenuExpanded by remember { mutableStateOf(false) }
+                            var expanded by remember { mutableStateOf(false) }
 
                             ExposedDropdownMenuBox(
-                                expanded = isDefaultTabDropdownMenuExpanded,
-                                onExpandedChange = { isDefaultTabDropdownMenuExpanded = it }
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it }
                             ) {
                                 OutlinedTextField(
                                     value = configuration.defaultTab.title,
@@ -97,20 +154,20 @@ fun SettingsContent(component: SettingsComponent) {
                                     leadingIcon = { Icon(configuration.defaultTab.icon, null) },
                                     trailingIcon = {
                                         Icon(
-                                            imageVector = if (isDefaultTabDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                            imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
                                             contentDescription = "Show options"
                                         )
                                     }
                                 )
 
                                 ExposedDropdownMenu(
-                                    expanded = isDefaultTabDropdownMenuExpanded,
-                                    onDismissRequest = { isDefaultTabDropdownMenuExpanded = false }
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
                                 ) {
                                     AppTab.entries.forEach {
                                         DropdownMenuItem(
                                             onClick = {
-                                                isDefaultTabDropdownMenuExpanded = false
+                                                expanded = false
                                                 component.onConfigChange(configuration.copy(defaultTab = it))
                                             },
                                             contentPadding = PaddingValues(horizontal = 10.dp)

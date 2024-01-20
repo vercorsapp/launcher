@@ -59,6 +59,8 @@ object UI {
         const val USER_INTERFACE = "User interface"
         const val THEME = "Theme"
         const val THEME_DESCRIPTION = "Change the global theme of the launcher."
+        const val ACCENT_COLOR = "Accent color"
+        const val ACCENT_COLOR_DESCRIPTION = "Change the accent color used in some buttons."
         const val SYSTEM_WINDOW = "Use system window frame"
         const val SYSTEM_WINDOW_DESCRIPTION =
             "Use the system window frame instead of the custom window frame provided by the launcher."
@@ -100,7 +102,7 @@ object UI {
         val crust: Color
 
         val transparentOverlay: Color
-        val material: Colors
+        fun material(accent: Color): Colors
     }
 
     object Latte : Palette {
@@ -132,11 +134,11 @@ object UI {
         override val crust = Color(0xffdce0e8)
 
         override val transparentOverlay = Color(0x7f000000)
-        override val material = lightColors(
-            primary = mauve,
-            primaryVariant = mauve,
-            secondary = mauve,
-            secondaryVariant = mauve,
+        override fun material(accent: Color) = lightColors(
+            primary = accent,
+            primaryVariant = accent,
+            secondary = accent,
+            secondaryVariant = accent,
             background = base,
             surface = surface0,
             error = red
@@ -153,8 +155,6 @@ object UI {
         override val peach = Color(0xfffab387)
         override val yellow = Color(0xfff9e2af)
         override val green = Color(0xffa6e3a1)
-
-        //override val green = Color(0xff508e54)
         override val teal = Color(0xff94e2d5)
         override val sky = Color(0xff89dceb)
         override val sapphire = Color(0xff74c7ec)
@@ -174,11 +174,11 @@ object UI {
         override val crust = Color(0xff11111b)
 
         override val transparentOverlay = Color(0x7f000000)
-        override val material = darkColors(
-            primary = mauve,
-            primaryVariant = mauve,
-            secondary = mauve,
-            secondaryVariant = mauve,
+        override fun material(accent: Color) = darkColors(
+            primary = accent,
+            primaryVariant = accent,
+            secondary = accent,
+            secondaryVariant = accent,
             background = base,
             surface = surface0,
             error = red

@@ -100,14 +100,14 @@ private fun FrameWindowScope.AppContent(
         LocalConfiguration provides configuration
     ) {
         MaterialTheme(
-            colors = LocalPalette.current.material,
+            colors = uiState.palette.material(configuration.accentColor.color(LocalPalette.current)),
             typography = UI.typography,
             //shapes = UI.shapes
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Row {
                     Surface(
-                        modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0)
+                        modifier = Modifier.fillMaxHeight().background(color = uiState.palette.surface0)
                             .shadow(4.dp)
                     ) {
                         Menu(currentTab) { component.navigate(it) }
@@ -125,7 +125,7 @@ private fun FrameWindowScope.AppContent(
                         ) {
                             Surface(
                                 modifier = Modifier.height(40.dp).fillMaxWidth()
-                                    .background(color = LocalPalette.current.surface0)
+                                    .background(color = uiState.palette.surface0)
                             ) {
                                 Toolbar(
                                     currentTab.title,
@@ -146,11 +146,11 @@ private fun FrameWindowScope.AppContent(
                         ) {
                             Surface(
                                 modifier = Modifier.fillMaxSize(),
-                                color = LocalPalette.current.surface0
+                                color = uiState.palette.surface0
                             ) {}
                             Surface(
                                 modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
-                                color = LocalPalette.current.base
+                                color = uiState.palette.base
                             ) {
                                 Crossfade(
                                     targetState = children,
