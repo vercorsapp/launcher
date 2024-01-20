@@ -11,28 +11,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.data.model.app.AppScene
+import com.skyecodes.vercors.data.model.app.AppTab
 
 @Composable
-fun Menu(currentScene: AppScene, onNavigate: (AppScene) -> Unit) {
+fun Menu(currentTab: AppTab, onNavigate: (AppTab) -> Unit) {
     Column(
         modifier = Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        TabNavigationItem(AppScene.Home, currentScene, onNavigate)
-        TabNavigationItem(AppScene.Instances, currentScene, onNavigate)
-        TabNavigationItem(AppScene.Search, currentScene, onNavigate)
+        TabNavigationItem(AppTab.Home, currentTab, onNavigate)
+        TabNavigationItem(AppTab.Instances, currentTab, onNavigate)
+        TabNavigationItem(AppTab.Search, currentTab, onNavigate)
         Spacer(Modifier.weight(1f))
-        TabNavigationItem(AppScene.Accounts, currentScene, onNavigate)
-        TabNavigationItem(AppScene.Settings, currentScene, onNavigate)
+        TabNavigationItem(AppTab.Accounts, currentTab, onNavigate)
+        TabNavigationItem(AppTab.Settings, currentTab, onNavigate)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TabNavigationItem(scene: AppScene, currentScene: AppScene, onNavigate: (AppScene) -> Unit) {
+private fun TabNavigationItem(tab: AppTab, currentTab: AppTab, onNavigate: (AppTab) -> Unit) {
     TooltipArea(
-        tooltip = { TabTooltip(scene.title) },
+        tooltip = { TabTooltip(tab.title) },
         tooltipPlacement = TooltipPlacement.ComponentRect(
             alignment = Alignment.CenterEnd,
             offset = DpOffset(30.dp, -(25.dp))
@@ -41,20 +41,20 @@ private fun TabNavigationItem(scene: AppScene, currentScene: AppScene, onNavigat
     ) {
         Button(
             modifier = Modifier.size(50.dp),
-            elevation = if (currentScene === scene) ButtonDefaults.elevation() else null,
-            colors = if (currentScene === scene) ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+            elevation = if (currentTab === tab) ButtonDefaults.elevation() else null,
+            colors = if (currentTab === tab) ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
             else ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colors.onSurface),
             contentPadding = PaddingValues(12.dp),
             shape = UI.largeRoundedCornerShape,
-            onClick = { onNavigate(scene) }
+            onClick = { onNavigate(tab) }
         ) {
-            Icon(scene.icon, scene.title, Modifier.fillMaxSize())
+            Icon(tab.icon, tab.title, Modifier.fillMaxSize())
         }
     }
 }
 
 @Composable
-private fun TabTooltip(sceneName: String) {
+private fun TabTooltip(tabName: String) {
     Surface(
         color = LocalPalette.current.surface1,
         modifier = Modifier.shadow(4.dp),
@@ -62,7 +62,7 @@ private fun TabTooltip(sceneName: String) {
     ) {
         Text(
             style = MaterialTheme.typography.body1,
-            text = sceneName,
+            text = tabName,
             modifier = Modifier.padding(horizontal = UI.mediumPadding, vertical = UI.smallPadding),
         )
     }

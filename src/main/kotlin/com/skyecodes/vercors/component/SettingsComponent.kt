@@ -3,7 +3,7 @@ package com.skyecodes.vercors.component
 import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.data.model.app.Provider
 
-interface SettingsComponent {
+interface SettingsComponent : Refreshable {
     fun onConfigChange(configuration: Configuration)
     fun onHomeProviderChanged(it: Provider, configuration: Configuration)
 
@@ -22,5 +22,9 @@ class DefaultSettingsComponent(
         val providers =
             if (it in configuration.homeProviders) configuration.homeProviders - it else configuration.homeProviders + it
         if (providers.isNotEmpty()) onConfigChange(configuration.copy(homeProviders = providers))
+    }
+
+    override fun refresh() {
+
     }
 }

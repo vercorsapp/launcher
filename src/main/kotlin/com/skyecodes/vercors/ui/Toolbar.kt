@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,16 +17,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.data.model.app.AppScene
+import com.skyecodes.vercors.applyIf
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
 @Composable
 fun Toolbar(
-    currentScene: AppScene,
-    onNextScene: () -> Unit,
-    onPreviousScene: () -> Unit,
-    onRefreshScene: () -> Unit,
+    screenTitle: String,
+    hasPreviousScreen: Boolean,
+    hasNextScreen: Boolean,
+    canRefreshScreen: Boolean,
+    onNextScreen: () -> Unit,
+    onPreviousScreen: () -> Unit,
+    onRefreshScreen: () -> Unit,
     onMinimize: () -> Unit,
     onMaximize: () -> Unit,
     onClose: () -> Unit
@@ -36,31 +40,33 @@ fun Toolbar(
         Row(
             modifier = Modifier.padding(UI.mediumPadding),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
+            horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
         ) {
-            /*Text(APP_NAME, color = MaterialTheme.colors.primary)
-            Text("v$APP_VERSION", color = MaterialTheme.colors.primary, style = MaterialTheme.typography.caption)
-            Spacer(modifier = Modifier.padding(horizontal = UI.smallPadding))*/
             Icon(
                 FeatherIcons.ChevronLeft,
                 "Previous",
-                modifier = Modifier.size(UI.mediumIconSize)
-                    .clickable(interactionSource = interactionSource, indication = null) { onPreviousScene() }
+                modifier = Modifier.size(UI.mediumIconSize).applyIf(hasPreviousScreen) {
+                    clickable(interactionSource = interactionSource, indication = null) { onPreviousScreen() }
+                },
+                tint = if (hasPreviousScreen) LocalContentColor.current else LocalPalette.current.surface2
             )
             Icon(
                 FeatherIcons.ChevronRight,
                 "Next",
-                modifier = Modifier.size(UI.mediumIconSize)
-                    .clickable(interactionSource = interactionSource, indication = null) { onNextScene() }
+                modifier = Modifier.size(UI.mediumIconSize).applyIf(hasNextScreen) {
+                    clickable(interactionSource = interactionSource, indication = null) { onNextScreen() }
+                },
+                tint = if (hasNextScreen) LocalContentColor.current else LocalPalette.current.surface2
             )
-            Text(currentScene.title)
-            Spacer(modifier = Modifier)
             Icon(
                 FeatherIcons.RefreshCw,
                 "Refresh",
-                modifier = Modifier.size(UI.mediumIconSize)
-                    .clickable(interactionSource = interactionSource, indication = null) { onRefreshScene() }
+                modifier = Modifier.size(UI.mediumIconSize).applyIf(canRefreshScreen) {
+                    clickable(interactionSource = interactionSource, indication = null) { onRefreshScreen() }
+                },
+                tint = if (canRefreshScreen) LocalContentColor.current else LocalPalette.current.surface2
             )
+            Text(screenTitle)
         }
         if (!LocalConfiguration.current.useSystemWindowFrame) {
             Spacer(Modifier.weight(1f))

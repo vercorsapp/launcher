@@ -8,8 +8,8 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 import kotlinx.serialization.Serializable
 
-@Serializable(AppSceneSerializer::class)
-enum class AppScene(
+@Serializable(AppTabSerializer::class)
+enum class AppTab(
     val title: String,
     val icon: ImageVector,
     override val value: String
@@ -21,4 +21,4 @@ enum class AppScene(
     Settings(UI.Text.SETTINGS, FeatherIcons.Settings, "settings");
 }
 
-private class AppSceneSerializer : StringEnumerableSerializer<AppScene>(AppScene.entries)
+private class AppTabSerializer : StringEnumerableSerializer<AppTab>(AppTab.entries)

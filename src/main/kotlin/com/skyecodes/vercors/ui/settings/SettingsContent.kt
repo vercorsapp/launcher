@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.SettingsComponent
-import com.skyecodes.vercors.data.model.app.AppScene
+import com.skyecodes.vercors.data.model.app.AppTab
 import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Provider
 import com.skyecodes.vercors.resourceAsStream
@@ -87,14 +87,14 @@ fun SettingsContent(component: SettingsComponent) {
                                 onExpandedChange = { isDefaultTabDropdownMenuExpanded = it }
                             ) {
                                 OutlinedTextField(
-                                    value = configuration.defaultScene.title,
+                                    value = configuration.defaultTab.title,
                                     onValueChange = {},
                                     readOnly = true,
                                     modifier = Modifier.pointerHoverIcon(
                                         PointerIcon.Default,
                                         overrideDescendants = true
                                     ),
-                                    leadingIcon = { Icon(configuration.defaultScene.icon, null) },
+                                    leadingIcon = { Icon(configuration.defaultTab.icon, null) },
                                     trailingIcon = {
                                         Icon(
                                             imageVector = if (isDefaultTabDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
@@ -107,11 +107,11 @@ fun SettingsContent(component: SettingsComponent) {
                                     expanded = isDefaultTabDropdownMenuExpanded,
                                     onDismissRequest = { isDefaultTabDropdownMenuExpanded = false }
                                 ) {
-                                    AppScene.entries.forEach {
+                                    AppTab.entries.forEach {
                                         DropdownMenuItem(
                                             onClick = {
                                                 isDefaultTabDropdownMenuExpanded = false
-                                                component.onConfigChange(configuration.copy(defaultScene = it))
+                                                component.onConfigChange(configuration.copy(defaultTab = it))
                                             },
                                             contentPadding = PaddingValues(horizontal = 10.dp)
                                         ) {

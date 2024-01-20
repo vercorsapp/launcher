@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-interface HomeComponent {
+interface HomeComponent : Refreshable {
     val uiState: StateFlow<HomeUiState>
 }
 
@@ -23,8 +23,11 @@ class DefaultHomeComponent(
     private val modrinthService: ModrinthService = componentContext.koin.get(),
     private val curseforgeService: CurseforgeService = componentContext.koin.get()
 ) : AppComponentContext by componentContext, HomeComponent {
+    companion object {
+        private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()
+    }
+
     override val uiState = MutableStateFlow(HomeUiState(emptyMap()))
-    private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()
 
     init {
         lifecycle.doOnCreate { initialize() }
@@ -48,6 +51,11 @@ class DefaultHomeComponent(
                 }
             )
         }
+    }
+
+    override fun refresh() {
+        cachedProjectsData.clear()
+        updateAll(configuration.value!!)
     }
 
     private fun updateAll(configuration: Configuration) {

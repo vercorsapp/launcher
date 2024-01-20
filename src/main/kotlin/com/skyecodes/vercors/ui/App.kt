@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,9 +24,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.skyecodes.vercors.APP_NAME
 import com.skyecodes.vercors.component.RootComponent
@@ -56,30 +55,30 @@ fun ApplicationScope.AppWindow(
     val instances by component.instances.collectAsState()
     configuration?.let { safeConfiguration ->
         instances?.let {
-        if (safeConfiguration.useSystemWindowFrame) {
-            Window(
-                state = windowState,
-                onCloseRequest = ::onClose,
-                undecorated = false,
-                title = APP_NAME,
-            ) {
-                AppContent(component, safeConfiguration, ::onClose)
+            if (safeConfiguration.useSystemWindowFrame) {
+                Window(
+                    state = windowState,
+                    onCloseRequest = ::onClose,
+                    undecorated = false,
+                    title = APP_NAME,
+                ) {
+                    AppContent(component, safeConfiguration, ::onClose)
+                }
+            } else {
+                Window(
+                    state = windowState,
+                    onCloseRequest = ::onClose,
+                    undecorated = true,
+                    title = APP_NAME,
+                ) {
+                    AppContent(component, safeConfiguration, ::onClose)
+                }
             }
-        } else {
-            Window(
-                state = windowState,
-                onCloseRequest = ::onClose,
-                undecorated = true,
-                title = APP_NAME,
-            ) {
-                AppContent(component, safeConfiguration, ::onClose)
-            }
-        }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 private fun FrameWindowScope.AppContent(
     component: RootComponent,
@@ -91,7 +90,8 @@ private fun FrameWindowScope.AppContent(
     }
 
     val uiState by component.uiState.collectAsState()
-    val currentScene by component.currentScene.collectAsState()
+    val children by component.children.subscribeAsState()
+    val currentTab by component.currentTab.collectAsState()
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -108,7 +108,7 @@ private fun FrameWindowScope.AppContent(
                         modifier = Modifier.fillMaxHeight().background(color = LocalPalette.current.surface0)
                             .shadow(4.dp)
                     ) {
-                        Menu(currentScene) { component.navigate(it) }
+                        Menu(currentTab) { component.navigate(it) }
                     }
                     Column {
                         WindowDraggableArea(
@@ -126,10 +126,13 @@ private fun FrameWindowScope.AppContent(
                                     .background(color = LocalPalette.current.surface0)
                             ) {
                                 Toolbar(
-                                    currentScene,
-                                    component::onNextScene,
-                                    component::onPreviousScene,
-                                    component::onRefresh,
+                                    currentTab.title,
+                                    children.hasPreviousScreen,
+                                    children.hasNextScreen,
+                                    children.canRefreshScreen,
+                                    component::onNextScreen,
+                                    component::onPreviousScreen,
+                                    component::onRefreshScreen,
                                     component::onMinimize,
                                     component::onMaximize,
                                     onClose
@@ -147,12 +150,11 @@ private fun FrameWindowScope.AppContent(
                                 modifier = Modifier.align(Alignment.TopStart).size(maxWidth - 10.dp, maxHeight - 10.dp),
                                 color = LocalPalette.current.base
                             ) {
-                                Children(
-                                    stack = component.childStack,
-                                    modifier = Modifier,
-                                    animation = if (configuration.animations) stackAnimation(fade()) else null
+                                Crossfade(
+                                    targetState = children,
+                                    animationSpec = if (configuration.animations) tween() else tween(0)
                                 ) {
-                                    when (val child = it.instance) {
+                                    when (val child = it.current.instance) {
                                         is RootComponent.NavChild.Home -> HomeContent(child.component)
                                         is RootComponent.NavChild.Instances -> InstancesContent(child.component)
                                         is RootComponent.NavChild.Search -> SearchContent(child.component)
@@ -164,9 +166,9 @@ private fun FrameWindowScope.AppContent(
                         }
                     }
                 }
-                AppDialog(uiState.showNewInstanceDialog, component::closeNewInstanceDialog) {
-                    CreateInstanceDialogContent(component::closeNewInstanceDialog)
-                }
+            }
+            AppDialog(uiState.showNewInstanceDialog, component::closeNewInstanceDialog) {
+                CreateInstanceDialogContent(component::closeNewInstanceDialog)
             }
         }
     }

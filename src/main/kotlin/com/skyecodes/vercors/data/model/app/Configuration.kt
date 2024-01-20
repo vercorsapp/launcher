@@ -8,7 +8,7 @@ data class Configuration(
     val theme: AppTheme = AppTheme.SYSTEM,
     val useSystemWindowFrame: Boolean = false,
     val animations: Boolean = true,
-    val defaultScene: AppScene = AppScene.Home,
+    val defaultTab: AppTab = AppTab.Home,
     val homeSections: List<HomeSectionType> = HomeSectionType.entries,
     val homeProviders: List<Provider> = Provider.entries
 ) {
