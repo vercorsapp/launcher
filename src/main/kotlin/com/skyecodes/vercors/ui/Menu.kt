@@ -1,5 +1,6 @@
 package com.skyecodes.vercors.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.data.model.app.AppTab
@@ -39,11 +41,20 @@ private fun TabNavigationItem(tab: AppTab, currentTab: AppTab, onNavigate: (AppT
         ),
         delayMillis = 250,
     ) {
+        var backgroundColor = if (currentTab === tab) MaterialTheme.colors.primary else Color.Transparent
+        var contentColor = if (currentTab === tab) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+        if (LocalConfiguration.current.animations) {
+            backgroundColor = animateColorAsState(backgroundColor).value
+            contentColor = animateColorAsState(contentColor).value
+        }
+
         Button(
             modifier = Modifier.size(50.dp),
             elevation = if (currentTab === tab) ButtonDefaults.elevation() else null,
-            colors = if (currentTab === tab) ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
-            else ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colors.onSurface),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = backgroundColor,
+                contentColor = contentColor
+            ),
             contentPadding = PaddingValues(12.dp),
             shape = UI.largeRoundedCornerShape,
             onClick = { onNavigate(tab) }
