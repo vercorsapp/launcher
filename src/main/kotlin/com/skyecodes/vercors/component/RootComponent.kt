@@ -7,10 +7,14 @@ import androidx.compose.ui.window.WindowState
 import com.arkivanov.decompose.Cancellation
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.router.children.*
+import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.jthemedetecor.OsThemeDetector
+import com.skyecodes.vercors.component.dialog.CreateNewInstanceComponent
+import com.skyecodes.vercors.component.dialog.DefaultCreateNewInstanceComponent
+import com.skyecodes.vercors.component.screen.*
 import com.skyecodes.vercors.data.model.app.AppTab
 import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Configuration
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -31,16 +36,13 @@ import java.util.concurrent.atomic.AtomicLong
 
 private val logger = KotlinLogging.logger { }
 
-interface Refreshable {
-    fun refresh()
-}
-
 interface RootComponent {
-    val children: Value<Children<*, NavChild>>
+    val children: Value<Children<*, ScreenChild>>
+    val dialog: Value<ChildStack<*, DialogChild>>
     val uiState: StateFlow<AppUiState>
     val configuration: StateFlow<Configuration?>
     val instances: StateFlow<List<Instance>?>
-    val currentTab: StateFlow<AppTab>
+    val activeTab: StateFlow<AppTab>
 
     fun initializeWindowState(windowState: WindowState)
     fun initializeWindow(window: ComposeWindow)
@@ -53,53 +55,46 @@ interface RootComponent {
     fun onPreviousScreen()
     fun onRefreshScreen()
     fun openNewInstanceDialog()
-    fun closeNewInstanceDialog()
+    fun closeDialog()
 
-    sealed interface NavChild {
-        val isDefault: Boolean
-        val tab: AppTab
+    sealed class ScreenChild(val tab: AppTab, val isDefault: Boolean) {
+        class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
+        class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
+            Refreshable by component
 
-        class Home(val component: HomeComponent) : NavChild, Refreshable by component {
-            override val tab = AppTab.Home
-            override val isDefault = true
-        }
+        class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
+        class Accounts(val component: AccountsComponent) : ScreenChild(AppTab.Accounts, true)
+        class Settings(val component: SettingsComponent) : ScreenChild(AppTab.Settings, true), Refreshable by component
+    }
 
-        class Instances(val component: InstancesComponent) : NavChild, Refreshable by component {
-            override val tab = AppTab.Instances
-            override val isDefault = true
-        }
-
-        class Search(val component: SearchComponent) : NavChild, Refreshable by component {
-            override val tab = AppTab.Search
-            override val isDefault = true
-        }
-
-        class Accounts(val component: AccountsComponent) : NavChild {
-            override val tab = AppTab.Accounts
-            override val isDefault = true
-        }
-
-        class Settings(val component: SettingsComponent) : NavChild, Refreshable by component {
-            override val tab = AppTab.Settings
-            override val isDefault = true
-        }
+    sealed interface DialogChild {
+        data object None : DialogChild
+        class CreateNewInstance(val component: CreateNewInstanceComponent) : DialogChild
     }
 
     class Children<out C : Any, out T : Any>(
         val items: List<Child.Created<C, T>>,
         val index: Int
     ) {
-        val current: Child.Created<C, T> = items[index]
+        val active: Child.Created<C, T> = items[index]
         val hasPreviousScreen = index > 0
         val hasNextScreen = index < items.size - 1
-        val canRefreshScreen = current.instance is Refreshable
+        val canRefreshScreen = active.instance is Refreshable
     }
+
+    data class AppUiState(
+        val palette: UI.Palette
+    )
+}
+
+interface Refreshable {
+    fun refresh()
 }
 
 class DefaultRootComponent(
     componentContext: AppComponentContext,
-    private val configurationService: ConfigurationService = componentContext.koin.get(),
-    private val instanceService: InstanceService = componentContext.koin.get()
+    private val configurationService: ConfigurationService = componentContext.get(),
+    private val instanceService: InstanceService = componentContext.get()
 ) : AppComponentContext by componentContext, RootComponent {
     private lateinit var window: ComposeWindow
     private lateinit var windowState: WindowState
@@ -111,19 +106,20 @@ class DefaultRootComponent(
     private val detectorListener: (Boolean) -> Unit =
         { if (configuration.value?.theme === AppTheme.SYSTEM) updatePalette() }
     private val screenId = AtomicLong(0)
-    private val navigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
+    private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
 
-    override val uiState: MutableStateFlow<AppUiState> = MutableStateFlow(AppUiState(UI.Mocha))
+    override val uiState: MutableStateFlow<RootComponent.AppUiState> =
+        MutableStateFlow(RootComponent.AppUiState(UI.Mocha))
     override val configuration: MutableStateFlow<Configuration?> = MutableStateFlow(null)
     override val instances: MutableStateFlow<List<Instance>?> = MutableStateFlow(null)
-    override val currentTab: MutableStateFlow<AppTab> = MutableStateFlow(Configuration.DEFAULT.defaultTab)
-    override val children: Value<RootComponent.Children<NavConfig, RootComponent.NavChild>> = children(
-        source = navigation,
+    override val activeTab: MutableStateFlow<AppTab> = MutableStateFlow(Configuration.DEFAULT.defaultTab)
+    override val children: Value<RootComponent.Children<ScreenConfig, RootComponent.ScreenChild>> = children(
+        source = screenNavigation,
         stateSerializer = AppNavigationState.serializer(),
-        key = "rootNavigation",
+        key = "screenNavigation",
         initialState = {
             AppNavigationState(
-                configurations = listOf(NavConfig.Home(screenId.getAndIncrement())),
+                configurations = listOf(ScreenConfig.Home(screenId.getAndIncrement())),
                 index = 0
             )
         },
@@ -149,8 +145,16 @@ class DefaultRootComponent(
             )
         }
     )
-
-    private val currentChild get() = children.value.current.instance
+    private val activeChild get() = children.value.active.instance
+    private val dialogNavigation = StackNavigation<DialogConfig>()
+    override val dialog: Value<ChildStack<*, RootComponent.DialogChild>> = appChildStack(
+        source = dialogNavigation,
+        serializer = DialogConfig.serializer(),
+        initialConfiguration = DialogConfig.None,
+        key = "dialogNavigation",
+        handleBackButton = true,
+        childFactory = ::createDialog
+    )
 
     init {
         lifecycle.doOnCreate(::onCreate)
@@ -171,8 +175,8 @@ class DefaultRootComponent(
         }
         detector.registerListener(detectorListener)
         cancellation = children.observe {
-            logger.info { "Navigated to ${it.current.instance.tab.title}" }
-            currentTab.value = it.current.instance.tab
+            logger.info { "Navigated to ${it.active.instance.tab.title}" }
+            activeTab.value = it.active.instance.tab
         }
     }
 
@@ -228,7 +232,7 @@ class DefaultRootComponent(
     }
 
     private fun initNavigation(tab: AppTab) {
-        navigation.navigate {
+        screenNavigation.navigate {
             it.copy(
                 configurations = listOf(createDefaultConfigForTab(tab)),
                 index = 0
@@ -236,9 +240,17 @@ class DefaultRootComponent(
         }
     }
 
+    private fun createDefaultConfigForTab(tab: AppTab) = when (tab) {
+        AppTab.Home -> ScreenConfig.Home(screenId.getAndIncrement())
+        AppTab.Instances -> ScreenConfig.Instances(screenId.getAndIncrement())
+        AppTab.Search -> ScreenConfig.Search(screenId.getAndIncrement())
+        AppTab.Accounts -> ScreenConfig.Accounts(screenId.getAndIncrement())
+        AppTab.Settings -> ScreenConfig.Settings(screenId.getAndIncrement())
+    }
+
     override fun navigate(tab: AppTab) {
-        if (currentTab.value === tab && currentChild.isDefault) return
-        navigation.navigate {
+        if (activeTab.value === tab && activeChild.isDefault) return
+        screenNavigation.navigate {
             it.copy(
                 configurations = it.configurations.filterIndexed { i, _ -> i <= it.index } + createDefaultConfigForTab(
                     tab
@@ -248,55 +260,47 @@ class DefaultRootComponent(
         }
     }
 
-    private fun createDefaultConfigForTab(tab: AppTab) = when (tab) {
-        AppTab.Home -> NavConfig.Home(screenId.getAndIncrement())
-        AppTab.Instances -> NavConfig.Instances(screenId.getAndIncrement())
-        AppTab.Search -> NavConfig.Search(screenId.getAndIncrement())
-        AppTab.Accounts -> NavConfig.Accounts(screenId.getAndIncrement())
-        AppTab.Settings -> NavConfig.Settings(screenId.getAndIncrement())
-    }
-
     override fun onNextScreen() {
         if (children.value.index < children.value.items.size - 1) {
             logger.info { "Navigating to next screen..." }
-            navigation.navigate { it.copy(index = it.index + 1) }
+            screenNavigation.navigate { it.copy(index = it.index + 1) }
         }
     }
 
     override fun onPreviousScreen() {
         if (children.value.index > 0) {
             logger.info { "Navigating to previous screen..." }
-            navigation.navigate { it.copy(index = it.index - 1) }
+            screenNavigation.navigate { it.copy(index = it.index - 1) }
         }
     }
 
     override fun onRefreshScreen() {
         logger.info { "Refreshing screen" }
-        currentChild.let {
+        activeChild.let {
             if (it is Refreshable) it.refresh()
         }
     }
 
-    override fun openNewInstanceDialog() = updateNewInstanceDialog(true)
+    override fun openNewInstanceDialog() {
+        dialogNavigation.replaceCurrent(DialogConfig.CreateNewInstance)
+    }
 
-    override fun closeNewInstanceDialog() = updateNewInstanceDialog(false)
+    override fun closeDialog() {
+        dialogNavigation.replaceCurrent(DialogConfig.None)
+    }
 
     private fun updateConfiguration(config: Configuration) {
         configuration.update { config }
         scope.launch { configurationService.save(config) }
     }
 
-    private fun updateNewInstanceDialog(showNewInstanceDialog: Boolean) {
-        uiState.update { it.copy(showNewInstanceDialog = showNewInstanceDialog) }
-    }
-
-    private fun createChild(config: NavConfig, componentContext: AppComponentContext): RootComponent.NavChild =
+    private fun createChild(config: ScreenConfig, componentContext: AppComponentContext): RootComponent.ScreenChild =
         when (config) {
-            is NavConfig.Accounts -> RootComponent.NavChild.Accounts(accountsComponent(componentContext))
-            is NavConfig.Home -> RootComponent.NavChild.Home(homeComponent(componentContext))
-            is NavConfig.Instances -> RootComponent.NavChild.Instances(instancesComponent(componentContext))
-            is NavConfig.Search -> RootComponent.NavChild.Search(searchComponent(componentContext))
-            is NavConfig.Settings -> RootComponent.NavChild.Settings(settingsComponent(componentContext))
+            is ScreenConfig.Accounts -> RootComponent.ScreenChild.Accounts(accountsComponent(componentContext))
+            is ScreenConfig.Home -> RootComponent.ScreenChild.Home(homeComponent(componentContext))
+            is ScreenConfig.Instances -> RootComponent.ScreenChild.Instances(instancesComponent(componentContext))
+            is ScreenConfig.Search -> RootComponent.ScreenChild.Search(searchComponent(componentContext))
+            is ScreenConfig.Settings -> RootComponent.ScreenChild.Settings(settingsComponent(componentContext))
         }
 
     private fun accountsComponent(componentContext: AppComponentContext): AccountsComponent = DefaultAccountsComponent(
@@ -325,33 +329,54 @@ class DefaultRootComponent(
         onConfigurationChange = ::updateConfiguration
     )
 
+    private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): RootComponent.DialogChild =
+        when (config) {
+            is DialogConfig.None -> RootComponent.DialogChild.None
+            is DialogConfig.CreateNewInstance -> RootComponent.DialogChild.CreateNewInstance(
+                createNewInstanceComponent(
+                    componentContext
+                )
+            )
+        }
+
+    private fun createNewInstanceComponent(componentContext: AppComponentContext): CreateNewInstanceComponent =
+        DefaultCreateNewInstanceComponent(
+            componentContext = componentContext,
+            onClose = ::closeDialog
+        )
+
     @Serializable
-    sealed interface NavConfig {
+    sealed interface ScreenConfig {
         @Serializable
-        data class Home(val screenId: Long) : NavConfig
+        data class Home(val screenId: Long) : ScreenConfig
+        @Serializable
+        data class Instances(val screenId: Long) : ScreenConfig
+        @Serializable
+        data class Search(val screenId: Long) : ScreenConfig
+        @Serializable
+        data class Accounts(val screenId: Long) : ScreenConfig
+        @Serializable
+        data class Settings(val screenId: Long) : ScreenConfig
+    }
+
+    @Serializable
+    sealed interface DialogConfig {
+        @Serializable
+        data object None : DialogConfig
 
         @Serializable
-        data class Instances(val screenId: Long) : NavConfig
-
-        @Serializable
-        data class Search(val screenId: Long) : NavConfig
-
-        @Serializable
-        data class Accounts(val screenId: Long) : NavConfig
-
-        @Serializable
-        data class Settings(val screenId: Long) : NavConfig
+        data object CreateNewInstance : DialogConfig
     }
 
     @Serializable
     private data class AppNavigationState(
-        val configurations: List<NavConfig>,
+        val configurations: List<ScreenConfig>,
         val index: Int
-    ) : NavState<NavConfig> {
-        override val children: List<ChildNavState<NavConfig>> by lazy {
-            configurations.mapIndexed { index, navConfig ->
+    ) : NavState<ScreenConfig> {
+        override val children: List<ChildNavState<ScreenConfig>> by lazy {
+            configurations.mapIndexed { index, screenConfig ->
                 SimpleChildNavState(
-                    configuration = navConfig,
+                    configuration = screenConfig,
                     status = if (index == this.index) ChildNavState.Status.ACTIVE else ChildNavState.Status.INACTIVE
                 )
             }
@@ -359,7 +384,26 @@ class DefaultRootComponent(
     }
 }
 
-data class AppUiState(
-    val palette: UI.Palette,
-    val showNewInstanceDialog: Boolean = false
-)
+private inline fun <reified C : Any, T : Any> AppComponentContext.appChildStack(
+    source: StackNavigationSource<C>,
+    serializer: KSerializer<C>?,
+    initialConfiguration: C,
+    key: String = "DefaultStack",
+    handleBackButton: Boolean = false,
+    noinline childFactory: (configuration: C, AppComponentContext) -> T
+): Value<ChildStack<C, T>> =
+    childStack(
+        source = source,
+        serializer = serializer,
+        initialConfiguration = initialConfiguration,
+        key = key,
+        handleBackButton = handleBackButton
+    ) { configuration, componentContext ->
+        childFactory(
+            configuration,
+            DefaultAppComponentContext(
+                componentContext = componentContext,
+                koin = koin
+            )
+        )
+    }

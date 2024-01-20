@@ -11,8 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.component.HomeComponent
-import com.skyecodes.vercors.component.HomeUiState
+import com.skyecodes.vercors.component.screen.HomeComponent
+import com.skyecodes.vercors.component.screen.HomeUiState
 import com.skyecodes.vercors.ui.UI
 
 

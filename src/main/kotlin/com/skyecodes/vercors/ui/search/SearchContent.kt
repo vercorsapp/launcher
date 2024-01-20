@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.skyecodes.vercors.component.SearchComponent
+import com.skyecodes.vercors.component.screen.SearchComponent
 import com.skyecodes.vercors.ui.UI
 
 

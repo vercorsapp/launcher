@@ -1,52 +1,40 @@
 package com.skyecodes.vercors.ui.instances
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.ChipDefaults.filterChipColors
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.skyecodes.vercors.applyIf
+import com.skyecodes.vercors.component.dialog.CreateNewInstanceComponent
 import com.skyecodes.vercors.data.model.app.Loader
-import com.skyecodes.vercors.data.model.mojang.MojangReleaseType
-import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
-import com.skyecodes.vercors.data.model.mojang.get
-import com.skyecodes.vercors.data.service.InstanceService
-import com.skyecodes.vercors.data.service.MojangService
 import com.skyecodes.vercors.resourceAsStream
+import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
 import com.skyecodes.vercors.ui.common.loadSvgPainter
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CreateInstanceDialogContent(onClose: () -> Unit) {
-    val mojangService = koinInject<MojangService>()
-    val instanceService = koinInject<InstanceService>()
+fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
+    val uiState by component.uiState.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-    var versionManifest: MojangVersionManifest? by remember { mutableStateOf(null) }
-    var instanceName by remember { mutableStateOf("") }
-    var isMinecraftVersionDropdownMenuExpanded by remember { mutableStateOf(false) }
-    var minecraftVersion by remember { mutableStateOf<MojangVersionManifest.Version?>(null) }
-    var minecraftVersionDisplay by remember { mutableStateOf("") }
-    var includeSnapshots by remember { mutableStateOf(false) }
-    var loader by remember { mutableStateOf<Loader?>(null) }
-    var isLoaderVersionDropdownMenuExpanded by remember { mutableStateOf(false) }
-    var loaderVersion by remember { mutableStateOf<String?>(null) }
-    var loaderVersionDisplay by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(true) {
+    /*LaunchedEffect(true) {
         val manifest = mojangService.getVersionManifest()
         versionManifest = manifest
         minecraftVersion = manifest.versions[manifest.latest.release]
@@ -59,10 +47,11 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
     LaunchedEffect(includeSnapshots) {
         if (!includeSnapshots && minecraftVersion?.type == MojangReleaseType.Snapshot) minecraftVersion =
             versionManifest?.latestRelease
-    }
+    }*/
 
     Column(
-        modifier = Modifier.padding(UI.largePadding),
+        modifier = Modifier.padding(UI.largePadding)
+            .applyIf(LocalConfiguration.current.animations) { animateContentSize() },
         verticalArrangement = Arrangement.spacedBy(UI.largePadding)
     ) {
         Text(
@@ -72,8 +61,8 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
 
         FormField(UI.Text.INSTANCE_NAME) {
             OutlinedTextField(
-                value = instanceName,
-                onValueChange = { instanceName = it },
+                value = uiState.instanceName,
+                onValueChange = component::updateInstanceName,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -84,69 +73,63 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 ExposedDropdownMenuBox(
-                    expanded = isMinecraftVersionDropdownMenuExpanded,
-                    onExpandedChange = { isMinecraftVersionDropdownMenuExpanded = it },
+                    expanded = uiState.isMinecraftVersionDropdownExpanded(),
+                    onExpandedChange = component::updateMinecraftVersionDropdown,
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = minecraftVersionDisplay,
+                        value = uiState.minecraftVersion,
                         onValueChange = {},
                         readOnly = true,
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Default, overrideDescendants = true)
                             .fillMaxWidth(),
                         trailingIcon = {
                             Icon(
-                                imageVector = if (isMinecraftVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                imageVector = if (uiState.isMinecraftVersionDropdownExpanded()) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
                                 contentDescription = "Show options"
                             )
                         }
                     )
 
                     ScrollableExposedDropdownMenu(
-                        expanded = isMinecraftVersionDropdownMenuExpanded,
-                        onDismissRequest = { isMinecraftVersionDropdownMenuExpanded = false }
+                        expanded = uiState.isMinecraftVersionDropdownExpanded(),
+                        onDismissRequest = { component.updateMinecraftVersionDropdown(false) }
                     ) {
-                        versionManifest?.let { manifest ->
-                            manifest.versions
-                                .filter { version -> version.type == MojangReleaseType.Release || includeSnapshots }
-                                .forEach { version ->
-                                    DropdownMenuItem(
-                                        onClick = {
-                                            isMinecraftVersionDropdownMenuExpanded = false
-                                            minecraftVersion = version
-                                        },
-                                        contentPadding = PaddingValues(horizontal = 10.dp)
+                        uiState.minecraftVersions
+                            .filter { version -> version.isRelease || uiState.includeSnapshots }
+                            .forEach { version ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        component.updateMinecraftVersionDropdown(false)
+                                        component.updateMinecraftVersion(version)
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 10.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Text(getVersionText(manifest, version))
-                                            getVersionIcon(manifest, version)?.let {
-                                                Icon(
-                                                    it,
-                                                    null,
-                                                    Modifier.size(UI.mediumIconSize)
-                                                )
-                                            }
+                                        Text(version.text)
+                                        version.icon?.let {
+                                            Icon(it, null, Modifier.size(UI.mediumIconSize))
                                         }
                                     }
                                 }
-                        }
+                            }
                     }
                 }
 
                 Checkbox(
                     modifier = Modifier.padding(start = UI.smallPadding),
-                    checked = includeSnapshots,
-                    onCheckedChange = { includeSnapshots = it },
+                    checked = uiState.includeSnapshots,
+                    onCheckedChange = component::updateIncludeSnapshots
                 )
                 Text(
                     modifier = Modifier.clickable(
                         interactionSource = interactionSource,
                         indication = null,
-                        onClick = { includeSnapshots = !includeSnapshots }
+                        onClick = component::toggleIncludeSnapshots
                     ),
                     text = UI.Text.INCLUDE_SNAPSHOTS,
                     style = MaterialTheme.typography.subtitle2
@@ -156,26 +139,26 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
 
         FormField(UI.Text.LOADER) {
             Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
-                LoaderChip(null, loader == null) { loader = null }
+                LoaderChip(null, uiState.loader == null) { component.updateLoader(null) }
                 Loader.entries.forEach {
-                    LoaderChip(it, loader == it) { loader = it }
+                    LoaderChip(it, uiState.loader == it) { component.updateLoader(it) }
                 }
             }
         }
 
-        if (loader != null) {
+        if (uiState.loader != null) {
             FormField(UI.Text.LOADER_VERSION) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     ExposedDropdownMenuBox(
-                        expanded = isLoaderVersionDropdownMenuExpanded,
-                        onExpandedChange = { isLoaderVersionDropdownMenuExpanded = it },
+                        expanded = uiState.isLoaderVersionDropdownExpanded(),
+                        onExpandedChange = component::updateLoaderVersionDropdown,
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
-                            value = loaderVersionDisplay,
+                            value = uiState.loaderVersion,
                             onValueChange = {},
                             readOnly = true,
                             modifier = Modifier.pointerHoverIcon(
@@ -184,15 +167,15 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
                             ).fillMaxWidth(),
                             trailingIcon = {
                                 Icon(
-                                    imageVector = if (isLoaderVersionDropdownMenuExpanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                    imageVector = if (uiState.isLoaderVersionDropdownExpanded()) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
                                     contentDescription = "Show options"
                                 )
                             }
                         )
 
                         ScrollableExposedDropdownMenu(
-                            expanded = isLoaderVersionDropdownMenuExpanded,
-                            onDismissRequest = { isLoaderVersionDropdownMenuExpanded = false }
+                            expanded = uiState.isLoaderVersionDropdownExpanded(),
+                            onDismissRequest = { component.updateLoaderVersionDropdown(false) }
                         ) {
 
                         }
@@ -206,7 +189,7 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         ) {
             TextButton(
-                onClick = onClose
+                onClick = component::close
             ) {
                 Icon(
                     imageVector = FeatherIcons.X,
@@ -220,18 +203,8 @@ fun CreateInstanceDialogContent(onClose: () -> Unit) {
             }
 
             IconTextButton(
-                enabled = instanceName.isNotBlank() && minecraftVersion != null && (loader == null || !loaderVersion.isNullOrBlank()),
-                onClick = {
-                    scope.launch {
-                        instanceService.createInstance(
-                            instanceName,
-                            minecraftVersion!!,
-                            loader,
-                            loaderVersion
-                        )
-                    }
-                    onClose()
-                },
+                enabled = uiState.isValid,
+                onClick = component::createInstance,
                 imageVector = FeatherIcons.Plus,
                 text = UI.Text.CREATE
             )
@@ -269,15 +242,3 @@ private fun LoaderChip(value: Loader?, selected: Boolean, onClick: () -> Unit) {
         Text(value?.name ?: "Vanilla", style = MaterialTheme.typography.body1)
     }
 }
-
-@Stable
-private fun getVersionText(manifest: MojangVersionManifest, version: MojangVersionManifest.Version) =
-    if (manifest.isLatestRelease(version)) "Latest release (${version.id})"
-    else if (manifest.isLatestSnapshot(version)) "Latest snapshot (${version.id})"
-    else version.id
-
-@Stable
-private fun getVersionIcon(manifest: MojangVersionManifest, version: MojangVersionManifest.Version) =
-    if (manifest.isLatestRelease(version)) FeatherIcons.Star
-    else if (manifest.isLatestSnapshot(version)) FeatherIcons.Clock
-    else null

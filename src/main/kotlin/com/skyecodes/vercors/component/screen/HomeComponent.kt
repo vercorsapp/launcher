@@ -1,6 +1,9 @@
-package com.skyecodes.vercors.component
+package com.skyecodes.vercors.component.screen
 
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.skyecodes.vercors.component.AppComponentContext
+import com.skyecodes.vercors.component.Refreshable
+import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.*
 import com.skyecodes.vercors.data.service.CurseforgeService
 import com.skyecodes.vercors.data.service.ModrinthService
@@ -20,8 +23,8 @@ class DefaultHomeComponent(
     componentContext: AppComponentContext,
     private val configuration: StateFlow<Configuration?>,
     private val instances: StateFlow<List<Instance>?>,
-    private val modrinthService: ModrinthService = componentContext.koin.get(),
-    private val curseforgeService: CurseforgeService = componentContext.koin.get()
+    private val modrinthService: ModrinthService = componentContext.get(),
+    private val curseforgeService: CurseforgeService = componentContext.get()
 ) : AppComponentContext by componentContext, HomeComponent {
     companion object {
         private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()

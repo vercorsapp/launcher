@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.skyecodes.vercors.component.InstancesComponent
+import com.skyecodes.vercors.component.screen.InstancesComponent
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
 import compose.icons.FeatherIcons

@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -91,7 +92,8 @@ private fun FrameWindowScope.AppContent(
 
     val uiState by component.uiState.collectAsState()
     val children by component.children.subscribeAsState()
-    val currentTab by component.currentTab.collectAsState()
+    val currentTab by component.activeTab.collectAsState()
+    val dialog by component.dialog.subscribeAsState()
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -154,12 +156,12 @@ private fun FrameWindowScope.AppContent(
                                     targetState = children,
                                     animationSpec = if (configuration.animations) tween() else tween(0)
                                 ) {
-                                    when (val child = it.current.instance) {
-                                        is RootComponent.NavChild.Home -> HomeContent(child.component)
-                                        is RootComponent.NavChild.Instances -> InstancesContent(child.component)
-                                        is RootComponent.NavChild.Search -> SearchContent(child.component)
-                                        is RootComponent.NavChild.Accounts -> AccountsContent(child.component)
-                                        is RootComponent.NavChild.Settings -> SettingsContent(child.component)
+                                    when (val child = it.active.instance) {
+                                        is RootComponent.ScreenChild.Home -> HomeContent(child.component)
+                                        is RootComponent.ScreenChild.Instances -> InstancesContent(child.component)
+                                        is RootComponent.ScreenChild.Search -> SearchContent(child.component)
+                                        is RootComponent.ScreenChild.Accounts -> AccountsContent(child.component)
+                                        is RootComponent.ScreenChild.Settings -> SettingsContent(child.component)
                                     }
                                 }
                             }
@@ -167,21 +169,19 @@ private fun FrameWindowScope.AppContent(
                     }
                 }
             }
-            AppDialog(uiState.showNewInstanceDialog, component::closeNewInstanceDialog) {
-                CreateInstanceDialogContent(component::closeNewInstanceDialog)
+            Crossfade(
+                targetState = dialog,
+                animationSpec = if (configuration.animations) tween() else tween(0)
+            ) {
+                when (val child = it.active.instance) {
+                    is RootComponent.DialogChild.CreateNewInstance -> AppDialogContent(component::closeDialog) {
+                        CreateInstanceDialogContent(child.component)
+                    }
+
+                    RootComponent.DialogChild.None -> {}
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun AppDialog(visible: Boolean, onClose: () -> Unit, content: @Composable () -> Unit) {
-    if (LocalConfiguration.current.animations) {
-        AnimatedVisibility(visible, enter = UI.transitionIn, exit = UI.transitionOut) {
-            AppDialogContent(onClose, content)
-        }
-    } else if (visible) {
-        AppDialogContent(onClose, content)
     }
 }
 
