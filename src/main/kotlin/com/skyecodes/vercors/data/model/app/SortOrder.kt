@@ -1,12 +1,13 @@
 package com.skyecodes.vercors.data.model.app
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(SortOrderSerializer::class)
-enum class SortOrder(override val value: String) : StringEnumerable {
-    Asc("asc"), Desc("desc")
-}
+@Serializable
+enum class SortOrder(val value: String) {
+    @SerialName("asc")
+    Asc("asc"),
 
-private class SortOrderSerializer : StringEnumerableSerializer<SortOrder>(SortOrder.entries)
+    @SerialName("desc")
+    Desc("desc")
+}

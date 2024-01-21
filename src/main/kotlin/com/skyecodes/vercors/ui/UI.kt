@@ -32,50 +32,6 @@ object UI {
     val mediumPadding = 10.dp
     val smallPadding = 5.dp
 
-    object Text {
-        // General
-        const val HOME = "Home"
-        const val INSTANCES = "Instances"
-        const val SEARCH = "Search"
-        const val ACCOUNTS = "Accounts"
-        const val SETTINGS = "Settings"
-        const val CANCEL = "Cancel"
-        const val CLOSE = "Close"
-
-        // Home
-        const val PLAY = "Play"
-        const val VIEW = "View"
-        const val INSTALL = "Install"
-
-        // Instances
-        const val NO_INSTANCES_FOUND = "No instances found"
-        const val CREATE_NEW_INSTANCE = "Create new instance"
-        const val INSTANCE_NAME = "Instance name"
-        const val ICON = "Icon"
-        const val MINECRAFT_VERSION = "Minecraft version"
-        const val INCLUDE_SNAPSHOTS = "Include snapshots"
-        const val LOADER = "Loader"
-        const val LOADER_VERSION = "Loader version"
-        const val CREATE = "Create"
-
-        // Settings
-        const val USER_INTERFACE = "User interface"
-        const val THEME = "Theme"
-        const val THEME_DESCRIPTION = "Change the global theme of the launcher."
-        const val ACCENT_COLOR = "Accent color"
-        const val ACCENT_COLOR_DESCRIPTION = "Change the accent color used in some buttons."
-        const val SYSTEM_WINDOW = "Use system window frame"
-        const val SYSTEM_WINDOW_DESCRIPTION =
-            "Use the system window frame instead of the custom window frame provided by the launcher."
-        const val ANIMATIONS = "Animations"
-        const val ANIMATIONS_DESCRIPTION = "Enables UI animations such as fade in, smooth element size change, etc."
-        const val DEFAULT_TAB = "Default tab"
-        const val DEFAULT_TAB_DESCRIPTION = "Change the tab that shows up when the launcher is opened."
-        const val PROVIDERS = "Providers"
-        const val PROVIDERS_DESCRIPTION =
-            "Choose which service(s) provide popular projects on the home tab."
-    }
-
     interface Palette {
         val rosewater: Color
         val flamingo: Color
@@ -106,90 +62,89 @@ object UI {
 
         val transparentOverlay: Color
         fun material(accent: Color): Colors
-    }
 
-    object Latte : Palette {
-        override val rosewater = Color(0xffdc8a78)
-        override val flamingo = Color(0xffdd7878)
-        override val pink = Color(0xffea76cb)
-        override val mauve = Color(0xff8839ef)
-        override val red = Color(0xffd20f39)
-        override val maroon = Color(0xffe64553)
-        override val peach = Color(0xfffe640b)
-        override val yellow = Color(0xffdf8e1d)
-        override val green = Color(0xff40a02b)
-        override val teal = Color(0xff179299)
-        override val sky = Color(0xff04a5e5)
-        override val sapphire = Color(0xff209fb5)
-        override val blue = Color(0xff1e66f5)
-        override val lavender = Color(0xff7287fd)
-        override val text = Color(0xff4c4f69)
-        override val subtext1 = Color(0xff5c5f77)
-        override val subtext0 = Color(0xff6c6f85)
-        override val overlay2 = Color(0xff7c7f93)
-        override val overlay1 = Color(0xff8c8fa1)
-        override val overlay0 = Color(0xff9ca0b0)
-        override val surface2 = Color(0xffacb0be)
-        override val surface1 = Color(0xffbcc0cc)
-        override val surface0 = Color(0xffccd0da)
-        override val base = Color(0xffeff1f5)
-        override val mantle = Color(0xffe6e9ef)
-        override val crust = Color(0xffdce0e8)
+        object Latte : Palette {
+            override val rosewater = Color(0xffdc8a78)
+            override val flamingo = Color(0xffdd7878)
+            override val pink = Color(0xffea76cb)
+            override val mauve = Color(0xff8839ef)
+            override val red = Color(0xffd20f39)
+            override val maroon = Color(0xffe64553)
+            override val peach = Color(0xfffe640b)
+            override val yellow = Color(0xffdf8e1d)
+            override val green = Color(0xff40a02b)
+            override val teal = Color(0xff179299)
+            override val sky = Color(0xff04a5e5)
+            override val sapphire = Color(0xff209fb5)
+            override val blue = Color(0xff1e66f5)
+            override val lavender = Color(0xff7287fd)
+            override val text = Color(0xff4c4f69)
+            override val subtext1 = Color(0xff5c5f77)
+            override val subtext0 = Color(0xff6c6f85)
+            override val overlay2 = Color(0xff7c7f93)
+            override val overlay1 = Color(0xff8c8fa1)
+            override val overlay0 = Color(0xff9ca0b0)
+            override val surface2 = Color(0xffacb0be)
+            override val surface1 = Color(0xffbcc0cc)
+            override val surface0 = Color(0xffccd0da)
+            override val base = Color(0xffeff1f5)
+            override val mantle = Color(0xffe6e9ef)
+            override val crust = Color(0xffdce0e8)
 
-        override val transparentOverlay = Color(0x7f000000)
-        override fun material(accent: Color) = lightColors(
-            primary = accent,
-            primaryVariant = accent,
-            secondary = accent,
-            secondaryVariant = accent,
-            background = base,
-            surface = surface0,
-            error = red
-        )
-    }
+            override val transparentOverlay = Color(0x7f000000)
+            override fun material(accent: Color) = lightColors(
+                primary = accent,
+                primaryVariant = accent,
+                secondary = accent,
+                secondaryVariant = accent,
+                background = base,
+                surface = surface0,
+                error = red
+            )
+        }
 
-    object Mocha : Palette {
-        override val rosewater = Color(0xfff5e0dc)
-        override val flamingo = Color(0xfff2cdcd)
-        override val pink = Color(0xfff5c2e7)
-        override val mauve = Color(0xffcba6f7)
-        override val red = Color(0xfff38ba8)
-        override val maroon = Color(0xffeba0ac)
-        override val peach = Color(0xfffab387)
-        override val yellow = Color(0xfff9e2af)
-        override val green = Color(0xffa6e3a1)
-        override val teal = Color(0xff94e2d5)
-        override val sky = Color(0xff89dceb)
-        override val sapphire = Color(0xff74c7ec)
-        override val blue = Color(0xff89b4fa)
-        override val lavender = Color(0xffb4befe)
-        override val text = Color(0xffcdd6f4)
-        override val subtext1 = Color(0xffbac2de)
-        override val subtext0 = Color(0xffa6adc8)
-        override val overlay2 = Color(0xff9399b2)
-        override val overlay1 = Color(0xff7f849c)
-        override val overlay0 = Color(0xff6c7086)
-        override val surface2 = Color(0xff585b70)
-        override val surface1 = Color(0xff45475a)
-        override val surface0 = Color(0xff313244)
-        override val base = Color(0xff1e1e2e)
-        override val mantle = Color(0xff181825)
-        override val crust = Color(0xff11111b)
+        object Mocha : Palette {
+            override val rosewater = Color(0xfff5e0dc)
+            override val flamingo = Color(0xfff2cdcd)
+            override val pink = Color(0xfff5c2e7)
+            override val mauve = Color(0xffcba6f7)
+            override val red = Color(0xfff38ba8)
+            override val maroon = Color(0xffeba0ac)
+            override val peach = Color(0xfffab387)
+            override val yellow = Color(0xfff9e2af)
+            override val green = Color(0xffa6e3a1)
+            override val teal = Color(0xff94e2d5)
+            override val sky = Color(0xff89dceb)
+            override val sapphire = Color(0xff74c7ec)
+            override val blue = Color(0xff89b4fa)
+            override val lavender = Color(0xffb4befe)
+            override val text = Color(0xffcdd6f4)
+            override val subtext1 = Color(0xffbac2de)
+            override val subtext0 = Color(0xffa6adc8)
+            override val overlay2 = Color(0xff9399b2)
+            override val overlay1 = Color(0xff7f849c)
+            override val overlay0 = Color(0xff6c7086)
+            override val surface2 = Color(0xff585b70)
+            override val surface1 = Color(0xff45475a)
+            override val surface0 = Color(0xff313244)
+            override val base = Color(0xff1e1e2e)
+            override val mantle = Color(0xff181825)
+            override val crust = Color(0xff11111b)
 
-        override val transparentOverlay = Color(0xbf000000)
-        override fun material(accent: Color) = darkColors(
-            primary = accent,
-            primaryVariant = accent,
-            secondary = accent,
-            secondaryVariant = accent,
-            background = base,
-            surface = surface0,
-            error = red
-        )
+            override val transparentOverlay = Color(0xbf000000)
+            override fun material(accent: Color) = darkColors(
+                primary = accent,
+                primaryVariant = accent,
+                secondary = accent,
+                secondaryVariant = accent,
+                background = base,
+                surface = surface0,
+                error = red
+            )
+        }
     }
 
     object Font {
-
         val family = FontFamily(
             Font("font/inter/Inter-Light.ttf", FontWeight.Light),
             Font("font/inter/Inter-Medium.ttf", FontWeight.Medium),
@@ -206,9 +161,123 @@ object UI {
         )
     )
 
+    interface Localization {
+        // General
+        val home: String
+        val instances: String
+        val search: String
+        val accounts: String
+        val settings: String
+        val cancel: String
+        val close: String
+
+        // Home
+        val jumpBackIn: String
+        val popularMods: String
+        val popularModpacks: String
+        val popularResourcePacks: String
+        val popularShaderPacks: String
+        val notPlayedBefore: String
+        val play: String
+        val view: String
+        val install: String
+
+        // Instances
+        val sortBy: String
+        val lastPlayed: String
+        val dateModified: String
+        val dateCreated: String
+        val gameVersion: String
+        val name: String
+        val groupBy: String
+        val noInstancesFound: String
+        val createNewInstance: String
+        val instanceName: String
+        val icon: String
+        val minecraftVersion: String
+        val includeSnapshots: String
+        val loader: String
+        val loaderVersion: String
+        val create: String
+
+        // Settings
+        val userInterface: String
+        val theme: String
+        val themeDescription: String
+        val accentColor: String
+        val accentColorDescription: String
+        val systemWindow: String
+        val systemWindowDescription: String
+        val animations: String
+        val animationsDescription: String
+        val defaultTab: String
+        val defaultTabDescription: String
+        val providers: String
+        val providersDescription: String
+
+        object En : Localization {
+            // General
+            override val home = "Home"
+            override val instances = "Instances"
+            override val search = "Search"
+            override val accounts = "Accounts"
+            override val settings = "Settings"
+            override val cancel = "Cancel"
+            override val close = "Close"
+
+            // Home
+            override val jumpBackIn = "Jump back in"
+            override val popularMods = "Jump back in"
+            override val popularModpacks = "Jump back in"
+            override val popularResourcePacks = "Jump back in"
+            override val popularShaderPacks = "Jump back in"
+            override val notPlayedBefore = "Not played before"
+            override val play = "Play"
+            override val view = "View"
+            override val install = "Install"
+
+            // Instances
+            override val sortBy = "Sort by"
+            override val lastPlayed = "Last played"
+            override val dateModified = "Date modified"
+            override val dateCreated = "Date created"
+            override val gameVersion = "Game version"
+            override val name = "Name"
+            override val groupBy = "Group by"
+            override val noInstancesFound = "No instances found"
+            override val createNewInstance = "Create new instance"
+            override val instanceName = "Instance name"
+            override val icon = "Icon"
+            override val minecraftVersion = "Minecraft version"
+            override val includeSnapshots = "Include snapshots"
+            override val loader = "Loader"
+            override val loaderVersion = "Loader version"
+            override val create = "Create"
+
+            // Settings
+            override val userInterface = "User interface"
+            override val theme = "Theme"
+            override val themeDescription = "Change the global theme of the launcher."
+            override val accentColor = "Accent color"
+            override val accentColorDescription = "Change the accent color used in some buttons."
+            override val systemWindow = "Use system window frame"
+            override val systemWindowDescription =
+                "Use the system window frame instead of the custom window frame provided by the launcher."
+            override val animations = "Animations"
+            override val animationsDescription =
+                "Enables UI animations such as fade in, smooth element size change, etc."
+            override val defaultTab = "Default tab"
+            override val defaultTabDescription = "Change the tab that shows up when the launcher is opened."
+            override val providers = "Providers"
+            override val providersDescription =
+                "Choose which service(s) provide popular projects on the home tab."
+        }
+    }
+
     val transitionIn = fadeIn(spring(stiffness = Spring.StiffnessMedium))
     val transitionOut = fadeOut(spring(stiffness = Spring.StiffnessMedium))
 }
 
-val LocalPalette = compositionLocalOf<UI.Palette> { UI.Mocha }
+val LocalPalette = compositionLocalOf<UI.Palette> { UI.Palette.Mocha }
 val LocalConfiguration = compositionLocalOf { Configuration.DEFAULT }
+val LocalLocalization = compositionLocalOf<UI.Localization> { UI.Localization.En }

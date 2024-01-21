@@ -1,31 +1,51 @@
 package com.skyecodes.vercors.data.model.app
 
 import androidx.compose.ui.graphics.Color
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
 import com.skyecodes.vercors.ui.UI
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.*
 
-@Serializable(AppColorSerializer::class)
-enum class AppColor(override val value: String, val ofPalette: (UI.Palette) -> Color) : StringEnumerable {
-    Rosewater("rosewater", UI.Palette::rosewater),
-    Flamingo("flamingo", UI.Palette::flamingo),
-    Pink("pink", UI.Palette::pink),
-    Mauve("mauve", UI.Palette::mauve),
-    Red("red", UI.Palette::red),
-    Maroon("maroon", UI.Palette::maroon),
-    Peach("peach", UI.Palette::peach),
-    Yellow("yellow", UI.Palette::yellow),
-    Green("green", UI.Palette::green),
-    Teal("teal", UI.Palette::teal),
-    Sky("sky", UI.Palette::sky),
-    Sapphire("sapphire", UI.Palette::sapphire),
-    Blue("blue", UI.Palette::blue),
-    Lavender("lavender", UI.Palette::lavender);
+@Serializable
+enum class AppColor(val title: String, val ofPalette: (UI.Palette) -> Color) {
+    @SerialName("rosewater")
+    Rosewater("Rosewater", UI.Palette::rosewater),
 
-    val title: String =
-        value.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    @SerialName("flamingo")
+    Flamingo("Flamingo", UI.Palette::flamingo),
+
+    @SerialName("pink")
+    Pink("Pink", UI.Palette::pink),
+
+    @SerialName("mauve")
+    Mauve("Mauve", UI.Palette::mauve),
+
+    @SerialName("red")
+    Red("Red", UI.Palette::red),
+
+    @SerialName("maroon")
+    Maroon("Maroon", UI.Palette::maroon),
+
+    @SerialName("peach")
+    Peach("Peach", UI.Palette::peach),
+
+    @SerialName("yellow")
+    Yellow("Yellow", UI.Palette::yellow),
+
+    @SerialName("green")
+    Green("Green", UI.Palette::green),
+
+    @SerialName("teal")
+    Teal("Teal", UI.Palette::teal),
+
+    @SerialName("sky")
+    Sky("Sky", UI.Palette::sky),
+
+    @SerialName("sapphire")
+    Sapphire("Sapphire", UI.Palette::sapphire),
+
+    @SerialName("blue")
+    Blue("Blue", UI.Palette::blue),
+
+    @SerialName("lavender")
+    Lavender("Lavender", UI.Palette::lavender);
 }
-
-private class AppColorSerializer : StringEnumerableSerializer<AppColor>(AppColor.entries)

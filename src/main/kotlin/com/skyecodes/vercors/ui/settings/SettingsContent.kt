@@ -19,6 +19,7 @@ import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Provider
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
@@ -33,6 +34,7 @@ import compose.icons.feathericons.*
 @Composable
 fun SettingsContent(component: SettingsComponent) {
     val configuration = LocalConfiguration.current
+    val locale = LocalLocalization.current
 
     Box(Modifier.padding(start = UI.mediumPadding)) {
         val scrollState = rememberScrollState()
@@ -42,13 +44,13 @@ fun SettingsContent(component: SettingsComponent) {
                 .padding(top = UI.smallPadding, bottom = UI.smallPadding, end = UI.mediumPadding + 6.dp)
                 .verticalScroll(scrollState)
         ) {
-            SectionContent(UI.Text.USER_INTERFACE) {
+            SectionContent(locale.userInterface) {
                 Card {
                     Column(
                         modifier = Modifier.padding(UI.largePadding),
                         verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
                     ) {
-                        Setting(UI.Text.THEME, UI.Text.THEME_DESCRIPTION) {
+                        Setting(locale.theme, locale.themeDescription) {
                             Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
                                 AppTheme.entries.forEach {
                                     SelectIconChip(
@@ -65,7 +67,7 @@ fun SettingsContent(component: SettingsComponent) {
                             }
                         }
 
-                        Setting(UI.Text.ACCENT_COLOR, UI.Text.ACCENT_COLOR_DESCRIPTION) {
+                        Setting(locale.accentColor, locale.accentColorDescription) {
                             var expanded by remember { mutableStateOf(false) }
 
                             ExposedDropdownMenuBox(
@@ -123,21 +125,21 @@ fun SettingsContent(component: SettingsComponent) {
                             }
                         }
 
-                        Setting(UI.Text.SYSTEM_WINDOW, UI.Text.SYSTEM_WINDOW_DESCRIPTION) {
+                        Setting(locale.systemWindow, locale.systemWindowDescription) {
                             Switch(
                                 checked = configuration.useSystemWindowFrame,
                                 onCheckedChange = { component.onConfigChange(configuration.copy(useSystemWindowFrame = it)) }
                             )
                         }
 
-                        Setting(UI.Text.ANIMATIONS, UI.Text.ANIMATIONS_DESCRIPTION) {
+                        Setting(locale.animations, locale.animationsDescription) {
                             Switch(
                                 checked = configuration.animations,
                                 onCheckedChange = { component.onConfigChange(configuration.copy(animations = it)) }
                             )
                         }
 
-                        Setting(UI.Text.DEFAULT_TAB, UI.Text.DEFAULT_TAB_DESCRIPTION) {
+                        Setting(locale.defaultTab, locale.defaultTabDescription) {
                             var expanded by remember { mutableStateOf(false) }
 
                             ExposedDropdownMenuBox(
@@ -145,7 +147,7 @@ fun SettingsContent(component: SettingsComponent) {
                                 onExpandedChange = { expanded = it }
                             ) {
                                 OutlinedTextField(
-                                    value = configuration.defaultTab.title,
+                                    value = configuration.defaultTab.localizedTitle(locale),
                                     onValueChange = {},
                                     readOnly = true,
                                     modifier = Modifier.pointerHoverIcon(
@@ -180,7 +182,7 @@ fun SettingsContent(component: SettingsComponent) {
                                                 modifier = Modifier.fillMaxWidth()
                                             ) {
                                                 Icon(it.icon, null, Modifier.size(UI.mediumIconSize))
-                                                Text(it.title)
+                                                Text(it.localizedTitle(locale))
                                             }
                                         }
                                     }
@@ -188,7 +190,7 @@ fun SettingsContent(component: SettingsComponent) {
                             }
                         }
 
-                        Setting(UI.Text.PROVIDERS, UI.Text.PROVIDERS_DESCRIPTION) {
+                        Setting(locale.providers, locale.providersDescription) {
                             Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
                                 Provider.entries.forEach {
                                     SelectIconChip(

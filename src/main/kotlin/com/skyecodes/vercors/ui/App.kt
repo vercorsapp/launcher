@@ -57,7 +57,7 @@ fun ApplicationScope.AppWindow(
 
     uiState.fatalError?.let {
         CompositionLocalProvider(
-            LocalPalette provides UI.Mocha,
+            LocalPalette provides UI.Palette.Mocha,
             LocalConfiguration provides Configuration.DEFAULT
         ) {
             MaterialTheme(
@@ -110,7 +110,7 @@ fun ApplicationScope.AppWindow(
 private fun FrameWindowScope.AppContent(
     component: RootComponent,
     configuration: Configuration,
-    uiState: RootComponent.AppUiState,
+    uiState: RootComponent.UiState,
     onClose: () -> Unit
 ) {
     LaunchedEffect(component) {
@@ -154,7 +154,7 @@ private fun FrameWindowScope.AppContent(
                                     .background(color = uiState.palette.surface0)
                             ) {
                                 Toolbar(
-                                    currentTab.title,
+                                    currentTab.localizedTitle(LocalLocalization.current),
                                     children.hasPreviousScreen,
                                     children.hasNextScreen,
                                     children.canRefreshScreen,

@@ -1,5 +1,6 @@
 package com.skyecodes.vercors
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
@@ -36,6 +37,7 @@ fun Long.readable(decimals: Int = 1): String {
 
 private val prettyTime = PrettyTime()
 
+@Stable
 fun Instant.readable(): String = prettyTime.format(this)
 
 fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this

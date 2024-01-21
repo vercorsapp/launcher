@@ -1,14 +1,16 @@
 package com.skyecodes.vercors.data.model.app
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(ThemeSerializer::class)
-enum class AppTheme(override val value: String) : StringEnumerable {
-    SYSTEM("system"),
-    LIGHT("light"),
-    DARK("dark")
-}
+@Serializable
+enum class AppTheme {
+    @SerialName("system")
+    SYSTEM,
 
-private class ThemeSerializer : StringEnumerableSerializer<AppTheme>(AppTheme.entries)
+    @SerialName("light")
+    LIGHT,
+
+    @SerialName("dark")
+    DARK
+}

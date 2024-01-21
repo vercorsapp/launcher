@@ -19,6 +19,7 @@ import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
@@ -32,6 +33,7 @@ import compose.icons.feathericons.*
 fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) {
     val uiState by component.uiState.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
+    val locale = LocalLocalization.current
 
     Column(
         modifier = Modifier.padding(UI.largePadding)
@@ -39,12 +41,12 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
         verticalArrangement = Arrangement.spacedBy(UI.largePadding)
     ) {
         Text(
-            text = UI.Text.CREATE_NEW_INSTANCE,
+            text = locale.createNewInstance,
             style = MaterialTheme.typography.h6
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(UI.largePadding)) {
-            FormField(UI.Text.INSTANCE_NAME, Modifier.weight(1f)) {
+            FormField(locale.instanceName, Modifier.weight(1f)) {
                 OutlinedTextField(
                     value = uiState.instanceName,
                     onValueChange = component::updateInstanceName,
@@ -58,7 +60,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                 )
             }
 
-            FormField(UI.Text.ICON) {
+            FormField(locale.icon) {
                 Card(
                     modifier = Modifier.size(55.dp).clickable { },
                     border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled))
@@ -68,7 +70,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
             }
         }
 
-        FormField(UI.Text.MINECRAFT_VERSION) {
+        FormField(locale.minecraftVersion) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -131,13 +133,13 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                         indication = null,
                         onClick = component::toggleIncludeSnapshots
                     ),
-                    text = UI.Text.INCLUDE_SNAPSHOTS,
+                    text = locale.includeSnapshots,
                     style = MaterialTheme.typography.subtitle2
                 )
             }
         }
 
-        FormField(UI.Text.LOADER) {
+        FormField(locale.loader) {
             Row(horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
                 LoaderChip(null, uiState.loader == null) { component.updateLoader(null) }
                 Loader.entries.forEach {
@@ -147,7 +149,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
         }
 
         if (uiState.loader != null) {
-            FormField(UI.Text.LOADER_VERSION) {
+            FormField(locale.loaderVersion) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -198,7 +200,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                     modifier = Modifier.size(UI.mediumIconSize)
                 )
                 Text(
-                    text = UI.Text.CANCEL,
+                    text = locale.cancel,
                     modifier = Modifier.padding(start = UI.mediumPadding)
                 )
             }
@@ -207,7 +209,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                 enabled = uiState.isValid,
                 onClick = component::createInstance,
                 imageVector = FeatherIcons.Plus,
-                text = UI.Text.CREATE
+                text = locale.create
             )
         }
     }

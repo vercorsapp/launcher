@@ -5,10 +5,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.skyecodes.vercors.component.screen.SearchComponent
-import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.LocalLocalization
 
 
 @Composable
 fun SearchContent(component: SearchComponent) {
-    Text(UI.Text.SEARCH, Modifier.fillMaxSize())
+    Text(LocalLocalization.current.search, Modifier.fillMaxSize())
 }

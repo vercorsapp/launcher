@@ -42,7 +42,7 @@ private val logger = KotlinLogging.logger { }
 interface RootComponent {
     val children: Value<Children<*, ScreenChild>>
     val dialog: Value<ChildStack<*, DialogChild>>
-    val uiState: StateFlow<AppUiState>
+    val uiState: StateFlow<UiState>
     val configuration: StateFlow<Configuration?>
     val instances: StateFlow<List<Instance>?>
     val activeTab: StateFlow<AppTab>
@@ -86,7 +86,7 @@ interface RootComponent {
         val canRefreshScreen = active.instance is Refreshable
     }
 
-    data class AppUiState(
+    data class UiState(
         val palette: UI.Palette,
         val fatalError: Throwable? = null,
         val error: Throwable? = null
@@ -114,8 +114,8 @@ class DefaultRootComponent(
     private val screenId = AtomicLong(0)
     private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
 
-    override val uiState: MutableStateFlow<RootComponent.AppUiState> =
-        MutableStateFlow(RootComponent.AppUiState(UI.Mocha))
+    override val uiState: MutableStateFlow<RootComponent.UiState> =
+        MutableStateFlow(RootComponent.UiState(UI.Palette.Mocha))
     override val configuration: MutableStateFlow<Configuration?> = MutableStateFlow(null)
     override val instances: MutableStateFlow<List<Instance>?> = MutableStateFlow(null)
     override val activeTab: MutableStateFlow<AppTab> = MutableStateFlow(Configuration.DEFAULT.defaultTab)
@@ -186,7 +186,7 @@ class DefaultRootComponent(
         }
         detector.registerListener(detectorListener)
         cancellation = children.observe {
-            logger.info { "Navigated to ${it.active.instance.tab.title}" }
+            logger.info { "Navigated to ${it.active.instance.tab.name}" }
             activeTab.value = it.active.instance.tab
         }
     }
@@ -198,9 +198,9 @@ class DefaultRootComponent(
 
     private fun updatePalette() {
         val palette = when (configuration.value?.theme) {
-            AppTheme.DARK -> UI.Mocha
-            AppTheme.LIGHT -> UI.Latte
-            else -> if (detector.isDark) UI.Mocha else UI.Latte
+            AppTheme.DARK -> UI.Palette.Mocha
+            AppTheme.LIGHT -> UI.Palette.Latte
+            else -> if (detector.isDark) UI.Palette.Mocha else UI.Palette.Latte
         }
         uiState.update { uiState -> uiState.copy(palette = palette) }
     }

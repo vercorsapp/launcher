@@ -1,16 +1,19 @@
 package com.skyecodes.vercors.data.model.modrinth
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(ModrinthProjectTypeSerializer::class)
-enum class ModrinthProjectType(override val value: String) : StringEnumerable {
+@Serializable
+enum class ModrinthProjectType(val value: String) {
+    @SerialName("mod")
     Mod("mod"),
+
+    @SerialName("modpack")
     Modpack("modpack"),
+
+    @SerialName("resourcepack")
     ResourcePack("resourcepack"),
+
+    @SerialName("shader")
     ShaderPack("shader")
 }
-
-private class ModrinthProjectTypeSerializer :
-    StringEnumerableSerializer<ModrinthProjectType>(ModrinthProjectType.entries)

@@ -1,16 +1,23 @@
 package com.skyecodes.vercors.data.model.app
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
+import com.skyecodes.vercors.ui.UI
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(HomeSectionSerializer::class)
-enum class HomeSectionType(val title: String, override val value: String) : StringEnumerable {
-    JumpBackIn("Jump back in", "jumpBackIn"),
-    PopularMods("Popular mods", "popularMods"),
-    PopularModpacks("Popular modpacks", "popularModpacks"),
-    PopularResourcePacks("Popular resource packs", "popularResourcePacks"),
-    PopularShaderPacks("Popular shader packs", "popularShaderPacks");
-}
+@Serializable
+enum class HomeSectionType(val localizedTitle: (UI.Localization) -> String) {
+    @SerialName("jumpBackIn")
+    JumpBackIn(UI.Localization::jumpBackIn),
 
-private class HomeSectionSerializer : StringEnumerableSerializer<HomeSectionType>(HomeSectionType.entries)
+    @SerialName("popularMods")
+    PopularMods(UI.Localization::popularMods),
+
+    @SerialName("popularModpacks")
+    PopularModpacks(UI.Localization::popularModpacks),
+
+    @SerialName("popularResourcePacks")
+    PopularResourcePacks(UI.Localization::popularResourcePacks),
+
+    @SerialName("popularShaderPacks")
+    PopularShaderPacks(UI.Localization::popularShaderPacks)
+}

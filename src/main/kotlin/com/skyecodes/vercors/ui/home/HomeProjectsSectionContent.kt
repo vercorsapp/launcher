@@ -29,6 +29,7 @@ import com.skyecodes.vercors.data.model.app.Project
 import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AsyncImage
@@ -194,13 +195,13 @@ private fun RowScope.ProjectCardContent(project: Project) {
                                 onClick = {},
                                 colors = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.surface2),
                                 imageVector = FeatherIcons.Eye,
-                                text = UI.Text.VIEW
+                                text = LocalLocalization.current.view
                             )
 
                             IconTextButton(
                                 onClick = {},
                                 imageVector = FeatherIcons.Download,
-                                text = UI.Text.INSTALL
+                                text = LocalLocalization.current.install
                             )
                         }
                     }

@@ -1,24 +1,29 @@
 package com.skyecodes.vercors.data.model.app
 
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
 import com.skyecodes.vercors.ui.UI
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(AppTabSerializer::class)
+@Serializable
 enum class AppTab(
-    val title: String,
+    val localizedTitle: (UI.Localization) -> String,
     val icon: ImageVector,
-    override val value: String
-) : StringEnumerable {
-    Home(UI.Text.HOME, FeatherIcons.Home, "home"),
-    Instances(UI.Text.INSTANCES, FeatherIcons.Box, "instances"),
-    Search(UI.Text.SEARCH, FeatherIcons.Search, "search"),
-    Accounts(UI.Text.ACCOUNTS, FeatherIcons.Users, "accounts"),
-    Settings(UI.Text.SETTINGS, FeatherIcons.Settings, "settings");
-}
+) {
+    @SerialName("home")
+    Home(UI.Localization::home, FeatherIcons.Home),
 
-private class AppTabSerializer : StringEnumerableSerializer<AppTab>(AppTab.entries)
+    @SerialName("instances")
+    Instances(UI.Localization::instances, FeatherIcons.Box),
+
+    @SerialName("search")
+    Search(UI.Localization::search, FeatherIcons.Search),
+
+    @SerialName("accounts")
+    Accounts(UI.Localization::accounts, FeatherIcons.Users),
+
+    @SerialName("settings")
+    Settings(UI.Localization::settings, FeatherIcons.Settings)
+}

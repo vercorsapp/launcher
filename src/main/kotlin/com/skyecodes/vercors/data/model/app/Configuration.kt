@@ -11,7 +11,8 @@ data class Configuration(
     val animations: Boolean = true,
     val defaultTab: AppTab = AppTab.Home,
     val homeSections: List<HomeSectionType> = HomeSectionType.entries,
-    val homeProviders: List<Provider> = Provider.entries
+    val homeProviders: List<Provider> = Provider.entries,
+    val instancesSortOrder: InstancesSortOrder = InstancesSortOrder.LastPlayed
 ) {
     companion object {
         val DEFAULT = Configuration()

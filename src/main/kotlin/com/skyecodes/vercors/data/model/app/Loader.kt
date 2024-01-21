@@ -1,19 +1,23 @@
 package com.skyecodes.vercors.data.model.app
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
 import com.skyecodes.vercors.data.model.curseforge.CurseforgeModLoaderType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(LoaderSerializer::class)
-enum class Loader(override val value: String) : StringEnumerable {
+@Serializable
+enum class Loader(val value: String) {
+    @SerialName("forge")
     Forge("forge"),
-    NeoForge("neoforge"),
-    Fabric("fabric"),
-    Quilt("quilt");
-}
 
-private class LoaderSerializer : StringEnumerableSerializer<Loader>(Loader.entries)
+    @SerialName("neoforge")
+    NeoForge("neoforge"),
+
+    @SerialName("fabric")
+    Fabric("fabric"),
+
+    @SerialName("quilt")
+    Quilt("quilt")
+}
 
 fun List<String>.toLoadersModrinth() = mapNotNull { it.toLoader() }
 

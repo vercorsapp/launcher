@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.screen.HomeComponent
-import com.skyecodes.vercors.component.screen.HomeUiState
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.SectionContent
@@ -37,10 +37,10 @@ fun HomeContent(viewModel: HomeComponent) {
                 .verticalScroll(scrollState)
         ) {
             state.sections.forEach { (type, section) ->
-                SectionContent(type.title) {
+                SectionContent(type.localizedTitle(LocalLocalization.current)) {
                     when (section) {
-                        is HomeUiState.Section.Instances -> HomeInstancesSectionContent(section.instances)
-                        is HomeUiState.Section.Projects -> HomeProjectsSectionContent(section.projects)
+                        is HomeComponent.UiState.Section.Instances -> HomeInstancesSectionContent(section.instances)
+                        is HomeComponent.UiState.Section.Projects -> HomeProjectsSectionContent(section.projects)
                     }
                 }
             }

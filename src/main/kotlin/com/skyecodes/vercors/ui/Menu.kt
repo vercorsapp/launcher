@@ -27,7 +27,7 @@ fun Menu(currentTab: AppTab, onNavigate: (AppTab) -> Unit, onCreateNewInstance: 
         TabNavigationItem(AppTab.Home, currentTab, onNavigate)
         TabNavigationItem(AppTab.Instances, currentTab, onNavigate)
         TabNavigationItem(AppTab.Search, currentTab, onNavigate)
-        NavigationItem(UI.Text.CREATE_NEW_INSTANCE, FeatherIcons.Plus, false, onCreateNewInstance)
+        NavigationItem(LocalLocalization.current.createNewInstance, FeatherIcons.Plus, false, onCreateNewInstance)
         Spacer(Modifier.weight(1f))
         TabNavigationItem(AppTab.Accounts, currentTab, onNavigate)
         TabNavigationItem(AppTab.Settings, currentTab, onNavigate)
@@ -36,7 +36,7 @@ fun Menu(currentTab: AppTab, onNavigate: (AppTab) -> Unit, onCreateNewInstance: 
 
 @Composable
 private fun TabNavigationItem(tab: AppTab, currentTab: AppTab, onNavigate: (AppTab) -> Unit) {
-    NavigationItem(tab.title, tab.icon, tab == currentTab) { onNavigate(tab) }
+    NavigationItem(tab.localizedTitle(LocalLocalization.current), tab.icon, tab == currentTab) { onNavigate(tab) }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

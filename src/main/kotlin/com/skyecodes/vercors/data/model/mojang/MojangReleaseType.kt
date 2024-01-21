@@ -1,15 +1,19 @@
 package com.skyecodes.vercors.data.model.mojang
 
-import com.skyecodes.vercors.data.model.StringEnumerable
-import com.skyecodes.vercors.data.model.StringEnumerableSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable(MojangReleaseTypeSerializable::class)
-enum class MojangReleaseType(override val value: String) : StringEnumerable {
-    Release("release"),
-    Snapshot("snapshot"),
-    Beta("old_beta"),
-    Alpha("old_alpha"),
-}
+@Serializable
+enum class MojangReleaseType {
+    @SerialName("release")
+    Release,
 
-private class MojangReleaseTypeSerializable : StringEnumerableSerializer<MojangReleaseType>(MojangReleaseType.entries)
+    @SerialName("snapshot")
+    Snapshot,
+
+    @SerialName("old_beta")
+    Beta,
+
+    @SerialName("old_alpha")
+    Alpha,
+}

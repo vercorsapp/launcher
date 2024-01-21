@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.data.model.app.Instance
+import com.skyecodes.vercors.readable
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
@@ -48,7 +50,7 @@ fun HomeInstancesSectionContent(instances: List<Instance>?) {
                 Spacer(Modifier.weight(1f))
             }
         } else {
-            Text("No projects found :(")
+            Text("No instances found :(")
         }
     }
 }
@@ -92,12 +94,25 @@ private fun RowScope.InstanceCardContent(instance: Instance) {
                     fontWeight = FontWeight.ExtraBold,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = (instance.loader?.value ?: "Vanilla") + " " + instance.gameVersion.id,
-                    style = MaterialTheme.typography.subtitle2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(UI.smallPadding, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = (instance.loader?.value ?: "Vanilla") + " " + instance.gameVersion.id,
+                        style = MaterialTheme.typography.subtitle2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = instance.lastPlayed?.let { "${LocalLocalization.current.lastPlayed} ${it.readable()}" }
+                            ?: LocalLocalization.current.notPlayedBefore,
+                        style = MaterialTheme.typography.subtitle2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -113,7 +128,7 @@ private fun RowScope.InstanceCardContent(instance: Instance) {
                 IconTextButton(
                     onClick = {},
                     imageVector = FeatherIcons.Play,
-                    text = UI.Text.PLAY
+                    text = LocalLocalization.current.play
                 )
             }
         }

@@ -9,6 +9,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.skyecodes.vercors.component.dialog.ErrorDialogComponent
+import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.UI
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.X
@@ -37,7 +38,7 @@ fun ErrorDialogContent(component: ErrorDialogComponent) {
                     modifier = Modifier.size(UI.mediumIconSize)
                 )
                 Text(
-                    text = UI.Text.CLOSE,
+                    text = LocalLocalization.current.close,
                     modifier = Modifier.padding(start = UI.mediumPadding)
                 )
             }

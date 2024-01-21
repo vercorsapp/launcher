@@ -16,7 +16,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 interface HomeComponent : Refreshable {
-    val uiState: StateFlow<HomeUiState>
+    val uiState: StateFlow<UiState>
+
+    data class UiState(val sections: Map<HomeSectionType, Section>) {
+        sealed interface Section {
+            data class Projects(val projects: List<Project>?) : Section
+            data class Instances(val instances: List<Instance>?) : Section
+        }
+    }
 }
 
 class DefaultHomeComponent(
@@ -30,7 +37,7 @@ class DefaultHomeComponent(
         private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()
     }
 
-    override val uiState = MutableStateFlow(HomeUiState(emptyMap()))
+    override val uiState = MutableStateFlow(HomeComponent.UiState(emptyMap()))
 
     init {
         lifecycle.doOnCreate { initialize() }
@@ -49,7 +56,7 @@ class DefaultHomeComponent(
         uiState.update { state ->
             state.copy(
                 sections = state.sections.mapValues { (type, section) ->
-                    if (type === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances)
+                    if (type === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(instances)
                     else section
                 }
             )
@@ -62,12 +69,12 @@ class DefaultHomeComponent(
     }
 
     private fun updateAll(configuration: Configuration) {
-        uiState.update { HomeUiState(configuration.homeSections.associateWith { emptySectionData(it) }) }
+        uiState.update { HomeComponent.UiState(configuration.homeSections.associateWith { emptySectionData(it) }) }
         configuration.homeSections.forEach { type ->
             scope.launch {
                 val section = getSectionData(type, configuration.homeProviders)
                 uiState.update {
-                    HomeUiState(it.sections.mapValues { (mapType, mapSection) ->
+                    HomeComponent.UiState(it.sections.mapValues { (mapType, mapSection) ->
                         if (mapType === type) section else mapSection
                     })
                 }
@@ -76,15 +83,18 @@ class DefaultHomeComponent(
     }
 
     private fun emptySectionData(sectionType: HomeSectionType) = when (sectionType) {
-        HomeSectionType.JumpBackIn -> HomeUiState.Section.Instances(null)
-        else -> HomeUiState.Section.Projects(null)
+        HomeSectionType.JumpBackIn -> HomeComponent.UiState.Section.Instances(null)
+        else -> HomeComponent.UiState.Section.Projects(null)
     }
 
-    private suspend fun getSectionData(sectionType: HomeSectionType, providers: List<Provider>): HomeUiState.Section =
-        if (sectionType === HomeSectionType.JumpBackIn) HomeUiState.Section.Instances(instances.value?.sortedByDescending {
-            it.lastLaunched ?: it.created
+    private suspend fun getSectionData(
+        sectionType: HomeSectionType,
+        providers: List<Provider>
+    ): HomeComponent.UiState.Section =
+        if (sectionType === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(instances.value?.sortedByDescending {
+            it.lastPlayed ?: it.created
         })
-        else HomeUiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
+        else HomeComponent.UiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {
                     if (lists.isNotEmpty()) {
@@ -127,12 +137,5 @@ class DefaultHomeComponent(
             }
 
             else -> emptyList()
-    }
-}
-
-data class HomeUiState(val sections: Map<HomeSectionType, Section>) {
-    sealed interface Section {
-        data class Projects(val projects: List<Project>?) : Section
-        data class Instances(val instances: List<Instance>?) : Section
     }
 }
