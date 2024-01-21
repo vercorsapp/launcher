@@ -2,10 +2,11 @@ package com.skyecodes.vercors.data.service
 
 import com.skyecodes.vercors.data.model.modrinth.ModrinthProjectSearchIndex
 import com.skyecodes.vercors.data.model.modrinth.ModrinthProjectSearchResult
+import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.CoroutineScope
 
 interface ModrinthService {
     suspend fun getPopularMods(): ModrinthProjectSearchResult
@@ -25,7 +26,10 @@ interface ModrinthService {
     ): ModrinthProjectSearchResult
 }
 
-class ModrinthServiceImpl(private val httpService: HttpService) : ModrinthService {
+class ModrinthServiceImpl(
+    coroutineScope: CoroutineScope,
+    private val httpClient: HttpClient
+) : ModrinthService, CoroutineScope by coroutineScope {
     override suspend fun getPopularMods() = getPopular("mod")
 
     override suspend fun getPopularModpacks() = getPopular("modpack")
@@ -57,7 +61,7 @@ class ModrinthServiceImpl(private val httpService: HttpService) : ModrinthServic
     private suspend fun get(
         urlString: String,
         block: HttpRequestBuilder.() -> Unit = {}
-    ): HttpResponse = httpService.client.get(BASE_URL + urlString) {
+    ): HttpResponse = httpClient.get(BASE_URL + urlString) {
         init()
         block()
     }
@@ -66,7 +70,7 @@ class ModrinthServiceImpl(private val httpService: HttpService) : ModrinthServic
         urlString: String,
         body: T,
         block: HttpRequestBuilder.() -> Unit = {}
-    ): HttpResponse = httpService.client.post(BASE_URL + urlString) {
+    ): HttpResponse = httpClient.post(BASE_URL + urlString) {
         init()
         jsonBody(body)
         block()
@@ -74,7 +78,6 @@ class ModrinthServiceImpl(private val httpService: HttpService) : ModrinthServic
 
     private fun HttpRequestBuilder.init() {
         header("Authorization", API_KEY)
-        expectSuccess = true
     }
 
     companion object {

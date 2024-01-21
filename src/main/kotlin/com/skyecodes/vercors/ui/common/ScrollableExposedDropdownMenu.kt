@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.skyecodes.vercors.ui.LocalConfiguration
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -31,6 +32,7 @@ fun ExposedDropdownMenuBoxScope.ScrollableExposedDropdownMenu(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
+    showScrollbar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     ScrollableDropdownMenu(
@@ -39,6 +41,7 @@ fun ExposedDropdownMenuBoxScope.ScrollableExposedDropdownMenu(
         modifier = modifier.exposedDropdownSize(),
         scrollState = scrollState,
         properties = PopupProperties(focusable = true),
+        showScrollbar = showScrollbar,
         content = content
     )
 }
@@ -51,6 +54,7 @@ private fun ScrollableDropdownMenu(
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties,
+    showScrollbar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val expandedStates = remember { MutableTransitionState(false) }
@@ -83,6 +87,7 @@ private fun ScrollableDropdownMenu(
                 transformOriginState = transformOriginState,
                 scrollState = scrollState,
                 modifier = modifier,
+                showScrollbar = showScrollbar,
                 content = content
             )
         }
@@ -95,55 +100,60 @@ fun ScrollableDropdownMenuContent(
     transformOriginState: MutableState<TransformOrigin>,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
+    showScrollbar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    // Menu open/close animation.
-    val transition = updateTransition(expandedStates, "DropDownMenu")
+    var scale = 1f
+    var alpha = 1f
+    if (LocalConfiguration.current.animations) {
+        // Menu open/close animation.
+        val transition = updateTransition(expandedStates, "DropDownMenu")
 
-    val scale by transition.animateFloat(
-        transitionSpec = {
-            if (false isTransitioningTo true) {
-                // Dismissed to expanded
-                tween(
-                    durationMillis = 120,
-                    easing = LinearOutSlowInEasing
-                )
-            } else {
-                // Expanded to dismissed.
-                tween(
-                    durationMillis = 1,
-                    delayMillis = 75 - 1
-                )
+        scale = transition.animateFloat(
+            transitionSpec = {
+                if (false isTransitioningTo true) {
+                    // Dismissed to expanded
+                    tween(
+                        durationMillis = 120,
+                        easing = LinearOutSlowInEasing
+                    )
+                } else {
+                    // Expanded to dismissed.
+                    tween(
+                        durationMillis = 1,
+                        delayMillis = 75 - 1
+                    )
+                }
             }
-        }
-    ) {
-        if (it) {
-            // Menu is expanded.
-            1f
-        } else {
-            // Menu is dismissed.
-            0.8f
-        }
-    }
+        ) {
+            if (it) {
+                // Menu is expanded.
+                1f
+            } else {
+                // Menu is dismissed.
+                0.8f
+            }
+        }.value
 
-    val alpha by transition.animateFloat(
-        transitionSpec = {
-            if (false isTransitioningTo true) {
-                // Dismissed to expanded
-                tween(durationMillis = 30)
-            } else {
-                // Expanded to dismissed.
-                tween(durationMillis = 75)
+        alpha = transition.animateFloat(
+            transitionSpec = {
+                if (false isTransitioningTo true) {
+                    // Dismissed to expanded
+                    tween(durationMillis = 30)
+                } else {
+                    // Expanded to dismissed.
+                    tween(durationMillis = 75)
+                }
             }
-        }
-    ) {
-        if (it) {
-            // Menu is expanded.
-            1f
-        } else {
-            // Menu is dismissed.
-            0f
-        }
+        ) {
+            if (it) {
+                // Menu is expanded.
+                1f
+            } else {
+                // Menu is dismissed.
+                0f
+            }
+        }.value
     }
     Card(
         modifier = Modifier.graphicsLayer {
@@ -159,7 +169,12 @@ fun ScrollableDropdownMenuContent(
                 modifier = Modifier.weight(1f).verticalScroll(scrollState),
                 content = content
             )
-            VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState))
+            if (showScrollbar) {
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(scrollState),
+                    modifier = Modifier.fillMaxHeight()
+                )
+            }
         }
     }
 }

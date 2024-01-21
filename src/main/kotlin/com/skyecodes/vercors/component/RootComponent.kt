@@ -12,8 +12,10 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.jthemedetecor.OsThemeDetector
-import com.skyecodes.vercors.component.dialog.CreateNewInstanceComponent
-import com.skyecodes.vercors.component.dialog.DefaultCreateNewInstanceComponent
+import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
+import com.skyecodes.vercors.component.dialog.DefaultCreateNewInstanceDialogComponent
+import com.skyecodes.vercors.component.dialog.DefaultErrorDialogComponent
+import com.skyecodes.vercors.component.dialog.ErrorDialogComponent
 import com.skyecodes.vercors.component.screen.*
 import com.skyecodes.vercors.data.model.app.AppTab
 import com.skyecodes.vercors.data.model.app.AppTheme
@@ -23,6 +25,7 @@ import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.ui.UI
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -49,19 +52,19 @@ interface RootComponent {
     fun onMinimize()
     fun onMaximize()
     fun navigate(tab: AppTab)
-
-    //fun updateConfiguration(config: Configuration)
+    fun updateConfiguration(config: Configuration)
     fun onNextScreen()
     fun onPreviousScreen()
     fun onRefreshScreen()
     fun openNewInstanceDialog()
+    fun openErrorDialog(title: String, vararg message: String)
     fun closeDialog()
 
     sealed class ScreenChild(val tab: AppTab, val isDefault: Boolean) {
         class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
+
         class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
             Refreshable by component
-
         class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
         class Accounts(val component: AccountsComponent) : ScreenChild(AppTab.Accounts, true)
         class Settings(val component: SettingsComponent) : ScreenChild(AppTab.Settings, true), Refreshable by component
@@ -69,7 +72,8 @@ interface RootComponent {
 
     sealed interface DialogChild {
         data object None : DialogChild
-        class CreateNewInstance(val component: CreateNewInstanceComponent) : DialogChild
+        class CreateNewInstance(val component: CreateNewInstanceDialogComponent) : DialogChild
+        class Error(val component: ErrorDialogComponent) : DialogChild
     }
 
     class Children<out C : Any, out T : Any>(
@@ -83,7 +87,9 @@ interface RootComponent {
     }
 
     data class AppUiState(
-        val palette: UI.Palette
+        val palette: UI.Palette,
+        val fatalError: Throwable? = null,
+        val error: Throwable? = null
     )
 }
 
@@ -156,6 +162,11 @@ class DefaultRootComponent(
         childFactory = ::createDialog
     )
 
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        logger.error(throwable) { "An error occured while loading the application." }
+        uiState.update { it.copy(fatalError = throwable) }
+    }
+
     init {
         lifecycle.doOnCreate(::onCreate)
         lifecycle.doOnDestroy(::onDestroy)
@@ -164,9 +175,9 @@ class DefaultRootComponent(
     private fun onCreate() {
         logger.info { "Creating RootComponent" }
         with(scope) {
-            launch { instances.value = instanceService.loadInstances(this) }
-            launch { configuration.filterNotNull().collect { updatePalette() } }
-            launch {
+            launch(handler) { instances.value = instanceService.loadInstances() }
+            launch(handler) { configuration.filterNotNull().collect { updatePalette() } }
+            launch(handler) {
                 configurationService.load().let {
                     configuration.value = it
                     initNavigation(it.defaultTab)
@@ -285,11 +296,15 @@ class DefaultRootComponent(
         dialogNavigation.replaceCurrent(DialogConfig.CreateNewInstance)
     }
 
+    override fun openErrorDialog(title: String, vararg message: String) {
+        dialogNavigation.replaceCurrent(DialogConfig.Error(title, message.toList()))
+    }
+
     override fun closeDialog() {
         dialogNavigation.replaceCurrent(DialogConfig.None)
     }
 
-    private fun updateConfiguration(config: Configuration) {
+    override fun updateConfiguration(config: Configuration) {
         configuration.update { config }
         scope.launch { configurationService.save(config) }
     }
@@ -337,13 +352,40 @@ class DefaultRootComponent(
                     componentContext
                 )
             )
+            is DialogConfig.Error -> RootComponent.DialogChild.Error(createErrorComponent(componentContext, config))
         }
 
-    private fun createNewInstanceComponent(componentContext: AppComponentContext): CreateNewInstanceComponent =
-        DefaultCreateNewInstanceComponent(
+    private fun createNewInstanceComponent(componentContext: AppComponentContext): CreateNewInstanceDialogComponent =
+        DefaultCreateNewInstanceDialogComponent(
             componentContext = componentContext,
+            onCreateInstance = ::onCreateInstance,
             onClose = ::closeDialog
         )
+
+    private fun createErrorComponent(
+        componentContext: AppComponentContext,
+        config: DialogConfig.Error
+    ): ErrorDialogComponent =
+        DefaultErrorDialogComponent(
+            componentContext = componentContext,
+            title = config.title,
+            message = config.message,
+            onClose = ::closeDialog
+        )
+
+    private fun onCreateInstance(instance: Instance) {
+        scope.launch {
+            try {
+                instanceService.createInstance(instance)
+                logger.info { "Created instance ${instance.name}" }
+                instances.update { it?.plus(instance) ?: listOf(instance) }
+            } catch (e: Exception) {
+                val title = "An error occured while creating instance"
+                logger.error(e) { title }
+                openErrorDialog(title, "Please check the logs for more details.", e.localizedMessage)
+            }
+        }
+    }
 
     @Serializable
     sealed interface ScreenConfig {
@@ -363,9 +405,11 @@ class DefaultRootComponent(
     sealed interface DialogConfig {
         @Serializable
         data object None : DialogConfig
-
         @Serializable
         data object CreateNewInstance : DialogConfig
+
+        @Serializable
+        data class Error(val title: String, val message: List<String>) : DialogConfig
     }
 
     @Serializable

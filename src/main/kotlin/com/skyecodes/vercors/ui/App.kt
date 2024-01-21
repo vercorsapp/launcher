@@ -13,16 +13,14 @@ import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.FrameWindowScope
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
@@ -31,8 +29,9 @@ import com.skyecodes.vercors.APP_NAME
 import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.ui.accounts.AccountsContent
+import com.skyecodes.vercors.ui.dialog.CreateNewInstanceDialogContent
+import com.skyecodes.vercors.ui.dialog.ErrorDialogContent
 import com.skyecodes.vercors.ui.home.HomeContent
-import com.skyecodes.vercors.ui.instances.CreateInstanceDialogContent
 import com.skyecodes.vercors.ui.instances.InstancesContent
 import com.skyecodes.vercors.ui.search.SearchContent
 import com.skyecodes.vercors.ui.settings.SettingsContent
@@ -54,7 +53,34 @@ fun ApplicationScope.AppWindow(
 
     val configuration by component.configuration.collectAsState()
     val instances by component.instances.collectAsState()
-    configuration?.let { safeConfiguration ->
+    val uiState by component.uiState.collectAsState()
+
+    uiState.fatalError?.let {
+        CompositionLocalProvider(
+            LocalPalette provides UI.Mocha,
+            LocalConfiguration provides Configuration.DEFAULT
+        ) {
+            MaterialTheme(
+                colors = LocalPalette.current.material(LocalConfiguration.current.accentColor.ofPalette(LocalPalette.current)),
+                typography = UI.typography
+            ) {
+                DialogWindow(
+                    onCloseRequest = ::onClose,
+                    title = APP_NAME
+                ) {
+                    Surface {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                            modifier = Modifier.fillMaxSize().padding(UI.largePadding)
+                        ) {
+                            Text("An error occured while loading Vercors.", style = MaterialTheme.typography.h6)
+                            Text(it.localizedMessage)
+                        }
+                    }
+                }
+            }
+        }
+    } ?: configuration?.let { safeConfiguration ->
         instances?.let {
             if (safeConfiguration.useSystemWindowFrame) {
                 Window(
@@ -63,7 +89,7 @@ fun ApplicationScope.AppWindow(
                     undecorated = false,
                     title = APP_NAME,
                 ) {
-                    AppContent(component, safeConfiguration, ::onClose)
+                    AppContent(component, safeConfiguration, uiState, ::onClose)
                 }
             } else {
                 Window(
@@ -72,7 +98,7 @@ fun ApplicationScope.AppWindow(
                     undecorated = true,
                     title = APP_NAME,
                 ) {
-                    AppContent(component, safeConfiguration, ::onClose)
+                    AppContent(component, safeConfiguration, uiState, ::onClose)
                 }
             }
         }
@@ -84,13 +110,13 @@ fun ApplicationScope.AppWindow(
 private fun FrameWindowScope.AppContent(
     component: RootComponent,
     configuration: Configuration,
+    uiState: RootComponent.AppUiState,
     onClose: () -> Unit
 ) {
     LaunchedEffect(component) {
         component.initializeWindow(window)
     }
 
-    val uiState by component.uiState.collectAsState()
     val children by component.children.subscribeAsState()
     val currentTab by component.activeTab.collectAsState()
     val dialog by component.dialog.subscribeAsState()
@@ -100,7 +126,7 @@ private fun FrameWindowScope.AppContent(
         LocalConfiguration provides configuration
     ) {
         MaterialTheme(
-            colors = uiState.palette.material(configuration.accentColor.color(LocalPalette.current)),
+            colors = uiState.palette.material(configuration.accentColor.ofPalette(LocalPalette.current)),
             typography = UI.typography,
             //shapes = UI.shapes
         ) {
@@ -110,7 +136,7 @@ private fun FrameWindowScope.AppContent(
                         modifier = Modifier.fillMaxHeight().background(color = uiState.palette.surface0)
                             .shadow(4.dp)
                     ) {
-                        Menu(currentTab) { component.navigate(it) }
+                        Menu(currentTab, component::navigate, component::openNewInstanceDialog)
                     }
                     Column {
                         WindowDraggableArea(
@@ -174,10 +200,19 @@ private fun FrameWindowScope.AppContent(
                 animationSpec = if (configuration.animations) tween() else tween(0)
             ) {
                 when (val child = it.active.instance) {
-                    is RootComponent.DialogChild.CreateNewInstance -> AppDialogContent(component::closeDialog) {
-                        CreateInstanceDialogContent(child.component)
+                    is RootComponent.DialogChild.CreateNewInstance -> AppDialogContent(
+                        modifier = Modifier.width(570.dp),
+                        onClose = component::closeDialog
+                    ) {
+                        CreateNewInstanceDialogContent(child.component)
                     }
 
+                    is RootComponent.DialogChild.Error -> AppDialogContent(
+                        modifier = Modifier.width(500.dp),
+                        onClose = component::closeDialog
+                    ) {
+                        ErrorDialogContent(child.component)
+                    }
                     RootComponent.DialogChild.None -> {}
                 }
             }
@@ -186,7 +221,7 @@ private fun FrameWindowScope.AppContent(
 }
 
 @Composable
-private fun AppDialogContent(onClose: () -> Unit, content: @Composable () -> Unit) {
+private fun AppDialogContent(modifier: Modifier, onClose: () -> Unit, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize()
             .background(LocalPalette.current.transparentOverlay)
@@ -198,7 +233,7 @@ private fun AppDialogContent(onClose: () -> Unit, content: @Composable () -> Uni
         contentAlignment = Alignment.Center
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = modifier
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,

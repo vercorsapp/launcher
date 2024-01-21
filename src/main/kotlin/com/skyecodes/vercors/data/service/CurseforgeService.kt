@@ -3,9 +3,11 @@ package com.skyecodes.vercors.data.service
 import com.skyecodes.vercors.data.model.curseforge.CurseforgeCategoriesResponse
 import com.skyecodes.vercors.data.model.curseforge.CurseforgeProjectSearchResponse
 import com.skyecodes.vercors.data.model.curseforge.CurseforgeProjectSearchSortField
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.CoroutineScope
 
 interface CurseforgeService {
     suspend fun getPopularMods(): CurseforgeProjectSearchResponse
@@ -29,7 +31,10 @@ interface CurseforgeService {
     ): CurseforgeProjectSearchResponse
 }
 
-class CurseforgeServiceImpl(private val httpService: HttpService) : CurseforgeService {
+class CurseforgeServiceImpl(
+    coroutineScope: CoroutineScope,
+    private val httpClient: HttpClient
+) : CurseforgeService, CoroutineScope by coroutineScope {
     override suspend fun getPopularMods() = search(MOD_CLASS_ID)
 
     override suspend fun getPopularModpacks() = search(MODPACK_CLASS_ID)
@@ -63,7 +68,7 @@ class CurseforgeServiceImpl(private val httpService: HttpService) : CurseforgeSe
     private suspend fun get(
         urlString: String,
         block: HttpRequestBuilder.() -> Unit = {}
-    ): HttpResponse = httpService.client.get(BASE_URL + urlString) {
+    ): HttpResponse = httpClient.get(BASE_URL + urlString) {
         init()
         block()
     }
@@ -72,7 +77,7 @@ class CurseforgeServiceImpl(private val httpService: HttpService) : CurseforgeSe
         urlString: String,
         body: T,
         block: HttpRequestBuilder.() -> Unit = {}
-    ): HttpResponse = httpService.client.post(BASE_URL + urlString) {
+    ): HttpResponse = httpClient.post(BASE_URL + urlString) {
         init()
         jsonBody(body)
         block()

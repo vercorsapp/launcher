@@ -4,10 +4,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.get
+import com.skyecodes.vercors.data.model.app.Instance
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.data.model.mojang.MojangReleaseType
 import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
-import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.data.service.MojangService
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Clock
@@ -18,37 +18,25 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-interface CreateNewInstanceComponent {
+interface CreateNewInstanceDialogComponent {
     val uiState: StateFlow<CreateNewInstanceUiState>
     fun updateInstanceName(instanceName: String)
-    fun updateMinecraftVersionDropdown(expanded: Boolean)
     fun updateMinecraftVersion(version: MinecraftVersion)
     fun updateIncludeSnapshots(include: Boolean)
     fun toggleIncludeSnapshots()
     fun updateLoader(loader: Loader?)
-    fun updateLoaderVersionDropdown(expanded: Boolean)
     fun close()
     fun createInstance()
 
     data class CreateNewInstanceUiState(
         val instanceName: String = "",
-        val expandedDropdown: Dropdown? = null,
         val minecraftVersion: String = "",
         val includeSnapshots: Boolean = false,
         val minecraftVersions: List<MinecraftVersion> = emptyList(),
         val loader: Loader? = null,
-        val loaderVersion: String = ""
-    ) {
-        val isValid: Boolean =
-            instanceName.isNotBlank() && minecraftVersion.isNotEmpty() && (loader == null || loaderVersion.isNotEmpty())
-
-        fun isMinecraftVersionDropdownExpanded() = expandedDropdown === Dropdown.MinecraftVersion
-        fun isLoaderVersionDropdownExpanded() = expandedDropdown === Dropdown.LoaderVersion
-    }
-
-    enum class Dropdown {
-        MinecraftVersion, LoaderVersion
-    }
+        val loaderVersion: String = "",
+        val isValid: Boolean = false
+    )
 
     data class MinecraftVersion(
         val text: String,
@@ -58,19 +46,20 @@ interface CreateNewInstanceComponent {
     )
 }
 
-class DefaultCreateNewInstanceComponent(
+class DefaultCreateNewInstanceDialogComponent(
     componentContext: AppComponentContext,
+    private val onCreateInstance: (Instance) -> Unit,
     private val onClose: () -> Unit,
     private val mojangService: MojangService = componentContext.get(),
-    private val instanceService: InstanceService = componentContext.get()
-) : CreateNewInstanceComponent, AppComponentContext by componentContext {
-    override val uiState = MutableStateFlow(CreateNewInstanceComponent.CreateNewInstanceUiState())
+) : CreateNewInstanceDialogComponent, AppComponentContext by componentContext {
+    override val uiState = MutableStateFlow(CreateNewInstanceDialogComponent.CreateNewInstanceUiState())
     private val instanceName = MutableStateFlow("")
     private val versionManifest: MutableStateFlow<MojangVersionManifest?> = MutableStateFlow(null)
-    private val minecraftVersion: MutableStateFlow<CreateNewInstanceComponent.MinecraftVersion?> =
+    private val minecraftVersion: MutableStateFlow<CreateNewInstanceDialogComponent.MinecraftVersion?> =
         MutableStateFlow(null)
     private val includeSnapshots = MutableStateFlow(false)
     private val loader: MutableStateFlow<Loader?> = MutableStateFlow(null)
+    private val loaderVersion: MutableStateFlow<String?> = MutableStateFlow(null)
 
     init {
         doOnCreate { initialize() }
@@ -88,36 +77,42 @@ class DefaultCreateNewInstanceComponent(
         }
         scope.launch {
             instanceName.collect { name ->
-                uiState.update { it.copy(instanceName = name) }
+                updateUi { it.copy(instanceName = name) }
             }
         }
         scope.launch {
             versionManifest.filterNotNull().collect { manifest ->
-                val versions = manifest.versions.map { manifest.convert(it) }
-                uiState.update { it.copy(minecraftVersions = versions) }
+                updateMinecraftVersions(manifest, includeSnapshots.value)
             }
         }
         scope.launch {
             minecraftVersion.filterNotNull().collect { version ->
-                uiState.update { it.copy(minecraftVersion = version.text) }
+                updateUi { it.copy(minecraftVersion = version.text) }
             }
         }
         scope.launch {
             includeSnapshots.collect { include ->
-                uiState.update { it.copy(includeSnapshots = include) }
-                if (!include && minecraftVersion.value?.isRelease == false) {
-                    versionManifest.value?.let { initializeMinecraftVersion(it) }
-                }
+                updateUi { it.copy(includeSnapshots = include) }
+                versionManifest.value?.let { updateMinecraftVersions(it, include) }
             }
         }
         scope.launch {
             loader.collect { l ->
-                uiState.update { it.copy(loader = l) }
+                updateUi { it.copy(loader = l) }
             }
         }
     }
 
-    private fun MojangVersionManifest.convert(version: MojangVersionManifest.Version): CreateNewInstanceComponent.MinecraftVersion {
+    private fun updateUi(state: (CreateNewInstanceDialogComponent.CreateNewInstanceUiState) -> CreateNewInstanceDialogComponent.CreateNewInstanceUiState) {
+        uiState.update { state(it).copy(isValid = checkValidity()) }
+    }
+
+    private fun checkValidity(): Boolean =
+        instanceName.value.filter { it.isLetterOrDigit() }.isNotBlank()
+                && minecraftVersion.value != null
+                && (loader.value == null || !loaderVersion.value.isNullOrBlank())
+
+    private fun MojangVersionManifest.convert(version: MojangVersionManifest.Version): CreateNewInstanceDialogComponent.MinecraftVersion {
         var title = version.id
         var icon: ImageVector? = null
         if (isLatestRelease(version)) {
@@ -127,7 +122,7 @@ class DefaultCreateNewInstanceComponent(
             title = "Latest snapshot (${version.id})"
             icon = FeatherIcons.Clock
         }
-        return CreateNewInstanceComponent.MinecraftVersion(
+        return CreateNewInstanceDialogComponent.MinecraftVersion(
             title,
             icon,
             version.type === MojangReleaseType.Release,
@@ -135,21 +130,21 @@ class DefaultCreateNewInstanceComponent(
         )
     }
 
+    private fun updateMinecraftVersions(manifest: MojangVersionManifest, includeSnapshots: Boolean) {
+        val versions = manifest.versions
+            .map { manifest.convert(it) }
+            .filter { version -> version.isRelease || includeSnapshots }
+        updateUi { it.copy(minecraftVersions = versions) }
+        if (!includeSnapshots && minecraftVersion.value?.isRelease == false) {
+            initializeMinecraftVersion(manifest)
+        }
+    }
+
     override fun updateInstanceName(instanceName: String) {
         this.instanceName.value = instanceName
     }
 
-    override fun updateMinecraftVersionDropdown(expanded: Boolean) =
-        updateDropdown(CreateNewInstanceComponent.Dropdown.MinecraftVersion, expanded)
-
-    override fun updateLoaderVersionDropdown(expanded: Boolean) =
-        updateDropdown(CreateNewInstanceComponent.Dropdown.LoaderVersion, expanded)
-
-    private fun updateDropdown(dropdown: CreateNewInstanceComponent.Dropdown, expanded: Boolean) {
-        uiState.update { it.copy(expandedDropdown = if (expanded) dropdown else null) }
-    }
-
-    override fun updateMinecraftVersion(version: CreateNewInstanceComponent.MinecraftVersion) {
+    override fun updateMinecraftVersion(version: CreateNewInstanceDialogComponent.MinecraftVersion) {
         minecraftVersion.value = version
     }
 
@@ -170,14 +165,14 @@ class DefaultCreateNewInstanceComponent(
     }
 
     override fun createInstance() {
-        scope.launch {
-            instanceService.createInstance(
-                instanceName = instanceName.value,
-                version = minecraftVersion.value!!.data,
+        onCreateInstance(
+            Instance(
+                name = instanceName.value.trim(),
+                gameVersion = minecraftVersion.value!!.data,
                 loader = loader.value,
                 loaderVersion = null
             )
-        }
+        )
         close()
     }
 }

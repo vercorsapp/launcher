@@ -39,6 +39,8 @@ object UI {
         const val SEARCH = "Search"
         const val ACCOUNTS = "Accounts"
         const val SETTINGS = "Settings"
+        const val CANCEL = "Cancel"
+        const val CLOSE = "Close"
 
         // Home
         const val VIEW = "View"
@@ -52,7 +54,6 @@ object UI {
         const val INCLUDE_SNAPSHOTS = "Include snapshots"
         const val LOADER = "Loader"
         const val LOADER_VERSION = "Loader version"
-        const val CANCEL = "Cancel"
         const val CREATE = "Create"
 
         // Settings
@@ -173,7 +174,7 @@ object UI {
         override val mantle = Color(0xff181825)
         override val crust = Color(0xff11111b)
 
-        override val transparentOverlay = Color(0x7f000000)
+        override val transparentOverlay = Color(0xbf000000)
         override fun material(accent: Color) = darkColors(
             primary = accent,
             primaryVariant = accent,

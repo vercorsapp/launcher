@@ -1,5 +1,6 @@
 package com.skyecodes.vercors
 
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.application
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
@@ -8,6 +9,7 @@ import com.skyecodes.vercors.component.DefaultRootComponent
 import com.skyecodes.vercors.data.service.*
 import com.skyecodes.vercors.ui.AppWindow
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
 import org.koin.compose.KoinApplication
 import org.koin.compose.getKoin
 import org.koin.dsl.module
@@ -21,15 +23,17 @@ private val logger = KotlinLogging.logger {}
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
     application {
+        val coroutineScope = rememberCoroutineScope()
+
         KoinApplication(application = {
             logger(SLF4JLogger())
             modules(module {
-                single<ConfigurationService> { ConfigurationServiceImpl(get()) }
-                single<CurseforgeService> { CurseforgeServiceImpl(get()) }
-                single<HttpService> { HttpServiceImpl() }
-                single<InstanceService> { InstanceServiceImpl(get()) }
-                single<ModrinthService> { ModrinthServiceImpl(get()) }
-                single<MojangService> { MojangServiceImpl(get()) }
+                single<ConfigurationService> { ConfigurationServiceImpl(coroutineScope, get()) }
+                single<CurseforgeService> { CurseforgeServiceImpl(coroutineScope, get()) }
+                single<HttpClient> { AppHttpClient }
+                single<InstanceService> { InstanceServiceImpl(coroutineScope, get()) }
+                single<ModrinthService> { ModrinthServiceImpl(coroutineScope, get()) }
+                single<MojangService> { MojangServiceImpl(coroutineScope, get()) }
                 single<StorageService> { StorageServiceImpl() }
             })
         }) {

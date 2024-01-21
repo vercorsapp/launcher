@@ -11,34 +11,30 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 
-interface HttpService {
-    val client: HttpClient
-}
-class HttpServiceImpl : HttpService {
-    override val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(appJson)
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 3000
-        }
-        install(HttpRequestRetry) {
-            retryOnServerErrors(1)
-            retryOnException(1, true)
-            constantDelay()
-        }
-        install(UserAgent) {
-            agent = "skyecodes/vercors/$APP_VERSION (contact@skye.codes)"
-        }
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.INFO
-        }
+val AppHttpClient = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        json(appJson)
+    }
+    install(HttpTimeout) {
+        requestTimeoutMillis = 3000
+    }
+    install(HttpRequestRetry) {
+        retryOnServerErrors(1)
+        retryOnException(1, true)
+        constantDelay()
+    }
+    install(UserAgent) {
+        agent = "skyecodes/vercors/$APP_VERSION (contact@skye.codes)"
+    }
+    install(Logging) {
+        logger = Logger.DEFAULT
+        level = LogLevel.INFO
     }
 }
 
 inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
     setBody(body)
     contentType(ContentType.Application.Json)
+    expectSuccess = true
 }
 

@@ -21,6 +21,7 @@ import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
 import com.skyecodes.vercors.ui.common.SectionContent
 import com.skyecodes.vercors.ui.common.SelectIconChip
 import com.skyecodes.vercors.ui.common.loadSvgPainter
@@ -82,7 +83,7 @@ fun SettingsContent(component: SettingsComponent) {
                                     leadingIcon = {
                                         Box(
                                             Modifier.size(UI.mediumIconSize)
-                                                .background(configuration.accentColor.color(LocalPalette.current))
+                                                .background(configuration.accentColor.ofPalette(LocalPalette.current))
                                         )
                                     },
                                     trailingIcon = {
@@ -93,9 +94,9 @@ fun SettingsContent(component: SettingsComponent) {
                                     }
                                 )
 
-                                ExposedDropdownMenu(
+                                ScrollableExposedDropdownMenu(
                                     expanded = expanded,
-                                    onDismissRequest = { expanded = false }
+                                    onDismissRequest = { expanded = false },
                                 ) {
                                     AppColor.entries.forEach {
                                         DropdownMenuItem(
@@ -112,7 +113,7 @@ fun SettingsContent(component: SettingsComponent) {
                                             ) {
                                                 Box(
                                                     Modifier.size(UI.mediumIconSize)
-                                                        .background(it.color(LocalPalette.current))
+                                                        .background(it.ofPalette(LocalPalette.current))
                                                 )
                                                 Text(it.title)
                                             }
@@ -160,9 +161,10 @@ fun SettingsContent(component: SettingsComponent) {
                                     }
                                 )
 
-                                ExposedDropdownMenu(
+                                ScrollableExposedDropdownMenu(
                                     expanded = expanded,
-                                    onDismissRequest = { expanded = false }
+                                    onDismissRequest = { expanded = false },
+                                    showScrollbar = false
                                 ) {
                                     AppTab.entries.forEach {
                                         DropdownMenuItem(

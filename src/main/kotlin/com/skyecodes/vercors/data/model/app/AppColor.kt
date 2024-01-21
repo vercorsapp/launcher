@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import java.util.*
 
 @Serializable(AppColorSerializer::class)
-enum class AppColor(override val value: String, val color: (UI.Palette) -> Color) : StringEnumerable {
+enum class AppColor(override val value: String, val ofPalette: (UI.Palette) -> Color) : StringEnumerable {
     Rosewater("rosewater", UI.Palette::rosewater),
     Flamingo("flamingo", UI.Palette::flamingo),
     Pink("pink", UI.Palette::pink),

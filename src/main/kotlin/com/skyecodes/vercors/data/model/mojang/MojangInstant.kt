@@ -16,5 +16,7 @@ private class MojangInstantSerializer : KSerializer<MojangInstant> {
 
     override fun deserialize(decoder: Decoder): MojangInstant = Instant.parse(decoder.decodeString())
 
-    override fun serialize(encoder: Encoder, value: MojangInstant) {}
+    override fun serialize(encoder: Encoder, value: MojangInstant) {
+        encoder.encodeString(value.toString())
+    }
 }

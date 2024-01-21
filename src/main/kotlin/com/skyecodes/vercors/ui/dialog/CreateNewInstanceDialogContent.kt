@@ -1,53 +1,36 @@
-package com.skyecodes.vercors.ui.instances
+package com.skyecodes.vercors.ui.dialog
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.ChipDefaults.filterChipColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.applyIf
-import com.skyecodes.vercors.component.dialog.CreateNewInstanceComponent
+import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
+import com.skyecodes.vercors.ui.common.SelectIconChip
 import com.skyecodes.vercors.ui.common.loadSvgPainter
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
+fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) {
     val uiState by component.uiState.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
-
-    /*LaunchedEffect(true) {
-        val manifest = mojangService.getVersionManifest()
-        versionManifest = manifest
-        minecraftVersion = manifest.versions[manifest.latest.release]
-    }
-
-    LaunchedEffect(minecraftVersion) {
-        minecraftVersionDisplay = minecraftVersion?.let { getVersionText(versionManifest!!, it) } ?: ""
-    }
-
-    LaunchedEffect(includeSnapshots) {
-        if (!includeSnapshots && minecraftVersion?.type == MojangReleaseType.Snapshot) minecraftVersion =
-            versionManifest?.latestRelease
-    }*/
 
     Column(
         modifier = Modifier.padding(UI.largePadding)
@@ -63,7 +46,13 @@ fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
             OutlinedTextField(
                 value = uiState.instanceName,
                 onValueChange = component::updateInstanceName,
-                modifier = Modifier.fillMaxWidth()
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().onPreviewKeyEvent {
+                    if (uiState.isValid && it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                        component.createInstance()
+                        true
+                    } else false
+                }
             )
         }
 
@@ -72,9 +61,10 @@ fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                var expanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
-                    expanded = uiState.isMinecraftVersionDropdownExpanded(),
-                    onExpandedChange = component::updateMinecraftVersionDropdown,
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
@@ -85,38 +75,36 @@ fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
                             .fillMaxWidth(),
                         trailingIcon = {
                             Icon(
-                                imageVector = if (uiState.isMinecraftVersionDropdownExpanded()) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
                                 contentDescription = "Show options"
                             )
                         }
                     )
 
                     ScrollableExposedDropdownMenu(
-                        expanded = uiState.isMinecraftVersionDropdownExpanded(),
-                        onDismissRequest = { component.updateMinecraftVersionDropdown(false) }
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
                     ) {
-                        uiState.minecraftVersions
-                            .filter { version -> version.isRelease || uiState.includeSnapshots }
-                            .forEach { version ->
-                                DropdownMenuItem(
-                                    onClick = {
-                                        component.updateMinecraftVersionDropdown(false)
-                                        component.updateMinecraftVersion(version)
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 10.dp)
+                        uiState.minecraftVersions.forEach { version ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    expanded = false
+                                    component.updateMinecraftVersion(version)
+                                },
+                                contentPadding = PaddingValues(horizontal = 10.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Text(version.text)
-                                        version.icon?.let {
-                                            Icon(it, null, Modifier.size(UI.mediumIconSize))
-                                        }
+                                    Text(version.text)
+                                    version.icon?.let {
+                                        Icon(it, null, Modifier.size(UI.mediumIconSize))
                                     }
                                 }
                             }
+                        }
                     }
                 }
 
@@ -152,9 +140,10 @@ fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    var expanded by remember { mutableStateOf(false) }
                     ExposedDropdownMenuBox(
-                        expanded = uiState.isLoaderVersionDropdownExpanded(),
-                        onExpandedChange = component::updateLoaderVersionDropdown,
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
@@ -167,15 +156,15 @@ fun CreateInstanceDialogContent(component: CreateNewInstanceComponent) {
                             ).fillMaxWidth(),
                             trailingIcon = {
                                 Icon(
-                                    imageVector = if (uiState.isLoaderVersionDropdownExpanded()) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
+                                    imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
                                     contentDescription = "Show options"
                                 )
                             }
                         )
 
                         ScrollableExposedDropdownMenu(
-                            expanded = uiState.isLoaderVersionDropdownExpanded(),
-                            onDismissRequest = { component.updateLoaderVersionDropdown(false) }
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
                         ) {
 
                         }
@@ -220,25 +209,19 @@ private fun FormField(name: String, content: @Composable () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun LoaderChip(value: Loader?, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
+    value?.let {
+        SelectIconChip(
+            selected = selected,
+            onClick = onClick,
+            text = it.name,
+            painter = loadSvgPainter(resourceAsStream("/icon/svg/${it.value}.svg"), LocalDensity.current),
+        )
+    } ?: SelectIconChip(
         selected = selected,
         onClick = onClick,
-        trailingIcon = {
-            value?.let {
-                Icon(
-                    loadSvgPainter(resourceAsStream("/icon/svg/${value.value}.svg"), LocalDensity.current),
-                    value.name, Modifier.size(UI.mediumIconSize)
-                )
-            } ?: Icon(FeatherIcons.Feather, "Vanilla", Modifier.size(UI.mediumIconSize))
-        },
-        colors = filterChipColors(
-            backgroundColor = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
-            contentColor = if (selected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
-        )
-    ) {
-        Text(value?.name ?: "Vanilla", style = MaterialTheme.typography.body1)
-    }
+        text = "Vanilla",
+        imageVector = FeatherIcons.Feather
+    )
 }
