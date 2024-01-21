@@ -1,5 +1,7 @@
 package com.skyecodes.vercors.data.model.app
 
+import com.skyecodes.vercors.data.model.StringEnumerable
+import com.skyecodes.vercors.data.model.StringEnumerableSerializer
 import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
 import kotlinx.serialization.Serializable
 import java.time.Instant
@@ -7,10 +9,24 @@ import java.time.Instant
 @Serializable
 data class Instance(
     val name: String,
-    var path: String = "",
+    val path: String = "",
+    val icon: Icon? = null,
     val gameVersion: MojangVersionManifest.Version,
     val loader: Loader? = null,
     val loaderVersion: String? = null,
     val created: AppInstant = Instant.now(),
     val lastLaunched: AppInstant? = null
-)
+) {
+    @Serializable
+    data class Icon(
+        val type: Type,
+        val name: String
+    ) {
+        @Serializable(TypeSerializer::class)
+        enum class Type(override val value: String) : StringEnumerable {
+            Base("base"), Custom("custom")
+        }
+
+        private class TypeSerializer : StringEnumerableSerializer<Type>(Type.entries)
+    }
+}

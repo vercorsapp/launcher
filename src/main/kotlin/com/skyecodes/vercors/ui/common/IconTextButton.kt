@@ -17,7 +17,7 @@ import com.skyecodes.vercors.ui.UI
 fun IconTextButton(
     onClick: () -> Unit,
     imageVector: ImageVector,
-    text: String,
+    text: String? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -43,9 +43,11 @@ fun IconTextButton(
             contentDescription = null,
             modifier = Modifier.size(UI.mediumIconSize)
         )
-        Text(
-            text = text,
-            modifier = Modifier.padding(start = UI.mediumPadding)
-        )
+        text?.let {
+            Text(
+                text = it,
+                modifier = Modifier.padding(start = UI.mediumPadding)
+            )
+        }
     }
 }

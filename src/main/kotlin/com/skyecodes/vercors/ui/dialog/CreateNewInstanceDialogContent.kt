@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.ui.dialog
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -42,18 +43,29 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
             style = MaterialTheme.typography.h6
         )
 
-        FormField(UI.Text.INSTANCE_NAME) {
-            OutlinedTextField(
-                value = uiState.instanceName,
-                onValueChange = component::updateInstanceName,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().onPreviewKeyEvent {
-                    if (uiState.isValid && it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                        component.createInstance()
-                        true
-                    } else false
+        Row(horizontalArrangement = Arrangement.spacedBy(UI.largePadding)) {
+            FormField(UI.Text.INSTANCE_NAME, Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = uiState.instanceName,
+                    onValueChange = component::updateInstanceName,
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().onPreviewKeyEvent {
+                        if (uiState.isValid && it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                            component.createInstance()
+                            true
+                        } else false
+                    }
+                )
+            }
+
+            FormField(UI.Text.ICON) {
+                Card(
+                    modifier = Modifier.size(55.dp).clickable { },
+                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled))
+                ) {
+                    Icon(FeatherIcons.Box, null, Modifier.padding(UI.smallPadding).fillMaxSize())
                 }
-            )
+            }
         }
 
         FormField(UI.Text.MINECRAFT_VERSION) {
@@ -202,8 +214,11 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
 }
 
 @Composable
-private fun FormField(name: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(UI.mediumPadding)) {
+private fun FormField(name: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(UI.mediumPadding)
+    ) {
         Text(name, style = MaterialTheme.typography.subtitle2)
         content()
     }

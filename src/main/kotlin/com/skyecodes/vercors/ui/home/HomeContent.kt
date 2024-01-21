@@ -1,5 +1,6 @@
 package com.skyecodes.vercors.ui.home
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,10 +11,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.screen.HomeComponent
 import com.skyecodes.vercors.component.screen.HomeUiState
+import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.common.SectionContent
 
 
 @Composable
@@ -29,9 +37,11 @@ fun HomeContent(viewModel: HomeComponent) {
                 .verticalScroll(scrollState)
         ) {
             state.sections.forEach { (type, section) ->
-                when (section) {
-                    is HomeUiState.Section.Instances -> HomeInstancesSectionContent(type.title, section.instances)
-                    is HomeUiState.Section.Projects -> HomeProjectsSectionContent(type.title, section.projects)
+                SectionContent(type.title) {
+                    when (section) {
+                        is HomeUiState.Section.Instances -> HomeInstancesSectionContent(section.instances)
+                        is HomeUiState.Section.Projects -> HomeProjectsSectionContent(section.projects)
+                    }
                 }
             }
         }
@@ -41,4 +51,41 @@ fun HomeContent(viewModel: HomeComponent) {
             adapter = rememberScrollbarAdapter(scrollState)
         )
     }
+}
+
+
+@Composable
+fun FakeHomeCard(box: @Composable (Modifier) -> Unit) {
+    val colors = listOf(LocalPalette.current.surface1, LocalPalette.current.surface0)
+    val limit = 1.5f
+    val transition = rememberInfiniteTransition()
+    val progressAnimated by transition.animateFloat(
+        initialValue = -limit,
+        targetValue = limit,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    box(Modifier.drawWithCache {
+        val width = size.width
+        val height = size.height
+
+        val offset = width * progressAnimated
+
+        val brush = Brush.linearGradient(
+            colors = colors,
+            start = Offset(offset, 0f),
+            end = Offset(offset + width, height)
+        )
+
+        onDrawWithContent {
+            drawRoundRect(
+                brush = brush,
+                blendMode = BlendMode.SrcIn,
+                cornerRadius = CornerRadius(5f)
+            )
+        }
+    })
 }

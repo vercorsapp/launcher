@@ -43,6 +43,7 @@ object UI {
         const val CLOSE = "Close"
 
         // Home
+        const val PLAY = "Play"
         const val VIEW = "View"
         const val INSTALL = "Install"
 
@@ -50,6 +51,7 @@ object UI {
         const val NO_INSTANCES_FOUND = "No instances found"
         const val CREATE_NEW_INSTANCE = "Create new instance"
         const val INSTANCE_NAME = "Instance name"
+        const val ICON = "Icon"
         const val MINECRAFT_VERSION = "Minecraft version"
         const val INCLUDE_SNAPSHOTS = "Include snapshots"
         const val LOADER = "Loader"

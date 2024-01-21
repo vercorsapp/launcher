@@ -12,7 +12,7 @@ import kotlin.io.path.*
 
 interface InstanceService {
     suspend fun loadInstances(): List<Instance>
-    suspend fun createInstance(instance: Instance)
+    suspend fun createInstance(instance: Instance): Instance
     suspend fun deleteInstance(instance: Instance)
 }
 
@@ -50,16 +50,17 @@ class InstanceServiceImpl(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun createInstance(instance: Instance) = withContext(Dispatchers.IO) {
+    override suspend fun createInstance(instance: Instance): Instance = withContext(Dispatchers.IO) {
         val sanitizedName = instance.name.filter { it !in "/\\" }
         var path = storageService.instancesDir.resolve(sanitizedName)
         var suffix = 1
         while (path.exists()) {
             path = storageService.instancesDir.resolve("${sanitizedName}_${suffix++}")
         }
-        instance.path = path.name
+        val instanceWithPath = instance.copy(path = path.name)
         path.resolve("instance.json").createParentDirectories().outputStream()
-            .use { appJson.encodeToStream(instance, it) }
+            .use { appJson.encodeToStream(instanceWithPath, it) }
+        instanceWithPath
     }
 
     @OptIn(ExperimentalPathApi::class)

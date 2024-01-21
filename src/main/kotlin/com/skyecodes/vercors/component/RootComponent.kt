@@ -376,9 +376,9 @@ class DefaultRootComponent(
     private fun onCreateInstance(instance: Instance) {
         scope.launch {
             try {
-                instanceService.createInstance(instance)
-                logger.info { "Created instance ${instance.name}" }
-                instances.update { it?.plus(instance) ?: listOf(instance) }
+                val instanceWithPath = instanceService.createInstance(instance)
+                logger.info { "Created instance ${instanceWithPath.name}" }
+                instances.update { it?.plus(instanceWithPath) ?: listOf(instanceWithPath) }
             } catch (e: Exception) {
                 val title = "An error occured while creating instance"
                 logger.error(e) { title }

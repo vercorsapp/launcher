@@ -1,24 +1,17 @@
 package com.skyecodes.vercors.ui.home
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,7 +33,6 @@ import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AsyncImage
 import com.skyecodes.vercors.ui.common.IconTextButton
-import com.skyecodes.vercors.ui.common.SectionContent
 import com.skyecodes.vercors.ui.common.loadImageBitmap
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
@@ -49,37 +41,35 @@ import compose.icons.feathericons.Eye
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeProjectsSectionContent(title: String, projects: List<Project>?) {
-    SectionContent(title) {
-        var rowSize by rememberSaveable { mutableStateOf(0) }
-        val localDensity = LocalDensity.current
+fun HomeProjectsSectionContent(projects: List<Project>?) {
+    var count by rememberSaveable { mutableStateOf(0) }
+    val localDensity = LocalDensity.current
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(UI.largePadding),
-            modifier = Modifier.fillMaxWidth().onGloballyPositioned {
-                rowSize = localDensity.run { ((it.size.width.toDp() - 80.dp) / 400.dp).roundToInt() }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(UI.largePadding),
+        modifier = Modifier.fillMaxWidth().onGloballyPositioned {
+            count = localDensity.run { ((it.size.width.toDp() - 80.dp) / 400.dp).roundToInt() }
+        }
+    ) {
+        if (projects == null) {
+            for (i in 0 until count) {
+                FakeHomeCard { ProjectCardBox(it) }
             }
-        ) {
-            if (projects == null) {
-                for (i in 0 until rowSize) {
-                    FakeProjectCard()
-                }
-            } else if (projects.isNotEmpty()) {
-                for (mod in projects.take(rowSize)) {
-                    ProjectCard(mod)
-                }
-            } else {
-                Text("No projects found :(")
+        } else if (projects.isNotEmpty()) {
+            for (project in projects.take(count)) {
+                ProjectCardContent(project)
             }
+        } else {
+            Text("No projects found :(")
         }
     }
 }
 
 @Composable
-private fun RowScope.HomeCard(
+private fun RowScope.ProjectCardBox(
     modifier: Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit = {}
 ) {
     Card(modifier = modifier.weight(1f).aspectRatio(1.5f), shape = shape) {
         content()
@@ -87,11 +77,11 @@ private fun RowScope.HomeCard(
 }
 
 @Composable
-private fun RowScope.ProjectCard(project: Project) {
+private fun RowScope.ProjectCardContent(project: Project) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    HomeCard(modifier = Modifier.hoverable(interactionSource)) {
+    ProjectCardBox(modifier = Modifier.hoverable(interactionSource)) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
                 project.imageUrl?.let { url ->
@@ -134,7 +124,7 @@ private fun RowScope.ProjectCard(project: Project) {
                     .applyIf(isHovered) { fillMaxHeight() }
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),
+                    modifier = Modifier.fillMaxWidth().height(80.dp).padding(UI.mediumLargePadding),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
                 ) {
@@ -195,26 +185,6 @@ private fun RowScope.ProjectCard(project: Project) {
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        /*Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
-                            ) {
-                                Icon(FeatherIcons.Download, "Downloads", Modifier.size(UI.mediumIconSize))
-                                Text(project.downloads.readable(), style = MaterialTheme.typography.body2)
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(UI.smallPadding)
-                            ) {
-                                Icon(FeatherIcons.Calendar, "Last updated", Modifier.size(UI.mediumIconSize))
-                                Text(project.lastUpdated.readable(), style = MaterialTheme.typography.body2)
-                            }
-                        }*/
-
                         Row(
                             modifier = Modifier.fillMaxSize().padding(bottom = UI.largePadding),
                             verticalAlignment = Alignment.CenterVertically,
@@ -263,43 +233,4 @@ private fun ProjectChip(name: String, icon: ImageVector, text: String) {
             )
         }
     }
-}
-
-@Composable
-private fun RowScope.FakeProjectCard() {
-    val colors = listOf(LocalPalette.current.surface1, LocalPalette.current.surface0)
-    val limit = 1.5f
-    val transition = rememberInfiniteTransition()
-    val progressAnimated by transition.animateFloat(
-        initialValue = -limit,
-        targetValue = limit,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    HomeCard(
-        modifier = Modifier.drawWithCache {
-            val width = size.width
-            val height = size.height
-
-            val offset = width * progressAnimated
-
-            val brush = Brush.linearGradient(
-                colors = colors,
-                start = Offset(offset, 0f),
-                end = Offset(offset + width, height)
-            )
-
-            onDrawWithContent {
-                drawRoundRect(
-                    brush = brush,
-                    blendMode = BlendMode.SrcIn,
-                    cornerRadius = CornerRadius(5f)
-                )
-            }
-        },
-        shape = RoundedCornerShape(15.dp)
-    ) {}
 }
