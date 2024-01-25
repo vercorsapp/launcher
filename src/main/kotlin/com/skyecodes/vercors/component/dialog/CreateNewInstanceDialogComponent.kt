@@ -2,6 +2,7 @@ package com.skyecodes.vercors.component.dialog
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.skyecodes.vercors.component.AbstractComponent
 import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.Instance
@@ -51,7 +52,7 @@ class DefaultCreateNewInstanceDialogComponent(
     private val onCreateInstance: (Instance) -> Unit,
     private val onClose: () -> Unit,
     private val mojangService: MojangService = componentContext.get(),
-) : CreateNewInstanceDialogComponent, AppComponentContext by componentContext {
+) : AbstractComponent(componentContext), CreateNewInstanceDialogComponent {
     override val uiState = MutableStateFlow(CreateNewInstanceDialogComponent.CreateNewInstanceUiState())
     private val instanceName = MutableStateFlow("")
     private val versionManifest: MutableStateFlow<MojangVersionManifest?> = MutableStateFlow(null)

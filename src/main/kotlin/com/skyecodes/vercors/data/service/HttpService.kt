@@ -1,7 +1,6 @@
 package com.skyecodes.vercors.data.service
 
 import com.skyecodes.vercors.APP_VERSION
-import com.skyecodes.vercors.appJson
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -10,10 +9,11 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 
-val AppHttpClient = HttpClient(CIO) {
+fun appHttpClient(json: Json) = HttpClient(CIO) {
     install(ContentNegotiation) {
-        json(appJson)
+        json(json)
     }
     install(HttpTimeout) {
         requestTimeoutMillis = 3000

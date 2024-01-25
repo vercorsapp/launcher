@@ -26,7 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:${property("ktor.version")}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${property("ktor.version")}")
     implementation("com.arkivanov.decompose:decompose:${property("decompose.version")}")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:${property("decompose.version")}")
+    implementation("com.arkivanov.decompose:extensions-compose:${property("decompose.version")}")
     implementation("com.arkivanov.essenty:lifecycle-coroutines:${property("essenty.version")}")
     implementation("br.com.devsrsouza.compose.icons:feather:${property("compose-icons.version")}")
     implementation("net.harawata:appdirs:${property("appdirs.version")}")

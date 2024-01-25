@@ -10,6 +10,7 @@ import com.skyecodes.vercors.data.service.*
 import com.skyecodes.vercors.ui.AppWindow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
+import kotlinx.serialization.json.Json
 import org.koin.compose.KoinApplication
 import org.koin.compose.getKoin
 import org.koin.dsl.module
@@ -28,10 +29,11 @@ fun main() {
         KoinApplication(application = {
             logger(SLF4JLogger())
             modules(module {
-                single<ConfigurationService> { ConfigurationServiceImpl(coroutineScope, get()) }
+                single<Json> { AppJson }
+                single<HttpClient> { appHttpClient(get()) }
+                single<ConfigurationService> { ConfigurationServiceImpl(coroutineScope, get(), get()) }
                 single<CurseforgeService> { CurseforgeServiceImpl(coroutineScope, get()) }
-                single<HttpClient> { AppHttpClient }
-                single<InstanceService> { InstanceServiceImpl(coroutineScope, get()) }
+                single<InstanceService> { InstanceServiceImpl(coroutineScope, get(), get()) }
                 single<ModrinthService> { ModrinthServiceImpl(coroutineScope, get()) }
                 single<MojangService> { MojangServiceImpl(coroutineScope, get()) }
                 single<StorageService> { StorageServiceImpl() }

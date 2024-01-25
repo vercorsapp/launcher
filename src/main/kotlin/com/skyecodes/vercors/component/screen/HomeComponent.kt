@@ -1,17 +1,20 @@
 package com.skyecodes.vercors.component.screen
 
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.skyecodes.vercors.component.AbstractComponent
 import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.Refreshable
 import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.*
+import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.CurseforgeService
+import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.data.service.ModrinthService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -28,16 +31,19 @@ interface HomeComponent : Refreshable {
 
 class DefaultHomeComponent(
     componentContext: AppComponentContext,
-    private val configuration: StateFlow<Configuration?>,
-    private val instances: StateFlow<List<Instance>?>,
+    private val configurationService: ConfigurationService = componentContext.get(),
+    private val instanceService: InstanceService = componentContext.get(),
     private val modrinthService: ModrinthService = componentContext.get(),
     private val curseforgeService: CurseforgeService = componentContext.get()
-) : AppComponentContext by componentContext, HomeComponent {
+) : AbstractComponent(componentContext), HomeComponent {
     companion object {
         private val cachedProjectsData: MutableMap<Pair<HomeSectionType, Provider>, List<Project>> = mutableMapOf()
     }
 
     override val uiState = MutableStateFlow(HomeComponent.UiState(emptyMap()))
+    private lateinit var configuration: StateFlow<Configuration>
+    private lateinit var instances: StateFlow<List<Instance>>
+    private var instancesLoaded = false
 
     init {
         lifecycle.doOnCreate { initialize() }
@@ -45,10 +51,13 @@ class DefaultHomeComponent(
 
     private fun initialize() {
         scope.launch {
-            instances.filterNotNull().collect { updateInstances(it) }
+            instances = instanceService.instances.stateIn(this)
+            instancesLoaded = true
+            instances.collect { updateInstances(it) }
         }
         scope.launch {
-            configuration.filterNotNull().collect { updateAll(it) }
+            configuration = configurationService.config.stateIn(this)
+            configuration.collect { updateAll(it) }
         }
     }
 
@@ -65,7 +74,7 @@ class DefaultHomeComponent(
 
     override fun refresh() {
         cachedProjectsData.clear()
-        updateAll(configuration.value!!)
+        updateAll(configuration.value)
     }
 
     private fun updateAll(configuration: Configuration) {
@@ -91,9 +100,10 @@ class DefaultHomeComponent(
         sectionType: HomeSectionType,
         providers: List<Provider>
     ): HomeComponent.UiState.Section =
-        if (sectionType === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(instances.value?.sortedByDescending {
-            it.lastPlayed ?: it.created
-        })
+        if (sectionType === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(
+            if (instancesLoaded) instances.value.sortedByDescending { it.lastPlayed ?: it.created }
+            else null
+        )
         else HomeComponent.UiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {

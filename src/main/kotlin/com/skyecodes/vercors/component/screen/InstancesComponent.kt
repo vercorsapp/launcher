@@ -1,11 +1,15 @@
 package com.skyecodes.vercors.component.screen
 
+import com.skyecodes.vercors.component.AbstractComponent
 import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.Refreshable
 import com.skyecodes.vercors.data.model.app.Instance
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+
+private val logger = KotlinLogging.logger { }
 
 interface InstancesComponent : Refreshable {
     val uiState: StateFlow<UiState>
@@ -20,10 +24,10 @@ interface InstancesComponent : Refreshable {
 }
 
 class DefaultInstancesComponent(
-    override val instances: StateFlow<List<Instance>?>,
+    componentContext: AppComponentContext,
     override val openNewInstanceDialog: () -> Unit,
-    componentContext: AppComponentContext
-) : AppComponentContext by componentContext, InstancesComponent {
+    override val instances: StateFlow<List<Instance>>
+) : AbstractComponent(componentContext), InstancesComponent {
     override val uiState = MutableStateFlow(InstancesComponent.UiState())
 
     override fun updateNameFilter(nameFilter: String) {

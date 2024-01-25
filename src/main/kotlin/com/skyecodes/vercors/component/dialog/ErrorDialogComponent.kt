@@ -1,5 +1,6 @@
 package com.skyecodes.vercors.component.dialog
 
+import com.skyecodes.vercors.component.AbstractComponent
 import com.skyecodes.vercors.component.AppComponentContext
 
 interface ErrorDialogComponent {
@@ -13,4 +14,4 @@ class DefaultErrorDialogComponent(
     override val title: String,
     override val message: List<String>,
     override val onClose: () -> Unit,
-) : ErrorDialogComponent, AppComponentContext by componentContext
+) : AbstractComponent(componentContext), ErrorDialogComponent

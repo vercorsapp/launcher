@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities
 private class Utils
 
 @OptIn(ExperimentalSerializationApi::class)
-val appJson = Json {
+val AppJson = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
     explicitNulls = false

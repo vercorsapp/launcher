@@ -22,12 +22,14 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.lifecycle.LifecycleController
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.skyecodes.vercors.APP_NAME
 import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
+import com.skyecodes.vercors.data.service.ConfigurationState
+import com.skyecodes.vercors.data.service.InstancesState
 import com.skyecodes.vercors.ui.accounts.AccountsContent
 import com.skyecodes.vercors.ui.dialog.CreateNewInstanceDialogContent
 import com.skyecodes.vercors.ui.dialog.ErrorDialogContent
@@ -51,11 +53,12 @@ fun ApplicationScope.AppWindow(
         component.initializeWindowState(windowState)
     }
 
-    val configuration by component.configuration.collectAsState()
-    val instances by component.instances.collectAsState()
+    val configurationState by component.configurationState.collectAsState()
+    val instancesState by component.instancesState.collectAsState()
     val uiState by component.uiState.collectAsState()
 
-    uiState.fatalError?.let {
+    val fatalError = uiState.fatalError
+    if (fatalError != null) {
         CompositionLocalProvider(
             LocalPalette provides UI.Palette.Mocha,
             LocalConfiguration provides Configuration.DEFAULT
@@ -74,22 +77,24 @@ fun ApplicationScope.AppWindow(
                             modifier = Modifier.fillMaxSize().padding(UI.largePadding)
                         ) {
                             Text("An error occured while loading Vercors.", style = MaterialTheme.typography.h6)
-                            Text(it.localizedMessage)
+                            Text(fatalError.localizedMessage)
                         }
                     }
                 }
             }
         }
-    } ?: configuration?.let { safeConfiguration ->
-        instances?.let {
-            if (safeConfiguration.useSystemWindowFrame) {
+    } else {
+        val finalConfigurationState = configurationState
+        val finalInstancesState = instancesState
+        if (finalConfigurationState is ConfigurationState.Loaded && finalInstancesState is InstancesState.Loaded)
+            if (finalConfigurationState.config.useSystemWindowFrame) {
                 Window(
                     state = windowState,
                     onCloseRequest = ::onClose,
                     undecorated = false,
                     title = APP_NAME,
                 ) {
-                    AppContent(component, safeConfiguration, uiState, ::onClose)
+                    AppContent(component, finalConfigurationState.config, uiState, ::onClose)
                 }
             } else {
                 Window(
@@ -98,10 +103,9 @@ fun ApplicationScope.AppWindow(
                     undecorated = true,
                     title = APP_NAME,
                 ) {
-                    AppContent(component, safeConfiguration, uiState, ::onClose)
+                    AppContent(component, finalConfigurationState.config, uiState, ::onClose)
                 }
             }
-        }
     }
 }
 
@@ -183,6 +187,7 @@ private fun FrameWindowScope.AppContent(
                                     animationSpec = if (configuration.animations) tween() else tween(0)
                                 ) {
                                     when (val child = it.active.instance) {
+                                        is RootComponent.ScreenChild.Empty -> {}
                                         is RootComponent.ScreenChild.Home -> HomeContent(child.component)
                                         is RootComponent.ScreenChild.Instances -> InstancesContent(child.component)
                                         is RootComponent.ScreenChild.Search -> SearchContent(child.component)
@@ -213,6 +218,7 @@ private fun FrameWindowScope.AppContent(
                     ) {
                         ErrorDialogContent(child.component)
                     }
+
                     RootComponent.DialogChild.None -> {}
                 }
             }

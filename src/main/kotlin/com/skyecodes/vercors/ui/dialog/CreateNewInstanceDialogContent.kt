@@ -9,6 +9,8 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -33,7 +35,12 @@ import compose.icons.feathericons.*
 fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) {
     val uiState by component.uiState.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
     val locale = LocalLocalization.current
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     Column(
         modifier = Modifier.padding(UI.largePadding)
@@ -51,7 +58,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                     value = uiState.instanceName,
                     onValueChange = component::updateInstanceName,
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().onPreviewKeyEvent {
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).onPreviewKeyEvent {
                         if (uiState.isValid && it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
                             component.createInstance()
                             true

@@ -22,13 +22,15 @@ import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.data.model.app.Instance
 import com.skyecodes.vercors.data.service.ConfigurationService
+import com.skyecodes.vercors.data.service.ConfigurationState
 import com.skyecodes.vercors.data.service.InstanceService
+import com.skyecodes.vercors.data.service.InstancesState
 import com.skyecodes.vercors.ui.UI
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
@@ -43,8 +45,10 @@ interface RootComponent {
     val children: Value<Children<*, ScreenChild>>
     val dialog: Value<ChildStack<*, DialogChild>>
     val uiState: StateFlow<UiState>
-    val configuration: StateFlow<Configuration?>
-    val instances: StateFlow<List<Instance>?>
+    val configurationState: StateFlow<ConfigurationState>
+    val configuration: StateFlow<Configuration>
+    val instancesState: StateFlow<InstancesState>
+    val instances: StateFlow<List<Instance>>
     val activeTab: StateFlow<AppTab>
 
     fun initializeWindowState(windowState: WindowState)
@@ -61,8 +65,8 @@ interface RootComponent {
     fun closeDialog()
 
     sealed class ScreenChild(val tab: AppTab, val isDefault: Boolean) {
+        data object Empty : ScreenChild(AppTab.Home, false)
         class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
-
         class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
             Refreshable by component
         class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
@@ -101,7 +105,7 @@ class DefaultRootComponent(
     componentContext: AppComponentContext,
     private val configurationService: ConfigurationService = componentContext.get(),
     private val instanceService: InstanceService = componentContext.get()
-) : AppComponentContext by componentContext, RootComponent {
+) : AbstractComponent(componentContext), RootComponent {
     private lateinit var window: ComposeWindow
     private lateinit var windowState: WindowState
     private lateinit var savedPos: WindowPosition
@@ -109,15 +113,19 @@ class DefaultRootComponent(
     private lateinit var savedSize: Dimension
     private lateinit var cancellation: Cancellation
     private val detector = OsThemeDetector.getDetector()
-    private val detectorListener: (Boolean) -> Unit =
-        { if (configuration.value?.theme === AppTheme.SYSTEM) updatePalette() }
+    private val detectorListener: (Boolean) -> Unit = {
+        val state = configurationState.value
+        if (state is ConfigurationState.Loaded && state.config.theme === AppTheme.SYSTEM) updatePalette()
+    }
     private val screenId = AtomicLong(0)
     private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
 
     override val uiState: MutableStateFlow<RootComponent.UiState> =
         MutableStateFlow(RootComponent.UiState(UI.Palette.Mocha))
-    override val configuration: MutableStateFlow<Configuration?> = MutableStateFlow(null)
-    override val instances: MutableStateFlow<List<Instance>?> = MutableStateFlow(null)
+    override val configurationState: StateFlow<ConfigurationState> = configurationService.state
+    override lateinit var configuration: StateFlow<Configuration>
+    override val instancesState: StateFlow<InstancesState> = instanceService.state
+    override lateinit var instances: StateFlow<List<Instance>>
     override val activeTab: MutableStateFlow<AppTab> = MutableStateFlow(Configuration.DEFAULT.defaultTab)
     override val children: Value<RootComponent.Children<ScreenConfig, RootComponent.ScreenChild>> = children(
         source = screenNavigation,
@@ -125,7 +133,7 @@ class DefaultRootComponent(
         key = "screenNavigation",
         initialState = {
             AppNavigationState(
-                configurations = listOf(ScreenConfig.Home(screenId.getAndIncrement())),
+                configurations = listOf(ScreenConfig.Empty),
                 index = 0
             )
         },
@@ -175,17 +183,19 @@ class DefaultRootComponent(
     private fun onCreate() {
         logger.info { "Creating RootComponent" }
         with(scope) {
-            launch(handler) { instances.value = instanceService.loadInstances() }
-            launch(handler) { configuration.filterNotNull().collect { updatePalette() } }
             launch(handler) {
-                configurationService.load().let {
-                    configuration.value = it
-                    initNavigation(it.defaultTab)
-                }
+                configurationService.load()
+                configuration = configurationService.config.stateIn(this)
+                initNavigation(configuration.value.defaultTab)
+                detector.registerListener(detectorListener)
+                configuration.collect { updatePalette() }
+            }
+            launch(handler) {
+                instanceService.loadInstances()
+                instances = instanceService.instances.stateIn(this)
             }
         }
-        detector.registerListener(detectorListener)
-        cancellation = children.observe {
+        cancellation = children.subscribe {
             logger.info { "Navigated to ${it.active.instance.tab.name}" }
             activeTab.value = it.active.instance.tab
         }
@@ -197,7 +207,7 @@ class DefaultRootComponent(
     }
 
     private fun updatePalette() {
-        val palette = when (configuration.value?.theme) {
+        val palette = when (configuration.value.theme) {
             AppTheme.DARK -> UI.Palette.Mocha
             AppTheme.LIGHT -> UI.Palette.Latte
             else -> if (detector.isDark) UI.Palette.Mocha else UI.Palette.Latte
@@ -305,12 +315,12 @@ class DefaultRootComponent(
     }
 
     override fun updateConfiguration(config: Configuration) {
-        configuration.update { config }
-        scope.launch { configurationService.save(config) }
+        configurationService.update(config)
     }
 
     private fun createChild(config: ScreenConfig, componentContext: AppComponentContext): RootComponent.ScreenChild =
         when (config) {
+            is ScreenConfig.Empty -> RootComponent.ScreenChild.Empty
             is ScreenConfig.Accounts -> RootComponent.ScreenChild.Accounts(accountsComponent(componentContext))
             is ScreenConfig.Home -> RootComponent.ScreenChild.Home(homeComponent(componentContext))
             is ScreenConfig.Instances -> RootComponent.ScreenChild.Instances(instancesComponent(componentContext))
@@ -323,16 +333,14 @@ class DefaultRootComponent(
     )
 
     private fun homeComponent(componentContext: AppComponentContext): HomeComponent = DefaultHomeComponent(
-        componentContext = componentContext,
-        configuration = configuration,
-        instances = instances
+        componentContext = componentContext
     )
 
     private fun instancesComponent(componentContext: AppComponentContext): InstancesComponent =
         DefaultInstancesComponent(
             componentContext = componentContext,
-            instances = instances,
-            openNewInstanceDialog = ::openNewInstanceDialog
+            openNewInstanceDialog = ::openNewInstanceDialog,
+            instances = instances
         )
 
     private fun searchComponent(componentContext: AppComponentContext): SearchComponent = DefaultSearchComponent(
@@ -340,8 +348,7 @@ class DefaultRootComponent(
     )
 
     private fun settingsComponent(componentContext: AppComponentContext): SettingsComponent = DefaultSettingsComponent(
-        componentContext = componentContext,
-        onConfigurationChange = ::updateConfiguration
+        componentContext = componentContext
     )
 
     private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): RootComponent.DialogChild =
@@ -376,9 +383,7 @@ class DefaultRootComponent(
     private fun onCreateInstance(instance: Instance) {
         scope.launch {
             try {
-                val instanceWithPath = instanceService.createInstance(instance)
-                logger.info { "Created instance ${instanceWithPath.name}" }
-                instances.update { it?.plus(instanceWithPath) ?: listOf(instanceWithPath) }
+                instanceService.createInstance(instance).await()
             } catch (e: Exception) {
                 val title = "An error occured while creating instance"
                 logger.error(e) { title }
@@ -389,6 +394,7 @@ class DefaultRootComponent(
 
     @Serializable
     sealed interface ScreenConfig {
+        data object Empty : ScreenConfig
         @Serializable
         data class Home(val screenId: Long) : ScreenConfig
         @Serializable
@@ -407,7 +413,6 @@ class DefaultRootComponent(
         data object None : DialogConfig
         @Serializable
         data object CreateNewInstance : DialogConfig
-
         @Serializable
         data class Error(val title: String, val message: List<String>) : DialogConfig
     }
@@ -421,7 +426,7 @@ class DefaultRootComponent(
             configurations.mapIndexed { index, screenConfig ->
                 SimpleChildNavState(
                     configuration = screenConfig,
-                    status = if (index == this.index) ChildNavState.Status.ACTIVE else ChildNavState.Status.INACTIVE
+                    status = if (index == this.index) ChildNavState.Status.RESUMED else ChildNavState.Status.CREATED
                 )
             }
         }
