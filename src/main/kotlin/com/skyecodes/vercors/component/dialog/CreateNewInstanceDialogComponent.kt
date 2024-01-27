@@ -31,7 +31,7 @@ interface CreateNewInstanceDialogComponent {
 
     data class CreateNewInstanceUiState(
         val instanceName: String = "",
-        val minecraftVersion: String = "",
+        val minecraftVersion: MinecraftVersion? = null,
         val includeSnapshots: Boolean = false,
         val minecraftVersions: List<MinecraftVersion> = emptyList(),
         val loader: Loader? = null,
@@ -88,7 +88,7 @@ class DefaultCreateNewInstanceDialogComponent(
         }
         scope.launch {
             minecraftVersion.filterNotNull().collect { version ->
-                updateUi { it.copy(minecraftVersion = version.text) }
+                updateUi { it.copy(minecraftVersion = version) }
             }
         }
         scope.launch {

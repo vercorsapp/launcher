@@ -12,9 +12,10 @@ data class Configuration(
     val defaultTab: AppTab = AppTab.Home,
     val homeSections: List<HomeSectionType> = HomeSectionType.entries,
     val homeProviders: List<Provider> = Provider.entries,
-    val instancesSortOrder: InstancesSortOrder = InstancesSortOrder.LastPlayed
+    val savedInstanceSorter: InstanceSorter = InstanceSorter()
 ) {
     companion object {
         val DEFAULT = Configuration()
     }
+
 }

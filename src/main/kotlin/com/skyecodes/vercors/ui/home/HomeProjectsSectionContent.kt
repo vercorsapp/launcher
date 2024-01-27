@@ -38,7 +38,6 @@ import com.skyecodes.vercors.ui.common.loadImageBitmap
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
-import compose.icons.feathericons.Eye
 import kotlin.math.roundToInt
 
 @Composable
@@ -181,8 +180,7 @@ private fun RowScope.ProjectCardContent(project: Project) {
                             style = MaterialTheme.typography.body2,
                             minLines = 4,
                             maxLines = 4,
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(UI.mediumLargePadding),
+                            modifier = Modifier.fillMaxWidth().padding(UI.mediumLargePadding),
                             overflow = TextOverflow.Ellipsis
                         )
 
@@ -191,13 +189,6 @@ private fun RowScope.ProjectCardContent(project: Project) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            IconTextButton(
-                                onClick = {},
-                                colors = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.surface2),
-                                imageVector = FeatherIcons.Eye,
-                                text = LocalLocalization.current.view
-                            )
-
                             IconTextButton(
                                 onClick = {},
                                 imageVector = FeatherIcons.Download,

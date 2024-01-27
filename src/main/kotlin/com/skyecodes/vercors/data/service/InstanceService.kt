@@ -20,6 +20,7 @@ interface InstanceService {
     val warns: Flow<List<InstanceLoadingException>>
     val errors: Flow<List<InstanceLoadingException>>
     fun loadInstances(): Job
+    fun reloadInstances(): Job
     fun createInstance(instance: Instance): Deferred<Instance>
     fun deleteInstance(instance: Instance): Job
 }
@@ -73,6 +74,11 @@ class InstanceServiceImpl(
         }.toList().joinAll()
         state.update { if (it is InstancesState.NotLoaded) InstancesState.Loaded() else it }
         logger.info { "Instances loaded" }
+    }
+
+    override fun reloadInstances(): Job {
+        state.value = InstancesState.Loaded()
+        return loadInstances()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

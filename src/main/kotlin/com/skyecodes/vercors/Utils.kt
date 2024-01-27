@@ -1,5 +1,9 @@
 package com.skyecodes.vercors
 
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -16,6 +20,7 @@ val AppJson = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
     explicitNulls = false
+    prettyPrint = true
 }
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
@@ -41,6 +46,13 @@ private val prettyTime = PrettyTime()
 fun Instant.readable(): String = prettyTime.format(this)
 
 fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this
+
+fun LazyGridScope.header(
+    key: Any?,
+    content: @Composable LazyGridItemScope.() -> Unit
+) {
+    item(key = key, span = { GridItemSpan(this.maxLineSpan) }, content = content)
+}
 
 fun <T> runOnUiThread(block: () -> T): T {
     if (SwingUtilities.isEventDispatchThread()) {

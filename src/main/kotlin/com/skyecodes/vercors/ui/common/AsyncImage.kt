@@ -34,9 +34,8 @@ fun AsyncImage(
     defaultImage: ImageBitmap? = null,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
+    storageService: StorageService = koinInject()
 ) {
-    val storageService = koinInject<StorageService>()
-
     val image: ImageBitmap? by produceState(defaultImage) {
         value = withContext(Dispatchers.IO) {
             try {

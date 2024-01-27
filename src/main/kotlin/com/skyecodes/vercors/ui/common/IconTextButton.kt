@@ -3,11 +3,13 @@ package com.skyecodes.vercors.ui.common
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,16 +40,18 @@ fun IconTextButton(
         colors,
         contentPadding
     ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = null,
-            modifier = Modifier.size(UI.mediumIconSize)
-        )
-        text?.let {
-            Text(
-                text = it,
-                modifier = Modifier.padding(start = UI.mediumPadding)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = null,
+                modifier = Modifier.size(UI.mediumIconSize)
             )
+            text?.let {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(start = UI.mediumPadding)
+                )
+            }
         }
     }
 }

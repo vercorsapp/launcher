@@ -7,7 +7,7 @@ import androidx.compose.ui.window.WindowState
 import com.arkivanov.decompose.Cancellation
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.router.children.*
-import com.arkivanov.decompose.router.stack.*
+import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
@@ -25,7 +25,7 @@ import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.ConfigurationState
 import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.data.service.InstancesState
-import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.Palette
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -43,7 +42,7 @@ private val logger = KotlinLogging.logger { }
 
 interface RootComponent {
     val children: Value<Children<*, ScreenChild>>
-    val dialog: Value<ChildStack<*, DialogChild>>
+    val dialog: Value<ChildSlot<*, DialogChild>>
     val uiState: StateFlow<UiState>
     val configurationState: StateFlow<ConfigurationState>
     val configuration: StateFlow<Configuration>
@@ -65,17 +64,17 @@ interface RootComponent {
     fun closeDialog()
 
     sealed class ScreenChild(val tab: AppTab, val isDefault: Boolean) {
-        data object Empty : ScreenChild(AppTab.Home, false)
+        data object None : ScreenChild(AppTab.Home, false)
         class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
         class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
             Refreshable by component
+
         class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
         class Accounts(val component: AccountsComponent) : ScreenChild(AppTab.Accounts, true)
         class Settings(val component: SettingsComponent) : ScreenChild(AppTab.Settings, true), Refreshable by component
     }
 
     sealed interface DialogChild {
-        data object None : DialogChild
         class CreateNewInstance(val component: CreateNewInstanceDialogComponent) : DialogChild
         class Error(val component: ErrorDialogComponent) : DialogChild
     }
@@ -91,7 +90,7 @@ interface RootComponent {
     }
 
     data class UiState(
-        val palette: UI.Palette,
+        val palette: Palette,
         val fatalError: Throwable? = null,
         val error: Throwable? = null
     )
@@ -121,7 +120,7 @@ class DefaultRootComponent(
     private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
 
     override val uiState: MutableStateFlow<RootComponent.UiState> =
-        MutableStateFlow(RootComponent.UiState(UI.Palette.Mocha))
+        MutableStateFlow(RootComponent.UiState(Palette.Mocha))
     override val configurationState: StateFlow<ConfigurationState> = configurationService.state
     override lateinit var configuration: StateFlow<Configuration>
     override val instancesState: StateFlow<InstancesState> = instanceService.state
@@ -133,7 +132,7 @@ class DefaultRootComponent(
         key = "screenNavigation",
         initialState = {
             AppNavigationState(
-                configurations = listOf(ScreenConfig.Empty),
+                configurations = listOf(ScreenConfig.None),
                 index = 0
             )
         },
@@ -160,15 +159,20 @@ class DefaultRootComponent(
         }
     )
     private val activeChild get() = children.value.active.instance
-    private val dialogNavigation = StackNavigation<DialogConfig>()
-    override val dialog: Value<ChildStack<*, RootComponent.DialogChild>> = appChildStack(
+    private val dialogNavigation = SlotNavigation<DialogConfig>()
+    override val dialog: Value<ChildSlot<DialogConfig, RootComponent.DialogChild>> = childSlot(
         source = dialogNavigation,
         serializer = DialogConfig.serializer(),
-        initialConfiguration = DialogConfig.None,
-        key = "dialogNavigation",
-        handleBackButton = true,
-        childFactory = ::createDialog
-    )
+        handleBackButton = true
+    ) { configuration, componentContext ->
+        createDialog(
+            configuration,
+            DefaultAppComponentContext(
+                componentContext = componentContext,
+                koin = koin
+            )
+        )
+    }
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         logger.error(throwable) { "An error occured while loading the application." }
@@ -182,18 +186,14 @@ class DefaultRootComponent(
 
     private fun onCreate() {
         logger.info { "Creating RootComponent" }
-        with(scope) {
-            launch(handler) {
-                configurationService.load()
-                configuration = configurationService.config.stateIn(this)
-                initNavigation(configuration.value.defaultTab)
-                detector.registerListener(detectorListener)
-                configuration.collect { updatePalette() }
-            }
-            launch(handler) {
-                instanceService.loadInstances()
-                instances = instanceService.instances.stateIn(this)
-            }
+        scope.launch(handler) {
+            configurationService.load()
+            instanceService.loadInstances()
+            configuration = configurationService.config.stateIn(this)
+            instances = instanceService.instances.stateIn(this)
+            initNavigation(configuration.value.defaultTab)
+            detector.registerListener(detectorListener)
+            configuration.collect { updatePalette() }
         }
         cancellation = children.subscribe {
             logger.info { "Navigated to ${it.active.instance.tab.name}" }
@@ -208,9 +208,9 @@ class DefaultRootComponent(
 
     private fun updatePalette() {
         val palette = when (configuration.value.theme) {
-            AppTheme.DARK -> UI.Palette.Mocha
-            AppTheme.LIGHT -> UI.Palette.Latte
-            else -> if (detector.isDark) UI.Palette.Mocha else UI.Palette.Latte
+            AppTheme.DARK -> Palette.Mocha
+            AppTheme.LIGHT -> Palette.Latte
+            else -> if (detector.isDark) Palette.Mocha else Palette.Latte
         }
         uiState.update { uiState -> uiState.copy(palette = palette) }
     }
@@ -303,15 +303,15 @@ class DefaultRootComponent(
     }
 
     override fun openNewInstanceDialog() {
-        dialogNavigation.replaceCurrent(DialogConfig.CreateNewInstance)
+        dialogNavigation.activate(DialogConfig.CreateNewInstance)
     }
 
     override fun openErrorDialog(title: String, vararg message: String) {
-        dialogNavigation.replaceCurrent(DialogConfig.Error(title, message.toList()))
+        dialogNavigation.activate(DialogConfig.Error(title, message.toList()))
     }
 
     override fun closeDialog() {
-        dialogNavigation.replaceCurrent(DialogConfig.None)
+        dialogNavigation.dismiss()
     }
 
     override fun updateConfiguration(config: Configuration) {
@@ -320,7 +320,7 @@ class DefaultRootComponent(
 
     private fun createChild(config: ScreenConfig, componentContext: AppComponentContext): RootComponent.ScreenChild =
         when (config) {
-            is ScreenConfig.Empty -> RootComponent.ScreenChild.Empty
+            is ScreenConfig.None -> RootComponent.ScreenChild.None
             is ScreenConfig.Accounts -> RootComponent.ScreenChild.Accounts(accountsComponent(componentContext))
             is ScreenConfig.Home -> RootComponent.ScreenChild.Home(homeComponent(componentContext))
             is ScreenConfig.Instances -> RootComponent.ScreenChild.Instances(instancesComponent(componentContext))
@@ -340,6 +340,7 @@ class DefaultRootComponent(
         DefaultInstancesComponent(
             componentContext = componentContext,
             openNewInstanceDialog = ::openNewInstanceDialog,
+            configuration = configuration,
             instances = instances
         )
 
@@ -353,12 +354,12 @@ class DefaultRootComponent(
 
     private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): RootComponent.DialogChild =
         when (config) {
-            is DialogConfig.None -> RootComponent.DialogChild.None
             is DialogConfig.CreateNewInstance -> RootComponent.DialogChild.CreateNewInstance(
                 createNewInstanceComponent(
                     componentContext
                 )
             )
+
             is DialogConfig.Error -> RootComponent.DialogChild.Error(createErrorComponent(componentContext, config))
         }
 
@@ -394,7 +395,8 @@ class DefaultRootComponent(
 
     @Serializable
     sealed interface ScreenConfig {
-        data object Empty : ScreenConfig
+        @Serializable
+        data object None : ScreenConfig
         @Serializable
         data class Home(val screenId: Long) : ScreenConfig
         @Serializable
@@ -409,8 +411,6 @@ class DefaultRootComponent(
 
     @Serializable
     sealed interface DialogConfig {
-        @Serializable
-        data object None : DialogConfig
         @Serializable
         data object CreateNewInstance : DialogConfig
         @Serializable
@@ -432,27 +432,3 @@ class DefaultRootComponent(
         }
     }
 }
-
-private inline fun <reified C : Any, T : Any> AppComponentContext.appChildStack(
-    source: StackNavigationSource<C>,
-    serializer: KSerializer<C>?,
-    initialConfiguration: C,
-    key: String = "DefaultStack",
-    handleBackButton: Boolean = false,
-    noinline childFactory: (configuration: C, AppComponentContext) -> T
-): Value<ChildStack<C, T>> =
-    childStack(
-        source = source,
-        serializer = serializer,
-        initialConfiguration = initialConfiguration,
-        key = key,
-        handleBackButton = handleBackButton
-    ) { configuration, componentContext ->
-        childFactory(
-            configuration,
-            DefaultAppComponentContext(
-                componentContext = componentContext,
-                koin = koin
-            )
-        )
-    }

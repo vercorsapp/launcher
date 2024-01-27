@@ -23,12 +23,12 @@ private val logger = KotlinLogging.logger {}
 
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
-    application {
+    application(exitProcessOnExit = false) {
         val coroutineScope = rememberCoroutineScope()
 
         KoinApplication(application = {
             logger(SLF4JLogger())
-            modules(module {
+            modules(module(createdAtStart = true) {
                 single<Json> { AppJson }
                 single<HttpClient> { appHttpClient(get()) }
                 single<ConfigurationService> { ConfigurationServiceImpl(coroutineScope, get(), get()) }
@@ -49,4 +49,5 @@ fun main() {
             AppWindow(root, lifecycle)
         }
     }
+    logger.info { "Goodbye!\n" }
 }

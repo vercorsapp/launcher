@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.component.screen
 
-import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnStart
+import com.arkivanov.essenty.lifecycle.doOnStop
 import com.skyecodes.vercors.component.AbstractComponent
 import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.Refreshable
@@ -10,6 +11,7 @@ import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.CurseforgeService
 import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.data.service.ModrinthService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,23 +44,29 @@ class DefaultHomeComponent(
 
     override val uiState = MutableStateFlow(HomeComponent.UiState(emptyMap()))
     private lateinit var configuration: StateFlow<Configuration>
+    private lateinit var configurationListener: Job
     private lateinit var instances: StateFlow<List<Instance>>
-    private var instancesLoaded = false
+    private lateinit var instancesListener: Job
 
     init {
-        lifecycle.doOnCreate { initialize() }
+        lifecycle.doOnStart { onStart() }
+        lifecycle.doOnStop { onStop() }
     }
 
-    private fun initialize() {
-        scope.launch {
+    private fun onStart() {
+        instancesListener = scope.launch {
             instances = instanceService.instances.stateIn(this)
-            instancesLoaded = true
             instances.collect { updateInstances(it) }
         }
-        scope.launch {
+        configurationListener = scope.launch {
             configuration = configurationService.config.stateIn(this)
             configuration.collect { updateAll(it) }
         }
+    }
+
+    private fun onStop() {
+        instancesListener.cancel()
+        configurationListener.cancel()
     }
 
     private fun updateInstances(instances: List<Instance>) {
@@ -101,8 +109,7 @@ class DefaultHomeComponent(
         providers: List<Provider>
     ): HomeComponent.UiState.Section =
         if (sectionType === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(
-            if (instancesLoaded) instances.value.sortedByDescending { it.lastPlayed ?: it.created }
-            else null
+            instances.value.sortedByDescending { it.lastPlayed ?: it.dateCreated }
         )
         else HomeComponent.UiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->

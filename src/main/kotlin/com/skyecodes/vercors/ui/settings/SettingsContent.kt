@@ -3,12 +3,11 @@ package com.skyecodes.vercors.ui.settings
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,12 +21,15 @@ import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
+import com.skyecodes.vercors.ui.common.AppDropdownMenuBox
 import com.skyecodes.vercors.ui.common.SectionContent
 import com.skyecodes.vercors.ui.common.SelectIconChip
 import com.skyecodes.vercors.ui.common.loadSvgPainter
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.*
+import compose.icons.feathericons.Check
+import compose.icons.feathericons.Cpu
+import compose.icons.feathericons.Moon
+import compose.icons.feathericons.Sun
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -68,59 +70,32 @@ fun SettingsContent(component: SettingsComponent) {
                         }
 
                         Setting(locale.accentColor, locale.accentColorDescription) {
-                            var expanded by remember { mutableStateOf(false) }
-
-                            ExposedDropdownMenuBox(
-                                expanded = expanded,
-                                onExpandedChange = { expanded = it }
+                            AppDropdownMenuBox(
+                                options = AppColor.entries,
+                                value = configuration.accentColor,
+                                textConverter = AppColor::title,
+                                onValueChange = { component.onConfigChange(configuration.copy(accentColor = it)) },
+                                leadingIcon = {
+                                    Box(
+                                        Modifier.size(UI.mediumIconSize)
+                                            .background(configuration.accentColor.ofPalette(LocalPalette.current))
+                                    )
+                                }
                             ) {
-                                OutlinedTextField(
-                                    value = configuration.accentColor.title,
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Default,
-                                        overrideDescendants = true
-                                    ),
-                                    leadingIcon = {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (it == configuration.accentColor) {
+                                        Icon(FeatherIcons.Check, null, Modifier.size(UI.mediumIconSize))
+                                    } else {
                                         Box(
                                             Modifier.size(UI.mediumIconSize)
-                                                .background(configuration.accentColor.ofPalette(LocalPalette.current))
-                                        )
-                                    },
-                                    trailingIcon = {
-                                        Icon(
-                                            imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                            contentDescription = "Show options"
+                                                .background(it.ofPalette(LocalPalette.current))
                                         )
                                     }
-                                )
-
-                                ScrollableExposedDropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                ) {
-                                    AppColor.entries.forEach {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                expanded = false
-                                                component.onConfigChange(configuration.copy(accentColor = it))
-                                            },
-                                            contentPadding = PaddingValues(horizontal = 10.dp)
-                                        ) {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.fillMaxWidth()
-                                            ) {
-                                                Box(
-                                                    Modifier.size(UI.mediumIconSize)
-                                                        .background(it.ofPalette(LocalPalette.current))
-                                                )
-                                                Text(it.title)
-                                            }
-                                        }
-                                    }
+                                    Text(it.title)
                                 }
                             }
                         }
@@ -140,52 +115,21 @@ fun SettingsContent(component: SettingsComponent) {
                         }
 
                         Setting(locale.defaultTab, locale.defaultTabDescription) {
-                            var expanded by remember { mutableStateOf(false) }
-
-                            ExposedDropdownMenuBox(
-                                expanded = expanded,
-                                onExpandedChange = { expanded = it }
+                            AppDropdownMenuBox(
+                                options = AppTab.entries,
+                                value = configuration.defaultTab,
+                                textConverter = { it.localizedTitle(locale) },
+                                onValueChange = { component.onConfigChange(configuration.copy(defaultTab = it)) },
+                                leadingIcon = { Icon(configuration.defaultTab.icon, null) },
+                                showScrollbar = false
                             ) {
-                                OutlinedTextField(
-                                    value = configuration.defaultTab.localizedTitle(locale),
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Default,
-                                        overrideDescendants = true
-                                    ),
-                                    leadingIcon = { Icon(configuration.defaultTab.icon, null) },
-                                    trailingIcon = {
-                                        Icon(
-                                            imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                            contentDescription = "Show options"
-                                        )
-                                    }
-                                )
-
-                                ScrollableExposedDropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    showScrollbar = false
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    AppTab.entries.forEach {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                expanded = false
-                                                component.onConfigChange(configuration.copy(defaultTab = it))
-                                            },
-                                            contentPadding = PaddingValues(horizontal = 10.dp)
-                                        ) {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.fillMaxWidth()
-                                            ) {
-                                                Icon(it.icon, null, Modifier.size(UI.mediumIconSize))
-                                                Text(it.localizedTitle(locale))
-                                            }
-                                        }
-                                    }
+                                    Icon(it.icon, null, Modifier.size(UI.mediumIconSize))
+                                    Text(it.localizedTitle(locale))
                                 }
                             }
                         }

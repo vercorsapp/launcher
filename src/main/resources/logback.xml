@@ -17,7 +17,7 @@
     <appender name="DEBUG_ROLLING_FILE" class="RollingFileAppender">
         <file>logs/debug.log</file>
         <rollingPolicy class="TimeBasedRollingPolicy">
-            <fileNamePattern>debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>logs/debug.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder class="PatternLayoutEncoder">
@@ -31,7 +31,7 @@
     <appender name="ROLLING_FILE" class="RollingFileAppender">
         <file>logs/vercors.log</file>
         <rollingPolicy class="TimeBasedRollingPolicy">
-            <fileNamePattern>vercors.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>logs/vercors.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder class="PatternLayoutEncoder">

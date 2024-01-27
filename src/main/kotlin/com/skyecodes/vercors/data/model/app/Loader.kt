@@ -5,18 +5,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Loader(val value: String) {
+enum class Loader(val value: String, val text: String) {
     @SerialName("forge")
-    Forge("forge"),
+    Forge("forge", "Forge"),
 
     @SerialName("neoforge")
-    NeoForge("neoforge"),
+    NeoForge("neoforge", "NeoForge"),
 
     @SerialName("fabric")
-    Fabric("fabric"),
+    Fabric("fabric", "Fabric"),
 
     @SerialName("quilt")
-    Quilt("quilt")
+    Quilt("quilt", "Quilt")
 }
 
 fun List<String>.toLoadersModrinth() = mapNotNull { it.toLoader() }

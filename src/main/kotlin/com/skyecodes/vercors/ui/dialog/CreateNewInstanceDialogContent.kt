@@ -1,7 +1,6 @@
 package com.skyecodes.vercors.ui.dialog
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -12,10 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
 import com.skyecodes.vercors.data.model.app.Loader
@@ -23,12 +19,12 @@ import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.common.IconTextButton
-import com.skyecodes.vercors.ui.common.ScrollableExposedDropdownMenu
-import com.skyecodes.vercors.ui.common.SelectIconChip
-import com.skyecodes.vercors.ui.common.loadSvgPainter
+import com.skyecodes.vercors.ui.common.*
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.*
+import compose.icons.feathericons.Box
+import compose.icons.feathericons.Feather
+import compose.icons.feathericons.Plus
+import compose.icons.feathericons.X
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -68,10 +64,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
             }
 
             FormField(locale.icon) {
-                Card(
-                    modifier = Modifier.size(55.dp).clickable { },
-                    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled))
-                ) {
+                OutlinedFieldButton {
                     Icon(FeatherIcons.Box, null, Modifier.padding(UI.smallPadding).fillMaxSize())
                 }
             }
@@ -82,49 +75,20 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                var expanded by remember { mutableStateOf(false) }
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    modifier = Modifier.weight(1f)
+                AppDropdownMenuBox(
+                    options = uiState.minecraftVersions,
+                    value = uiState.minecraftVersion,
+                    textConverter = { it.text },
+                    onValueChange = component::updateMinecraftVersion,
                 ) {
-                    OutlinedTextField(
-                        value = uiState.minecraftVersion,
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Default, overrideDescendants = true)
-                            .fillMaxWidth(),
-                        trailingIcon = {
-                            Icon(
-                                imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                contentDescription = "Show options"
-                            )
-                        }
-                    )
-
-                    ScrollableExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        uiState.minecraftVersions.forEach { version ->
-                            DropdownMenuItem(
-                                onClick = {
-                                    expanded = false
-                                    component.updateMinecraftVersion(version)
-                                },
-                                contentPadding = PaddingValues(horizontal = 10.dp)
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(version.text)
-                                    version.icon?.let {
-                                        Icon(it, null, Modifier.size(UI.mediumIconSize))
-                                    }
-                                }
-                            }
+                        Text(it.text)
+                        it.icon?.let {
+                            Icon(it, null, Modifier.size(UI.mediumIconSize))
                         }
                     }
                 }
@@ -161,34 +125,14 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    var expanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
+                    AppDropdownMenuBox(
+                        options = emptyList(),
+                        value = null,
+                        textConverter = { "" },
+                        onValueChange = {},
                         modifier = Modifier.weight(1f)
                     ) {
-                        OutlinedTextField(
-                            value = uiState.loaderVersion,
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier.pointerHoverIcon(
-                                PointerIcon.Default,
-                                overrideDescendants = true
-                            ).fillMaxWidth(),
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = if (expanded) FeatherIcons.ChevronUp else FeatherIcons.ChevronDown,
-                                    contentDescription = "Show options"
-                                )
-                            }
-                        )
 
-                        ScrollableExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-
-                        }
                     }
                 }
             }
@@ -239,13 +183,13 @@ private fun LoaderChip(value: Loader?, selected: Boolean, onClick: () -> Unit) {
         SelectIconChip(
             selected = selected,
             onClick = onClick,
-            text = it.name,
+            text = it.text,
             painter = loadSvgPainter(resourceAsStream("/icon/svg/${it.value}.svg"), LocalDensity.current),
         )
     } ?: SelectIconChip(
         selected = selected,
         onClick = onClick,
-        text = "Vanilla",
+        text = UI.vanilla,
         imageVector = FeatherIcons.Feather
     )
 }

@@ -13,7 +13,8 @@ data class Instance(
     val gameVersion: MojangVersionManifest.Version,
     val loader: Loader? = null,
     val loaderVersion: String? = null,
-    val created: AppInstant = Instant.now(),
+    val dateCreated: AppInstant = Instant.now(),
+    val dateModified: AppInstant = Instant.now(),
     val lastPlayed: AppInstant? = null
 ) {
     @Serializable

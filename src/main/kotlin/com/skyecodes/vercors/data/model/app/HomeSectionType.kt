@@ -1,23 +1,23 @@
 package com.skyecodes.vercors.data.model.app
 
-import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.Localization
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class HomeSectionType(val localizedTitle: (UI.Localization) -> String) {
+enum class HomeSectionType(val localizedTitle: (Localization) -> String) {
     @SerialName("jumpBackIn")
-    JumpBackIn(UI.Localization::jumpBackIn),
+    JumpBackIn(Localization::jumpBackIn),
 
     @SerialName("popularMods")
-    PopularMods(UI.Localization::popularMods),
+    PopularMods(Localization::popularMods),
 
     @SerialName("popularModpacks")
-    PopularModpacks(UI.Localization::popularModpacks),
+    PopularModpacks(Localization::popularModpacks),
 
     @SerialName("popularResourcePacks")
-    PopularResourcePacks(UI.Localization::popularResourcePacks),
+    PopularResourcePacks(Localization::popularResourcePacks),
 
     @SerialName("popularShaderPacks")
-    PopularShaderPacks(UI.Localization::popularShaderPacks)
+    PopularShaderPacks(Localization::popularShaderPacks)
 }
