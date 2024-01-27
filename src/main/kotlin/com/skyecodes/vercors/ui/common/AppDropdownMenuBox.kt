@@ -31,16 +31,16 @@ fun <T> AppDropdownMenuBox(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        modifier = modifier
+        modifier = modifier.pointerHoverIcon(
+            PointerIcon.Hand,
+            overrideDescendants = true
+        )
     ) {
         OutlinedTextField(
             value = value?.let(textConverter) ?: "",
             onValueChange = {},
             readOnly = true,
-            modifier = Modifier.pointerHoverIcon(
-                PointerIcon.Default,
-                overrideDescendants = true
-            ).fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             leadingIcon = leadingIcon,
             trailingIcon = {
                 Icon(
@@ -53,7 +53,8 @@ fun <T> AppDropdownMenuBox(
         ScrollableExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            showScrollbar = showScrollbar
+            showScrollbar = showScrollbar,
+            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
             options.forEach {
                 DropdownMenuItem(

@@ -10,7 +10,6 @@ import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.*
 import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.InstanceService
-import com.skyecodes.vercors.ui.UI
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,7 +78,7 @@ class DefaultInstancesComponent(
             filter.isBlank()
                     || filter in it.name.lowercase()
                     || filter in it.gameVersion.id.lowercase()
-                    || filter in (it.loader?.value ?: UI.vanilla).lowercase()
+                    || filter in (it.loader?.value ?: Loader.Vanilla).lowercase()
         }
         val sortedInstances = filteredInstances.sortedWith(
             sortBy.comparator.applyIf(sortByOrder == SortOrder.Desc) { reversed() }

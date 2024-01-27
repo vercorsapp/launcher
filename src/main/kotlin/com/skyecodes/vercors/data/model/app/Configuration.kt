@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Configuration(
     val version: Int = 0,
-    val theme: AppTheme = AppTheme.SYSTEM,
+    val theme: AppTheme = AppTheme.System,
     val accentColor: AppColor = AppColor.Mauve,
     val useSystemWindowFrame: Boolean = false,
     val animations: Boolean = true,

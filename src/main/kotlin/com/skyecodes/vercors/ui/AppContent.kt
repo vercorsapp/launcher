@@ -79,7 +79,7 @@ fun FrameWindowScope.AppContent(
                                     .background(color = uiState.palette.surface0)
                             ) {
                                 Toolbar(
-                                    currentTab.localizedTitle(LocalLocalization.current),
+                                    currentTab?.localizedTitle?.let { it(LocalLocalization.current) },
                                     children.hasPreviousScreen,
                                     children.hasNextScreen,
                                     children.canRefreshScreen,
@@ -105,7 +105,9 @@ fun FrameWindowScope.AppContent(
                             ) {
                                 Crossfade(
                                     targetState = children,
-                                    animationSpec = if (configuration.animations) tween() else tween(0)
+                                    animationSpec = if (configuration.animations && !uiState.isFirstNavigation) tween() else tween(
+                                        0
+                                    )
                                 ) {
                                     when (val child = it.active.instance) {
                                         is RootComponent.ScreenChild.None -> {}

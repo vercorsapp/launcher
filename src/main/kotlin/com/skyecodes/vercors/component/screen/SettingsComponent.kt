@@ -5,12 +5,14 @@ import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.Refreshable
 import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.Configuration
+import com.skyecodes.vercors.data.model.app.HomeSectionType
 import com.skyecodes.vercors.data.model.app.Provider
 import com.skyecodes.vercors.data.service.ConfigurationService
 
 interface SettingsComponent : Refreshable {
     fun onConfigChange(configuration: Configuration)
-    fun onHomeProviderChanged(it: Provider, configuration: Configuration)
+    fun onHomeProviderChanged(provider: Provider, configuration: Configuration)
+    fun onHomeSectionChanged(section: HomeSectionType, configuration: Configuration)
 
 }
 
@@ -23,11 +25,18 @@ class DefaultSettingsComponent(
         configurationService.update(configuration)
     }
 
-    override fun onHomeProviderChanged(it: Provider, configuration: Configuration) {
+    override fun onHomeProviderChanged(provider: Provider, configuration: Configuration) {
         val providers =
-            if (it in configuration.homeProviders) configuration.homeProviders - it
-            else configuration.homeProviders + it
-        if (providers.isNotEmpty()) onConfigChange(configuration.copy(homeProviders = providers))
+            if (provider in configuration.homeProviders) configuration.homeProviders - provider
+            else configuration.homeProviders + provider
+        if (providers.isNotEmpty()) onConfigChange(configuration.copy(homeProviders = providers.sorted()))
+    }
+
+    override fun onHomeSectionChanged(section: HomeSectionType, configuration: Configuration) {
+        val sections =
+            if (section in configuration.homeSections) configuration.homeSections - section
+            else configuration.homeSections + section
+        if (sections.isNotEmpty()) onConfigChange(configuration.copy(homeSections = sections.sorted()))
     }
 
     override fun refresh() {

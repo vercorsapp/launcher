@@ -25,8 +25,8 @@ import com.skyecodes.vercors.ui.common.SectionContent
 
 
 @Composable
-fun HomeContent(viewModel: HomeComponent) {
-    val state by viewModel.uiState.collectAsState()
+fun HomeContent(component: HomeComponent) {
+    val state by component.uiState.collectAsState()
 
     Box(Modifier.padding(start = UI.mediumPadding)) {
         val scrollState = rememberScrollState()
@@ -39,8 +39,17 @@ fun HomeContent(viewModel: HomeComponent) {
             state.sections.forEach { (type, section) ->
                 SectionContent(type.localizedTitle(LocalLocalization.current)) {
                     when (section) {
-                        is HomeComponent.UiState.Section.Instances -> HomeInstancesSectionContent(section.instances)
-                        is HomeComponent.UiState.Section.Projects -> HomeProjectsSectionContent(section.projects)
+                        is HomeComponent.UiState.Section.Instances -> HomeInstancesSectionContent(
+                            section.instances,
+                            component::showInstance,
+                            component::launchInstance
+                        )
+
+                        is HomeComponent.UiState.Section.Projects -> HomeProjectsSectionContent(
+                            section.projects,
+                            component::showProject,
+                            component::installProject
+                        )
                     }
                 }
             }

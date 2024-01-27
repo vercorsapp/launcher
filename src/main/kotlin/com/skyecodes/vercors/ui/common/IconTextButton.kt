@@ -29,7 +29,7 @@ fun IconTextButton(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
 ) {
-    Button(
+    AppButton(
         onClick,
         modifier,
         enabled,

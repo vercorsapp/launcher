@@ -10,7 +10,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import com.skyecodes.vercors.ui.UI
 
 @Composable
@@ -18,8 +17,7 @@ fun SectionContent(title: String, content: @Composable () -> Unit) {
     Column(Modifier.fillMaxWidth().background(MaterialTheme.colors.background).padding(UI.mediumPadding)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.h6,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.h5
         )
         Spacer(Modifier.padding(UI.smallPadding))
 

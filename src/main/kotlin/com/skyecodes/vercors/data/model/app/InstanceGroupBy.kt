@@ -2,9 +2,9 @@ package com.skyecodes.vercors.data.model.app
 
 import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
 import com.skyecodes.vercors.ui.Localization
-import com.skyecodes.vercors.ui.UI
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.skyecodes.vercors.data.model.app.Loader as AppLoader
 
 @Serializable
 enum class InstanceGroupBy(val localizedName: (Localization) -> String, val behavior: Behavior<*>) {
@@ -32,9 +32,9 @@ enum class InstanceGroupBy(val localizedName: (Localization) -> String, val beha
             comparator = Comparator.comparing(MojangVersionManifest.Version::releaseTime)
         )
 
-        data object Loader : Behavior<com.skyecodes.vercors.data.model.app.Loader?>(
+        data object Loader : Behavior<AppLoader?>(
             key = Instance::loader,
-            header = { it?.text ?: UI.vanilla }
+            header = { it?.text ?: AppLoader.Vanilla }
         )
     }
 }

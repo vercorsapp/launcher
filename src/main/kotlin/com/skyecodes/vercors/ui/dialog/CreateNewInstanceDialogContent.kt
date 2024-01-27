@@ -1,22 +1,24 @@
 package com.skyecodes.vercors.ui.dialog
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
-import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.resourceAsStream
-import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.*
@@ -26,7 +28,6 @@ import compose.icons.feathericons.Feather
 import compose.icons.feathericons.Plus
 import compose.icons.feathericons.X
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) {
     val uiState by component.uiState.collectAsState()
@@ -39,13 +40,12 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
     }
 
     Column(
-        modifier = Modifier.padding(UI.largePadding)
-            .applyIf(LocalConfiguration.current.animations) { animateContentSize() },
+        modifier = Modifier.padding(UI.largePadding).appAnimateContentSize(),
         verticalArrangement = Arrangement.spacedBy(UI.largePadding)
     ) {
         Text(
             text = locale.createNewInstance,
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.h5
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(UI.largePadding)) {
@@ -93,7 +93,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                     }
                 }
 
-                Checkbox(
+                AppCheckbox(
                     modifier = Modifier.padding(start = UI.smallPadding),
                     checked = uiState.includeSnapshots,
                     onCheckedChange = component::updateIncludeSnapshots
@@ -103,7 +103,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = component::toggleIncludeSnapshots
-                    ),
+                    ).pointerHoverIcon(PointerIcon.Hand),
                     text = locale.includeSnapshots,
                     style = MaterialTheme.typography.subtitle2
                 )
@@ -142,7 +142,7 @@ fun CreateNewInstanceDialogContent(component: CreateNewInstanceDialogComponent) 
             horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.End),
             modifier = Modifier.fillMaxWidth()
         ) {
-            TextButton(
+            AppTextButton(
                 onClick = component::close
             ) {
                 Icon(
@@ -172,7 +172,7 @@ private fun FormField(name: String, modifier: Modifier = Modifier, content: @Com
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(UI.mediumPadding)
     ) {
-        Text(name, style = MaterialTheme.typography.subtitle2)
+        Text(name, style = MaterialTheme.typography.h6)
         content()
     }
 }
@@ -189,7 +189,7 @@ private fun LoaderChip(value: Loader?, selected: Boolean, onClick: () -> Unit) {
     } ?: SelectIconChip(
         selected = selected,
         onClick = onClick,
-        text = UI.vanilla,
+        text = Loader.Vanilla,
         imageVector = FeatherIcons.Feather
     )
 }

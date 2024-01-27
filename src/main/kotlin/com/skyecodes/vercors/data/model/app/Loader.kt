@@ -16,7 +16,11 @@ enum class Loader(val value: String, val text: String) {
     Fabric("fabric", "Fabric"),
 
     @SerialName("quilt")
-    Quilt("quilt", "Quilt")
+    Quilt("quilt", "Quilt");
+
+    companion object {
+        const val Vanilla = "Vanilla"
+    }
 }
 
 fun List<String>.toLoadersModrinth() = mapNotNull { it.toLoader() }

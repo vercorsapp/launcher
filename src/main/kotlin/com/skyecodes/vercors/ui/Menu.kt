@@ -1,12 +1,12 @@
 package com.skyecodes.vercors.ui
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -15,11 +15,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.data.model.app.AppTab
+import com.skyecodes.vercors.ui.common.AppButton
+import com.skyecodes.vercors.ui.common.appAnimateColorAsState
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Plus
 
 @Composable
-fun Menu(currentTab: AppTab, onNavigate: (AppTab) -> Unit, onCreateNewInstance: () -> Unit) {
+fun Menu(currentTab: AppTab?, onNavigate: (AppTab) -> Unit, onCreateNewInstance: () -> Unit) {
     Column(
         modifier = Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -35,7 +37,7 @@ fun Menu(currentTab: AppTab, onNavigate: (AppTab) -> Unit, onCreateNewInstance: 
 }
 
 @Composable
-private fun TabNavigationItem(tab: AppTab, currentTab: AppTab, onNavigate: (AppTab) -> Unit) {
+private fun TabNavigationItem(tab: AppTab, currentTab: AppTab?, onNavigate: (AppTab) -> Unit) {
     NavigationItem(tab.localizedTitle(LocalLocalization.current), tab.icon, tab == currentTab) { onNavigate(tab) }
 }
 
@@ -50,14 +52,10 @@ private fun NavigationItem(title: String, icon: ImageVector, active: Boolean, on
         ),
         delayMillis = 250,
     ) {
-        var backgroundColor = if (active) MaterialTheme.colors.primary else Color.Transparent
-        var contentColor = if (active) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
-        if (LocalConfiguration.current.animations) {
-            backgroundColor = animateColorAsState(backgroundColor).value
-            contentColor = animateColorAsState(contentColor).value
-        }
+        val backgroundColor by appAnimateColorAsState(if (active) MaterialTheme.colors.primary else Color.Transparent)
+        val contentColor by appAnimateColorAsState(if (active) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
 
-        Button(
+        AppButton(
             modifier = Modifier.size(50.dp),
             elevation = if (active) ButtonDefaults.elevation() else null,
             colors = ButtonDefaults.buttonColors(

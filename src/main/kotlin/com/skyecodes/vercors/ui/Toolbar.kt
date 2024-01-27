@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.applyIf
 import compose.icons.FeatherIcons
@@ -23,7 +25,7 @@ import compose.icons.feathericons.*
 
 @Composable
 fun Toolbar(
-    screenTitle: String,
+    screenTitle: String?,
     hasPreviousScreen: Boolean,
     hasNextScreen: Boolean,
     canRefreshScreen: Boolean,
@@ -42,31 +44,15 @@ fun Toolbar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
         ) {
-            Icon(
-                FeatherIcons.ChevronLeft,
-                "Previous",
-                modifier = Modifier.size(UI.mediumIconSize).applyIf(hasPreviousScreen) {
-                    clickable(interactionSource = interactionSource, indication = null) { onPreviousScreen() }
-                },
-                tint = if (hasPreviousScreen) LocalContentColor.current else LocalPalette.current.surface2
-            )
-            Icon(
-                FeatherIcons.ChevronRight,
-                "Next",
-                modifier = Modifier.size(UI.mediumIconSize).applyIf(hasNextScreen) {
-                    clickable(interactionSource = interactionSource, indication = null) { onNextScreen() }
-                },
-                tint = if (hasNextScreen) LocalContentColor.current else LocalPalette.current.surface2
-            )
-            Icon(
-                FeatherIcons.RefreshCw,
-                "Refresh",
-                modifier = Modifier.size(UI.mediumIconSize).applyIf(canRefreshScreen) {
-                    clickable(interactionSource = interactionSource, indication = null) { onRefreshScreen() }
-                },
-                tint = if (canRefreshScreen) LocalContentColor.current else LocalPalette.current.surface2
-            )
-            Text(screenTitle)
+            ToolbarButton(FeatherIcons.ChevronLeft, "Previous", interactionSource, hasPreviousScreen, onPreviousScreen)
+            ToolbarButton(FeatherIcons.ChevronRight, "Next", interactionSource, hasNextScreen, onNextScreen)
+            ToolbarButton(FeatherIcons.RefreshCw, "Refresh", interactionSource, canRefreshScreen, onRefreshScreen)
+            screenTitle?.let {
+                Text(
+                    text = it,
+                    lineHeight = UI.normalLineHeight
+                )
+            }
         }
         if (!LocalConfiguration.current.useSystemWindowFrame) {
             Spacer(Modifier.weight(1f))
@@ -80,12 +66,35 @@ fun Toolbar(
 }
 
 @Composable
+fun ToolbarButton(
+    icon: ImageVector,
+    name: String,
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = name,
+        modifier = Modifier.size(UI.mediumIconSize).applyIf(enabled) {
+            pointerHoverIcon(PointerIcon.Hand).clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+        },
+        tint = if (enabled) LocalContentColor.current else LocalPalette.current.surface2
+    )
+}
+
+@Composable
 private fun WindowButton(icon: ImageVector, name: String, onClick: () -> Unit, isRed: Boolean = false) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     Box(
-        Modifier.fillMaxHeight().width(40.dp).clickable(onClick = onClick).hoverable(interactionSource)
+        Modifier.fillMaxHeight().width(40.dp).pointerHoverIcon(PointerIcon.Hand)
+            .clickable(onClick = onClick).hoverable(interactionSource)
             .background(if (isRed && isHovered) MaterialTheme.colors.error else MaterialTheme.colors.surface)
     ) {
         Icon(icon, name, Modifier.align(Alignment.Center).size(UI.mediumIconSize))

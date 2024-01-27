@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.applyIf
@@ -25,7 +27,8 @@ fun OutlinedFieldButton(
     content: @Composable () -> Unit
 ) {
     Card(
-        modifier = Modifier.size(size).applyIf(enabled) { clickable(onClick = onClick) },
+        modifier = Modifier.size(size)
+            .applyIf(enabled) { clickable(onClick = onClick).pointerHoverIcon(PointerIcon.Hand) },
         border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled))
     ) {
         CompositionLocalProvider(LocalContentAlpha provides if (enabled) 1f else ContentAlpha.disabled) {

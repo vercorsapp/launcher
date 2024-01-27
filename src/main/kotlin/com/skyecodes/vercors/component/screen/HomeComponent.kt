@@ -22,6 +22,10 @@ import kotlinx.coroutines.launch
 
 interface HomeComponent : Refreshable {
     val uiState: StateFlow<UiState>
+    fun showInstance(instance: Instance)
+    fun launchInstance(instance: Instance)
+    fun showProject(project: Project)
+    fun installProject(project: Project)
 
     data class UiState(val sections: Map<HomeSectionType, Section>) {
         sealed interface Section {
@@ -73,7 +77,7 @@ class DefaultHomeComponent(
         uiState.update { state ->
             state.copy(
                 sections = state.sections.mapValues { (type, section) ->
-                    if (type === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(instances)
+                    if (type === HomeSectionType.JumpBackIn) createInstancesSection(instances)
                     else section
                 }
             )
@@ -104,13 +108,15 @@ class DefaultHomeComponent(
         else -> HomeComponent.UiState.Section.Projects(null)
     }
 
+    private fun createInstancesSection(instances: List<Instance>) = HomeComponent.UiState.Section.Instances(
+        instances.sortedByDescending { it.lastPlayed ?: it.dateCreated }
+    )
+
     private suspend fun getSectionData(
         sectionType: HomeSectionType,
         providers: List<Provider>
     ): HomeComponent.UiState.Section =
-        if (sectionType === HomeSectionType.JumpBackIn) HomeComponent.UiState.Section.Instances(
-            instances.value.sortedByDescending { it.lastPlayed ?: it.dateCreated }
-        )
+        if (sectionType === HomeSectionType.JumpBackIn) createInstancesSection(instances.value)
         else HomeComponent.UiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {
@@ -154,5 +160,21 @@ class DefaultHomeComponent(
             }
 
             else -> emptyList()
+    }
+
+    override fun showInstance(instance: Instance) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun launchInstance(instance: Instance) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun showProject(project: Project) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun installProject(project: Project) {
+        //TODO("Not yet implemented")
     }
 }

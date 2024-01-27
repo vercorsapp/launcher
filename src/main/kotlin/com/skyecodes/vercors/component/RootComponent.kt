@@ -48,7 +48,7 @@ interface RootComponent {
     val configuration: StateFlow<Configuration>
     val instancesState: StateFlow<InstancesState>
     val instances: StateFlow<List<Instance>>
-    val activeTab: StateFlow<AppTab>
+    val activeTab: StateFlow<AppTab?>
 
     fun initializeWindowState(windowState: WindowState)
     fun initializeWindow(window: ComposeWindow)
@@ -63,8 +63,8 @@ interface RootComponent {
     fun openErrorDialog(title: String, vararg message: String)
     fun closeDialog()
 
-    sealed class ScreenChild(val tab: AppTab, val isDefault: Boolean) {
-        data object None : ScreenChild(AppTab.Home, false)
+    sealed class ScreenChild(val tab: AppTab? = null, val isDefault: Boolean = false) {
+        data object None : ScreenChild()
         class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
         class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
             Refreshable by component
@@ -91,6 +91,7 @@ interface RootComponent {
 
     data class UiState(
         val palette: Palette,
+        val isFirstNavigation: Boolean = true,
         val fatalError: Throwable? = null,
         val error: Throwable? = null
     )
@@ -114,7 +115,7 @@ class DefaultRootComponent(
     private val detector = OsThemeDetector.getDetector()
     private val detectorListener: (Boolean) -> Unit = {
         val state = configurationState.value
-        if (state is ConfigurationState.Loaded && state.config.theme === AppTheme.SYSTEM) updatePalette()
+        if (state is ConfigurationState.Loaded && state.config.theme === AppTheme.System) updatePalette()
     }
     private val screenId = AtomicLong(0)
     private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
@@ -125,7 +126,7 @@ class DefaultRootComponent(
     override lateinit var configuration: StateFlow<Configuration>
     override val instancesState: StateFlow<InstancesState> = instanceService.state
     override lateinit var instances: StateFlow<List<Instance>>
-    override val activeTab: MutableStateFlow<AppTab> = MutableStateFlow(Configuration.DEFAULT.defaultTab)
+    override val activeTab: MutableStateFlow<AppTab?> = MutableStateFlow(null)
     override val children: Value<RootComponent.Children<ScreenConfig, RootComponent.ScreenChild>> = children(
         source = screenNavigation,
         stateSerializer = AppNavigationState.serializer(),
@@ -196,8 +197,10 @@ class DefaultRootComponent(
             configuration.collect { updatePalette() }
         }
         cancellation = children.subscribe {
-            logger.info { "Navigated to ${it.active.instance.tab.name}" }
-            activeTab.value = it.active.instance.tab
+            it.active.instance.tab?.let { tab ->
+                logger.info { "Navigated to ${tab.name}" }
+                activeTab.value = tab
+            }
         }
     }
 
@@ -208,8 +211,8 @@ class DefaultRootComponent(
 
     private fun updatePalette() {
         val palette = when (configuration.value.theme) {
-            AppTheme.DARK -> Palette.Mocha
-            AppTheme.LIGHT -> Palette.Latte
+            AppTheme.Dark -> Palette.Mocha
+            AppTheme.Light -> Palette.Latte
             else -> if (detector.isDark) Palette.Mocha else Palette.Latte
         }
         uiState.update { uiState -> uiState.copy(palette = palette) }
@@ -259,6 +262,7 @@ class DefaultRootComponent(
                 index = 0
             )
         }
+        uiState.update { it.copy(isFirstNavigation = false) }
     }
 
     private fun createDefaultConfigForTab(tab: AppTab) = when (tab) {

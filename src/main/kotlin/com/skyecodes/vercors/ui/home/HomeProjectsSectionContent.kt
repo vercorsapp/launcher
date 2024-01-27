@@ -1,8 +1,8 @@
 package com.skyecodes.vercors.ui.home
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -28,12 +30,12 @@ import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.data.model.app.Project
 import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.resourceAsStream
-import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AsyncImage
 import com.skyecodes.vercors.ui.common.IconTextButton
+import com.skyecodes.vercors.ui.common.appAnimateContentSize
 import com.skyecodes.vercors.ui.common.loadImageBitmap
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
@@ -41,7 +43,11 @@ import compose.icons.feathericons.Download
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeProjectsSectionContent(projects: List<Project>?) {
+fun HomeProjectsSectionContent(
+    projects: List<Project>?,
+    onProjectClick: (Project) -> Unit,
+    onProjectInstallClick: (Project) -> Unit
+) {
     var count by rememberSaveable { mutableStateOf(0) }
     val localDensity = LocalDensity.current
 
@@ -57,7 +63,7 @@ fun HomeProjectsSectionContent(projects: List<Project>?) {
             }
         } else if (projects.isNotEmpty()) {
             for (project in projects.take(count)) {
-                ProjectCardContent(project)
+                ProjectCardContent(project, onProjectClick, onProjectInstallClick)
             }
         } else {
             Text("No projects found :(")
@@ -77,11 +83,18 @@ private fun RowScope.ProjectCardBox(
 }
 
 @Composable
-private fun RowScope.ProjectCardContent(project: Project) {
+private fun RowScope.ProjectCardContent(
+    project: Project,
+    onProjectClick: (Project) -> Unit,
+    onProjectInstallClick: (Project) -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    ProjectCardBox(modifier = Modifier.hoverable(interactionSource)) {
+    ProjectCardBox(
+        modifier = Modifier.hoverable(interactionSource)
+            .pointerHoverIcon(PointerIcon.Hand).clickable { onProjectClick(project) }
+    ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
                 project.imageUrl?.let { url ->
@@ -120,8 +133,7 @@ private fun RowScope.ProjectCardContent(project: Project) {
 
             Column(
                 modifier = Modifier.background(LocalPalette.current.surface1).align(Alignment.TopCenter).fillMaxWidth()
-                    .applyIf(LocalConfiguration.current.animations) { animateContentSize() }
-                    .applyIf(isHovered) { fillMaxHeight() }
+                    .appAnimateContentSize().applyIf(isHovered) { fillMaxHeight() }
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(80.dp).padding(UI.mediumLargePadding),
@@ -152,9 +164,8 @@ private fun RowScope.ProjectCardContent(project: Project) {
                     Column {
                         Text(
                             project.name,
-                            style = MaterialTheme.typography.subtitle1,
+                            style = MaterialTheme.typography.h6,
                             maxLines = 1,
-                            fontWeight = FontWeight.ExtraBold,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
@@ -190,7 +201,7 @@ private fun RowScope.ProjectCardContent(project: Project) {
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             IconTextButton(
-                                onClick = {},
+                                onClick = { onProjectInstallClick(project) },
                                 imageVector = FeatherIcons.Download,
                                 text = LocalLocalization.current.install
                             )
@@ -216,12 +227,11 @@ private fun ProjectChip(name: String, icon: ImageVector, text: String) {
             Icon(
                 imageVector = icon,
                 contentDescription = name,
-                modifier = Modifier.size(UI.smallIconSize)
+                modifier = Modifier.size(UI.mediumIconSize)
             )
             Text(
                 text = text,
-                style = MaterialTheme.typography.caption,
-                fontSize = UI.smallFontSize
+                style = MaterialTheme.typography.caption
             )
         }
     }

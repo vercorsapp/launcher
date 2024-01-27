@@ -13,22 +13,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.screen.InstancesComponent
+import com.skyecodes.vercors.data.model.app.Instance
 import com.skyecodes.vercors.data.model.app.InstanceGroupBy
 import com.skyecodes.vercors.data.model.app.InstanceSortBy
+import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.header
+import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.ui.LocalLocalization
+import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AppDropdownMenuBox
 import com.skyecodes.vercors.ui.common.AppTooltip
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.OutlinedFieldButton
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Plus
-import compose.icons.feathericons.Save
-import compose.icons.feathericons.Search
-import compose.icons.feathericons.X
+import compose.icons.feathericons.*
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
@@ -154,7 +156,7 @@ fun InstancesContent(
             Box(Modifier.padding(start = UI.mediumPadding)) {
                 LazyVerticalGrid(
                     state = gridState,
-                    columns = GridCells.Adaptive(minSize = 250.dp),
+                    columns = GridCells.Adaptive(minSize = 200.dp),
                     modifier = Modifier.padding(top = UI.smallPadding, bottom = UI.smallPadding, end = UI.largePadding)
                 ) {
                     if (uiState.instances.isEmpty()) {
@@ -170,7 +172,7 @@ fun InstancesContent(
                         }
                     } else if (uiState.sorter.groupBy === InstanceGroupBy.None) {
                         items(uiState.instances[""]!!, key = { it.path }) {
-                            Card(modifier = Modifier.padding(UI.mediumPadding).aspectRatio(0.8f)) {
+                            Card(modifier = Modifier.padding(UI.mediumPadding)) {
                                 InstanceCardContent(it)
                             }
                         }
@@ -186,7 +188,10 @@ fun InstancesContent(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
                                 ) {
-                                    Text(key)
+                                    Text(
+                                        text = key,
+                                        style = MaterialTheme.typography.h6
+                                    )
                                     Divider(
                                         color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled),
                                         thickness = 1.dp,
@@ -196,14 +201,14 @@ fun InstancesContent(
 
                             }
                             items(instances, key = { it.path }) {
-                                Card(modifier = Modifier.padding(UI.mediumPadding).aspectRatio(0.8f)) {
+                                Card(modifier = Modifier.padding(UI.mediumPadding)) {
                                     InstanceCardContent(it)
                                 }
                             }
                         }
                     }
                 }
-                VerticalScrollbar(
+                VerticalScrollbar( // TODO fix scrollbar
                     modifier = Modifier.align(Alignment.CenterEnd).padding(2.dp).fillMaxHeight(),
                     adapter = scrollbarAdapter
                 )
@@ -225,6 +230,58 @@ fun InstancesContent(
                 imageVector = FeatherIcons.Plus,
                 text = locale.createNewInstance
             )
+        }
+    }
+}
+
+@Composable
+fun InstanceCardContent(instance: Instance) {
+    val locale = LocalLocalization.current
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(UI.largePadding),
+        modifier = Modifier.padding(UI.largePadding)
+    ) {
+        Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
+            Surface(
+                color = LocalPalette.current.surface2,
+                modifier = Modifier.fillMaxSize(),
+                shape = UI.defaultRoundedCornerShape,
+                elevation = 1.dp
+            ) {
+                Icon(FeatherIcons.Box, null, Modifier.fillMaxSize())
+            }
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = instance.name,
+                style = MaterialTheme.typography.h6,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = (instance.loader?.value ?: Loader.Vanilla) + " " + instance.gameVersion.id,
+                    style = MaterialTheme.typography.subtitle2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = instance.lastPlayed?.let { "${locale.lastPlayed} ${it.readable()}" }
+                        ?: locale.notPlayedBefore,
+                    style = MaterialTheme.typography.subtitle2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

@@ -16,6 +16,10 @@ interface Localization {
     val ascending: String
     val descending: String
     val none: String
+    val mods: String
+    val modpacks: String
+    val resourcePacks: String
+    val shaderPacks: String
 
     // Home
     val jumpBackIn: String
@@ -51,6 +55,9 @@ interface Localization {
     val userInterface: String
     val theme: String
     val themeDescription: String
+    val system: String
+    val light: String
+    val dark: String
     val accentColor: String
     val accentColorDescription: String
     val systemWindow: String
@@ -59,6 +66,8 @@ interface Localization {
     val animationsDescription: String
     val defaultTab: String
     val defaultTabDescription: String
+    val sections: String
+    val sectionsDescription: String
     val providers: String
     val providersDescription: String
 
@@ -81,6 +90,10 @@ interface Localization {
         override val popularModpacks = "Popular modpacks"
         override val popularResourcePacks = "Popular resource packs"
         override val popularShaderPacks = "Popular shader packs"
+        override val mods = "Mods"
+        override val modpacks = "Modpacks"
+        override val resourcePacks = "Resource packs"
+        override val shaderPacks = "Shader packs"
         override val notPlayedBefore = "Not played before"
         override val play = "Play"
         override val view = "View"
@@ -108,6 +121,9 @@ interface Localization {
         // Settings
         override val userInterface = "User interface"
         override val theme = "Theme"
+        override val system = "System"
+        override val light = "Light"
+        override val dark = "Dark"
         override val themeDescription = "Change the global theme of the launcher."
         override val accentColor = "Accent color"
         override val accentColorDescription = "Change the accent color used in some buttons."
@@ -119,6 +135,9 @@ interface Localization {
             "Enables UI animations such as fade in, smooth element size change, etc."
         override val defaultTab = "Default tab"
         override val defaultTabDescription = "Change the tab that shows up when the launcher is opened."
+        override val sections = "Sections"
+        override val sectionsDescription =
+            "Choose which section(s) to show on the home tab."
         override val providers = "Providers"
         override val providersDescription =
             "Choose which service(s) provide popular projects on the home tab."
