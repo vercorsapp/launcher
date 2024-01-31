@@ -71,6 +71,20 @@ interface Localization {
     val providers: String
     val providersDescription: String
 
+    // Account
+    val addAccount: String
+    val addAccountLogin: String
+    val addAccountInfo: String
+    val openInBrowser: String
+    val copyUrl: String
+    val errorOccurred: String
+    val microsoftAuth: String
+    val microsoftToken: String
+    val xboxLiveAuth: String
+    val xstsToken: String
+    val minecraftAuth: String
+    val minecraftProfile: String
+
     object En : Localization {
         // General
         override val home = "Home"
@@ -141,5 +155,20 @@ interface Localization {
         override val providers = "Providers"
         override val providersDescription =
             "Choose which service(s) provide popular projects on the home tab."
+
+        // Account
+        override val addAccount = "Add account"
+        override val addAccountLogin =
+            "Please log into the Microsoft account linked to your Minecraft profile through your browser."
+        override val addAccountInfo = "This dialog window needs to stay open during the process."
+        override val openInBrowser = "Open in browser"
+        override val copyUrl = "Copy URL"
+        override val errorOccurred = "An error has occured."
+        override val microsoftAuth = "Awaiting authentication"
+        override val microsoftToken = "Getting Microsoft access token"
+        override val xboxLiveAuth = "Authenticating with Xbox Live"
+        override val xstsToken = "Obtaining XSTS token"
+        override val minecraftAuth = "Authenticating with Minecraft"
+        override val minecraftProfile = "Getting Minecraft profile"
     }
 }

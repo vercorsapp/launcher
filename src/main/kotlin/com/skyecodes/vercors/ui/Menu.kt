@@ -19,9 +19,15 @@ import com.skyecodes.vercors.ui.common.AppButton
 import com.skyecodes.vercors.ui.common.appAnimateColorAsState
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Plus
+import compose.icons.feathericons.User
 
 @Composable
-fun Menu(currentTab: AppTab?, onNavigate: (AppTab) -> Unit, onCreateNewInstance: () -> Unit) {
+fun Menu(
+    currentTab: AppTab?,
+    onNavigate: (AppTab) -> Unit,
+    onCreateNewInstance: () -> Unit,
+    onOpenAccounts: () -> Unit
+) {
     Column(
         modifier = Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -31,8 +37,8 @@ fun Menu(currentTab: AppTab?, onNavigate: (AppTab) -> Unit, onCreateNewInstance:
         TabNavigationItem(AppTab.Search, currentTab, onNavigate)
         NavigationItem(LocalLocalization.current.createNewInstance, FeatherIcons.Plus, false, onCreateNewInstance)
         Spacer(Modifier.weight(1f))
-        TabNavigationItem(AppTab.Accounts, currentTab, onNavigate)
         TabNavigationItem(AppTab.Settings, currentTab, onNavigate)
+        NavigationItem(LocalLocalization.current.accounts, FeatherIcons.User, false, onOpenAccounts)
     }
 }
 

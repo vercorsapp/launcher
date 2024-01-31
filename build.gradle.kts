@@ -25,6 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:${property("ktor.version")}")
     implementation("io.ktor:ktor-client-logging:${property("ktor.version")}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${property("ktor.version")}")
+    implementation("io.ktor:ktor-server-cio:${property("ktor.version")}")
     implementation("com.arkivanov.decompose:decompose:${property("decompose.version")}")
     implementation("com.arkivanov.decompose:extensions-compose:${property("decompose.version")}")
     implementation("com.arkivanov.essenty:lifecycle-coroutines:${property("essenty.version")}")
@@ -52,6 +53,24 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks {
+    val appProperties by registering(WriteProperties::class) {
+        destinationFile = layout.buildDirectory.file("app.properties")
+        encoding = "UTF-8"
+        property("curseforgeApiKey", findProperty("curseforgeApiKey") as String? ?: System.getenv("CURSEFORGE_API_KEY"))
+        property("modrinthApiKey", findProperty("modrinthApiKey") as String? ?: System.getenv("MODRINTH_API_KEY"))
+        property(
+            "microsoftClientId",
+            findProperty("microsoftClientId") as String? ?: System.getenv("MICROSOFT_CLIENT_ID")
+        )
+    }
+
+    processResources {
+        from(appProperties)
+    }
+}
+
+
 compose.desktop {
     application {
         mainClass = "com.skyecodes.vercors.MainKt"
@@ -73,7 +92,6 @@ compose.desktop {
             licenseFile = file("LICENSE")
 
             windows {
-                perUserInstall = true
                 shortcut = true
                 menu = true
             }

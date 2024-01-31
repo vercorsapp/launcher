@@ -12,19 +12,13 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.jthemedetecor.OsThemeDetector
-import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
-import com.skyecodes.vercors.component.dialog.DefaultCreateNewInstanceDialogComponent
-import com.skyecodes.vercors.component.dialog.DefaultErrorDialogComponent
-import com.skyecodes.vercors.component.dialog.ErrorDialogComponent
+import com.skyecodes.vercors.component.dialog.*
 import com.skyecodes.vercors.component.screen.*
 import com.skyecodes.vercors.data.model.app.AppTab
 import com.skyecodes.vercors.data.model.app.AppTheme
 import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.data.model.app.Instance
-import com.skyecodes.vercors.data.service.ConfigurationService
-import com.skyecodes.vercors.data.service.ConfigurationState
-import com.skyecodes.vercors.data.service.InstanceService
-import com.skyecodes.vercors.data.service.InstancesState
+import com.skyecodes.vercors.data.service.*
 import com.skyecodes.vercors.ui.Palette
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -49,6 +43,7 @@ interface RootComponent {
     val instancesState: StateFlow<InstancesState>
     val instances: StateFlow<List<Instance>>
     val activeTab: StateFlow<AppTab?>
+    val accountData: StateFlow<AccountData>
 
     fun initializeWindowState(windowState: WindowState)
     fun initializeWindow(window: ComposeWindow)
@@ -60,6 +55,7 @@ interface RootComponent {
     fun onPreviousScreen()
     fun onRefreshScreen()
     fun openNewInstanceDialog()
+    fun openAccounts()
     fun openErrorDialog(title: String, vararg message: String)
     fun closeDialog()
 
@@ -68,14 +64,13 @@ interface RootComponent {
         class Home(val component: HomeComponent) : ScreenChild(AppTab.Home, true), Refreshable by component
         class Instances(val component: InstancesComponent) : ScreenChild(AppTab.Instances, true),
             Refreshable by component
-
         class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
-        class Accounts(val component: AccountsComponent) : ScreenChild(AppTab.Accounts, true)
         class Settings(val component: SettingsComponent) : ScreenChild(AppTab.Settings, true), Refreshable by component
     }
 
     sealed interface DialogChild {
         class CreateNewInstance(val component: CreateNewInstanceDialogComponent) : DialogChild
+        class AddAccount(val component: AddAccountDialogComponent) : DialogChild
         class Error(val component: ErrorDialogComponent) : DialogChild
     }
 
@@ -93,7 +88,8 @@ interface RootComponent {
         val palette: Palette,
         val isFirstNavigation: Boolean = true,
         val fatalError: Throwable? = null,
-        val error: Throwable? = null
+        val error: Throwable? = null,
+        val accountsPopupOpen: Boolean = false
     )
 }
 
@@ -104,7 +100,8 @@ interface Refreshable {
 class DefaultRootComponent(
     componentContext: AppComponentContext,
     private val configurationService: ConfigurationService = componentContext.get(),
-    private val instanceService: InstanceService = componentContext.get()
+    private val instanceService: InstanceService = componentContext.get(),
+    private val accountService: AccountService = componentContext.get()
 ) : AbstractComponent(componentContext), RootComponent {
     private lateinit var window: ComposeWindow
     private lateinit var windowState: WindowState
@@ -174,6 +171,7 @@ class DefaultRootComponent(
             )
         )
     }
+    override val accountData: StateFlow<AccountData> = accountService.accountData
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         logger.error(throwable) { "An error occured while loading the application." }
@@ -188,8 +186,9 @@ class DefaultRootComponent(
     private fun onCreate() {
         logger.info { "Creating RootComponent" }
         scope.launch(handler) {
-            configurationService.load()
+            configurationService.loadConfiguration()
             instanceService.loadInstances()
+            accountService.loadAccounts()
             configuration = configurationService.config.stateIn(this)
             instances = instanceService.instances.stateIn(this)
             initNavigation(configuration.value.defaultTab)
@@ -269,7 +268,6 @@ class DefaultRootComponent(
         AppTab.Home -> ScreenConfig.Home(screenId.getAndIncrement())
         AppTab.Instances -> ScreenConfig.Instances(screenId.getAndIncrement())
         AppTab.Search -> ScreenConfig.Search(screenId.getAndIncrement())
-        AppTab.Accounts -> ScreenConfig.Accounts(screenId.getAndIncrement())
         AppTab.Settings -> ScreenConfig.Settings(screenId.getAndIncrement())
     }
 
@@ -310,6 +308,21 @@ class DefaultRootComponent(
         dialogNavigation.activate(DialogConfig.CreateNewInstance)
     }
 
+    override fun openAccounts() {
+        val data = accountData.value
+        if (data is AccountData.Loaded) {
+            if (data.accounts.isEmpty()) {
+                openAddAcountDialog()
+            } else {
+                uiState.update { it.copy(accountsPopupOpen = true) }
+            }
+        }
+    }
+
+    private fun openAddAcountDialog() {
+        dialogNavigation.activate(DialogConfig.AddAccount)
+    }
+
     override fun openErrorDialog(title: String, vararg message: String) {
         dialogNavigation.activate(DialogConfig.Error(title, message.toList()))
     }
@@ -319,22 +332,17 @@ class DefaultRootComponent(
     }
 
     override fun updateConfiguration(config: Configuration) {
-        configurationService.update(config)
+        configurationService.updateConfiguration(config)
     }
 
     private fun createChild(config: ScreenConfig, componentContext: AppComponentContext): RootComponent.ScreenChild =
         when (config) {
             is ScreenConfig.None -> RootComponent.ScreenChild.None
-            is ScreenConfig.Accounts -> RootComponent.ScreenChild.Accounts(accountsComponent(componentContext))
             is ScreenConfig.Home -> RootComponent.ScreenChild.Home(homeComponent(componentContext))
             is ScreenConfig.Instances -> RootComponent.ScreenChild.Instances(instancesComponent(componentContext))
             is ScreenConfig.Search -> RootComponent.ScreenChild.Search(searchComponent(componentContext))
             is ScreenConfig.Settings -> RootComponent.ScreenChild.Settings(settingsComponent(componentContext))
         }
-
-    private fun accountsComponent(componentContext: AppComponentContext): AccountsComponent = DefaultAccountsComponent(
-        componentContext = componentContext
-    )
 
     private fun homeComponent(componentContext: AppComponentContext): HomeComponent = DefaultHomeComponent(
         componentContext = componentContext
@@ -359,11 +367,10 @@ class DefaultRootComponent(
     private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): RootComponent.DialogChild =
         when (config) {
             is DialogConfig.CreateNewInstance -> RootComponent.DialogChild.CreateNewInstance(
-                createNewInstanceComponent(
-                    componentContext
-                )
+                createNewInstanceComponent(componentContext)
             )
 
+            is DialogConfig.AddAccount -> RootComponent.DialogChild.AddAccount(addAccountComponent(componentContext))
             is DialogConfig.Error -> RootComponent.DialogChild.Error(createErrorComponent(componentContext, config))
         }
 
@@ -371,6 +378,12 @@ class DefaultRootComponent(
         DefaultCreateNewInstanceDialogComponent(
             componentContext = componentContext,
             onCreateInstance = ::onCreateInstance,
+            onClose = ::closeDialog
+        )
+
+    private fun addAccountComponent(componentContext: AppComponentContext): AddAccountDialogComponent =
+        DefaultAddAccountDialogComponent(
+            componentContext = componentContext,
             onClose = ::closeDialog
         )
 
@@ -408,8 +421,6 @@ class DefaultRootComponent(
         @Serializable
         data class Search(val screenId: Long) : ScreenConfig
         @Serializable
-        data class Accounts(val screenId: Long) : ScreenConfig
-        @Serializable
         data class Settings(val screenId: Long) : ScreenConfig
     }
 
@@ -417,6 +428,9 @@ class DefaultRootComponent(
     sealed interface DialogConfig {
         @Serializable
         data object CreateNewInstance : DialogConfig
+
+        @Serializable
+        data object AddAccount : DialogConfig
         @Serializable
         data class Error(val title: String, val message: List<String>) : DialogConfig
     }

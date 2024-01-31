@@ -22,7 +22,7 @@ class DefaultSettingsComponent(
 ) : AbstractComponent(componentContext), SettingsComponent {
     override fun onConfigChange(configuration: Configuration) {
         if (configuration.homeProviders.isEmpty()) return
-        configurationService.update(configuration)
+        configurationService.updateConfiguration(configuration)
     }
 
     override fun onHomeProviderChanged(provider: Provider, configuration: Configuration) {
@@ -40,6 +40,6 @@ class DefaultSettingsComponent(
     }
 
     override fun refresh() {
-        configurationService.load()
+        configurationService.loadConfiguration()
     }
 }

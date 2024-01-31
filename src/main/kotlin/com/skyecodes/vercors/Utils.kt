@@ -10,8 +10,11 @@ import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
 import java.awt.Desktop
 import java.net.URI
+import java.security.MessageDigest
 import java.time.Instant
 import javax.swing.SwingUtilities
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 private class Utils
 
@@ -74,4 +77,12 @@ fun <T> runOnUiThread(block: () -> T): T {
 
     @Suppress("UNCHECKED_CAST")
     return result as T
+}
+
+fun String.sha256(): String = hash("SHA-256")
+
+@OptIn(ExperimentalEncodingApi::class)
+fun String.hash(method: String): String {
+    val bytes = MessageDigest.getInstance(method).digest(toByteArray())
+    return Base64.UrlSafe.encode(bytes)
 }

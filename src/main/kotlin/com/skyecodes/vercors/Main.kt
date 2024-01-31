@@ -15,6 +15,7 @@ import org.koin.compose.KoinApplication
 import org.koin.compose.getKoin
 import org.koin.dsl.module
 import org.koin.logger.SLF4JLogger
+import java.util.*
 
 const val APP_VERSION = "0.1.0"
 const val APP_NAME = "Vercors"
@@ -23,6 +24,9 @@ private val logger = KotlinLogging.logger {}
 
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
+    val properties = Properties().apply { load(resourceAsStream("/app.properties")) }
+    logger.info { "Loaded application properties" }
+
     application(exitProcessOnExit = false) {
         val coroutineScope = rememberCoroutineScope()
 
@@ -32,11 +36,32 @@ fun main() {
                 single<Json> { AppJson }
                 single<HttpClient> { appHttpClient(get()) }
                 single<ConfigurationService> { ConfigurationServiceImpl(coroutineScope, get(), get()) }
-                single<CurseforgeService> { CurseforgeServiceImpl(coroutineScope, get()) }
+                single<CurseforgeService> {
+                    CurseforgeServiceImpl(
+                        coroutineScope,
+                        get(),
+                        properties.getProperty("curseforgeApiKey")
+                    )
+                }
                 single<InstanceService> { InstanceServiceImpl(coroutineScope, get(), get()) }
-                single<ModrinthService> { ModrinthServiceImpl(coroutineScope, get()) }
+                single<ModrinthService> {
+                    ModrinthServiceImpl(
+                        coroutineScope,
+                        get(),
+                        properties.getProperty("modrinthApiKey")
+                    )
+                }
                 single<MojangService> { MojangServiceImpl(coroutineScope, get()) }
                 single<StorageService> { StorageServiceImpl() }
+                single<AccountService> {
+                    AccountServiceImpl(
+                        coroutineScope,
+                        get(),
+                        get(),
+                        get(),
+                        properties.getProperty("microsoftClientId")
+                    )
+                }
             })
         }) {
             val lifecycle = LifecycleRegistry()

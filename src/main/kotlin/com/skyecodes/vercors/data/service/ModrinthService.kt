@@ -28,7 +28,8 @@ interface ModrinthService {
 
 class ModrinthServiceImpl(
     coroutineScope: CoroutineScope,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val apiKey: String
 ) : ModrinthService, CoroutineScope by coroutineScope {
     override suspend fun getPopularMods() = getPopular("mod")
 
@@ -77,11 +78,10 @@ class ModrinthServiceImpl(
     }
 
     private fun HttpRequestBuilder.init() {
-        header("Authorization", API_KEY)
+        header("Authorization", apiKey)
     }
 
     companion object {
         private const val BASE_URL = "https://api.modrinth.com/v2"
-        private const val API_KEY = "mrp_feID7t7UQm0KumC2AX7oCWHYHFnwJR2sZ64qM0kPNE8TsiJGAFwKpzU6COyo"
     }
 }

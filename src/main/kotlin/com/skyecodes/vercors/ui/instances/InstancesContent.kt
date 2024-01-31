@@ -1,12 +1,16 @@
 package com.skyecodes.vercors.ui.instances
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,10 +29,7 @@ import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.common.AppDropdownMenuBox
-import com.skyecodes.vercors.ui.common.AppTooltip
-import com.skyecodes.vercors.ui.common.IconTextButton
-import com.skyecodes.vercors.ui.common.OutlinedFieldButton
+import com.skyecodes.vercors.ui.common.*
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
@@ -237,50 +238,80 @@ fun InstancesContent(
 @Composable
 fun InstanceCardContent(instance: Instance) {
     val locale = LocalLocalization.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(UI.largePadding),
-        modifier = Modifier.padding(UI.largePadding)
+    Card(
+        modifier = Modifier.hoverable(interactionSource)
+            .pointerHoverIcon(PointerIcon.Hand).clickable { /*onInstanceClick(instance)*/ }
     ) {
-        Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
-            Surface(
-                color = LocalPalette.current.surface2,
-                modifier = Modifier.fillMaxSize(),
-                shape = UI.defaultRoundedCornerShape,
-                elevation = 1.dp
-            ) {
-                Icon(FeatherIcons.Box, null, Modifier.fillMaxSize())
-            }
-        }
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(UI.largePadding),
+            modifier = Modifier.padding(UI.largePadding)
         ) {
-            Text(
-                text = instance.name,
-                style = MaterialTheme.typography.h6,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Box(Modifier.fillMaxWidth().aspectRatio(1f)) {
+                Surface(
+                    color = LocalPalette.current.surface2,
+                    modifier = Modifier.fillMaxSize(),
+                    shape = UI.defaultRoundedCornerShape,
+                    elevation = 1.dp
+                ) {
+                    Icon(FeatherIcons.Box, null, Modifier.fillMaxSize())
+                }
+                AppAnimatedVisibility(
+                    visible = isHovered,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(UI.darker),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        IconButton(
+                            onClick = { /*onInstanceLaunchClick(instance)*/ },
+                            modifier = Modifier.size(64.dp).background(MaterialTheme.colors.primary, CircleShape),
+                            content = {
+                                Icon(
+                                    FeatherIcons.Play,
+                                    "Play",
+                                    Modifier.size(32.dp),
+                                    MaterialTheme.colors.onPrimary
+                                )
+                            }
+                        )
+                    }
+                }
+            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(UI.mediumPadding, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = (instance.loader?.value ?: Loader.Vanilla) + " " + instance.gameVersion.id,
-                    style = MaterialTheme.typography.subtitle2,
+                    text = instance.name,
+                    style = MaterialTheme.typography.h6,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = instance.lastPlayed?.let { "${locale.lastPlayed} ${it.readable()}" }
-                        ?: locale.notPlayedBefore,
-                    style = MaterialTheme.typography.subtitle2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = (instance.loader?.value ?: Loader.Vanilla) + " " + instance.gameVersion.id,
+                        style = MaterialTheme.typography.subtitle2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = instance.lastPlayed?.let { "${locale.lastPlayed} ${it.readable()}" }
+                            ?: locale.notPlayedBefore,
+                        style = MaterialTheme.typography.subtitle2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }

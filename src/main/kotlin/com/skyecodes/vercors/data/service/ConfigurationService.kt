@@ -20,8 +20,8 @@ private val logger = KotlinLogging.logger { }
 interface ConfigurationService {
     val state: StateFlow<ConfigurationState>
     val config: Flow<Configuration>
-    fun load(): Job
-    fun update(config: Configuration)
+    fun loadConfiguration(): Job
+    fun updateConfiguration(config: Configuration)
 }
 
 sealed interface ConfigurationState {
@@ -46,11 +46,11 @@ class ConfigurationServiceImpl(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    override fun load() = launch(Dispatchers.IO) {
+    override fun loadConfiguration() = launch(Dispatchers.IO) {
         logger.debug { "Loading configuration at location $configFile" }
         if (configFile.exists()) {
             try {
-                update(configFile.inputStream().use { json.decodeFromStream(it) })
+                updateConfiguration(configFile.inputStream().use { json.decodeFromStream(it) })
             } catch (e: SerializationException) {
                 val message =
                     "Unable to load configuration. Please check that the configuration file at location $configFile is valid, or delete it to recreate it when you restart the application."
@@ -58,13 +58,13 @@ class ConfigurationServiceImpl(
                 state.value = ConfigurationState.Errored(ConfigurationLoadingException(message, e))
             }
         } else {
-            update(Configuration.DEFAULT)
+            updateConfiguration(Configuration.DEFAULT)
             save(Configuration.DEFAULT)
         }
         logger.info { "Configuration loaded" }
     }
 
-    override fun update(config: Configuration) {
+    override fun updateConfiguration(config: Configuration) {
         state.value = ConfigurationState.Loaded(config)
     }
 

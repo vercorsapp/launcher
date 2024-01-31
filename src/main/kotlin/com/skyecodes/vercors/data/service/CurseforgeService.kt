@@ -33,7 +33,8 @@ interface CurseforgeService {
 
 class CurseforgeServiceImpl(
     coroutineScope: CoroutineScope,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val apiKey: String
 ) : CurseforgeService, CoroutineScope by coroutineScope {
     override suspend fun getPopularMods() = search(MOD_CLASS_ID)
 
@@ -84,12 +85,11 @@ class CurseforgeServiceImpl(
     }
 
     private fun HttpRequestBuilder.init() {
-        header("x-api-key", API_KEY)
+        header("x-api-key", apiKey)
     }
 
     companion object {
         private const val BASE_URL = "https://api.curseforge.com"
-        private const val API_KEY = "\$2a\$10\$lCr8PZ1p3YwsVpHK4euhJe..bDmLaj52azYRTfvP.oOZghtCD.hbi"
         private const val MINECRAFT_GAME_ID = 432
         private const val MODPACK_CLASS_ID = 4471
         private const val MOD_CLASS_ID = 6

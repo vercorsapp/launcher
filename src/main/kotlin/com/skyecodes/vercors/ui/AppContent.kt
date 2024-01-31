@@ -19,7 +19,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.ui.accounts.AccountsContent
+import com.skyecodes.vercors.ui.dialog.AddAccountDialogContent
 import com.skyecodes.vercors.ui.dialog.AppDialogContent
 import com.skyecodes.vercors.ui.dialog.CreateNewInstanceDialogContent
 import com.skyecodes.vercors.ui.dialog.ErrorDialogContent
@@ -46,6 +46,7 @@ fun FrameWindowScope.AppContent(
     val children by component.children.subscribeAsState()
     val currentTab by component.activeTab.collectAsState()
     val dialog by component.dialog.subscribeAsState()
+    //val accounts by component.accounts.subscribeAsState()
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -61,7 +62,7 @@ fun FrameWindowScope.AppContent(
                         modifier = Modifier.fillMaxHeight().background(color = uiState.palette.surface0)
                             .shadow(4.dp)
                     ) {
-                        Menu(currentTab, component::navigate, component::openNewInstanceDialog)
+                        Menu(currentTab, component::navigate, component::openNewInstanceDialog, component::openAccounts)
                     }
                     Column {
                         WindowDraggableArea(
@@ -114,10 +115,12 @@ fun FrameWindowScope.AppContent(
                                         is RootComponent.ScreenChild.Home -> HomeContent(child.component)
                                         is RootComponent.ScreenChild.Instances -> InstancesContent(child.component)
                                         is RootComponent.ScreenChild.Search -> SearchContent(child.component)
-                                        is RootComponent.ScreenChild.Accounts -> AccountsContent(child.component)
                                         is RootComponent.ScreenChild.Settings -> SettingsContent(child.component)
                                     }
                                 }
+                            }
+                            if (uiState.accountsPopupOpen) {
+                                // TODO accounts popup
                             }
                         }
                     }
@@ -133,6 +136,13 @@ fun FrameWindowScope.AppContent(
                         onClose = component::closeDialog
                     ) {
                         CreateNewInstanceDialogContent(child.component)
+                    }
+
+                    is RootComponent.DialogChild.AddAccount -> AppDialogContent(
+                        modifier = Modifier.width(500.dp),
+                        onClose = component::closeDialog
+                    ) {
+                        AddAccountDialogContent(child.component)
                     }
 
                     is RootComponent.DialogChild.Error -> AppDialogContent(

@@ -3,7 +3,10 @@ package com.skyecodes.vercors.data.model.app
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.skyecodes.vercors.ui.Localization
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.*
+import compose.icons.feathericons.Box
+import compose.icons.feathericons.Home
+import compose.icons.feathericons.Search
+import compose.icons.feathericons.Settings
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,9 +23,6 @@ enum class AppTab(
 
     @SerialName("search")
     Search(Localization::search, FeatherIcons.Search),
-
-    @SerialName("accounts")
-    Accounts(Localization::accounts, FeatherIcons.Users),
 
     @SerialName("settings")
     Settings(Localization::settings, FeatherIcons.Settings)

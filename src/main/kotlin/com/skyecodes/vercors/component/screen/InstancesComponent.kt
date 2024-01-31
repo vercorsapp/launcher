@@ -126,7 +126,7 @@ class DefaultInstancesComponent(
     }
 
     override fun saveFilters() {
-        configurationService.update(configuration.value.copy(savedInstanceSorter = uiState.value.sorter))
+        configurationService.updateConfiguration(configuration.value.copy(savedInstanceSorter = uiState.value.sorter))
         uiState.update { it.copy(canSaveFilters = false) }
     }
 
