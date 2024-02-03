@@ -11,8 +11,8 @@ enum class InstanceGroupBy(val localizedName: (Localization) -> String, val beha
     @SerialName("none")
     None(Localization::none, Behavior.None),
 
-    @SerialName("minecraftVersion")
-    GameVersion(Localization::minecraftVersion, Behavior.GameVersion),
+    @SerialName("gameVersion")
+    GameVersion(Localization::gameVersion, Behavior.GameVersion),
 
     @SerialName("loader")
     Loader(Localization::loader, Behavior.Loader);

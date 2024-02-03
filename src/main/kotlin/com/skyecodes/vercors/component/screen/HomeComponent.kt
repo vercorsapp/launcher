@@ -22,10 +22,10 @@ import kotlinx.coroutines.launch
 
 interface HomeComponent : Refreshable {
     val uiState: StateFlow<UiState>
-    fun showInstance(instance: Instance)
-    fun launchInstance(instance: Instance)
-    fun showProject(project: Project)
-    fun installProject(project: Project)
+    val showInstanceDetails: (Instance) -> Unit
+    val launchInstance: (Instance) -> Unit
+    val showProjectDetails: (Project) -> Unit
+    val installProject: (Project) -> Unit
 
     data class UiState(val sections: Map<HomeSectionType, Section>) {
         sealed interface Section {
@@ -37,6 +37,10 @@ interface HomeComponent : Refreshable {
 
 class DefaultHomeComponent(
     componentContext: AppComponentContext,
+    override val showInstanceDetails: (Instance) -> Unit,
+    override val launchInstance: (Instance) -> Unit,
+    override val showProjectDetails: (Project) -> Unit,
+    override val installProject: (Project) -> Unit,
     private val configurationService: ConfigurationService = componentContext.get(),
     private val instanceService: InstanceService = componentContext.get(),
     private val modrinthService: ModrinthService = componentContext.get(),
@@ -160,21 +164,5 @@ class DefaultHomeComponent(
             }
 
             else -> emptyList()
-    }
-
-    override fun showInstance(instance: Instance) {
-        //TODO("Not yet implemented")
-    }
-
-    override fun launchInstance(instance: Instance) {
-        //TODO("Not yet implemented")
-    }
-
-    override fun showProject(project: Project) {
-        //TODO("Not yet implemented")
-    }
-
-    override fun installProject(project: Project) {
-        //TODO("Not yet implemented")
     }
 }

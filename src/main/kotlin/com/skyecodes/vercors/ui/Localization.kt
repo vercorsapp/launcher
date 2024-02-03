@@ -20,6 +20,8 @@ interface Localization {
     val modpacks: String
     val resourcePacks: String
     val shaderPacks: String
+    val selected: String
+    val remove: String
 
     // Home
     val jumpBackIn: String
@@ -78,12 +80,10 @@ interface Localization {
     val openInBrowser: String
     val copyUrl: String
     val errorOccurred: String
-    val microsoftAuth: String
-    val microsoftToken: String
-    val xboxLiveAuth: String
-    val xstsToken: String
-    val minecraftAuth: String
-    val minecraftProfile: String
+    val authenticating: String
+    val awaitingAuth: String
+    val accountSuccess: String
+    val logOut: String
 
     object En : Localization {
         // General
@@ -112,6 +112,8 @@ interface Localization {
         override val play = "Play"
         override val view = "View"
         override val install = "Install"
+        override val selected = "Selected"
+        override val remove = "Remove"
 
         // Instances
         override val sortBy = "Sort by"
@@ -163,12 +165,10 @@ interface Localization {
         override val addAccountInfo = "This dialog window needs to stay open during the process."
         override val openInBrowser = "Open in browser"
         override val copyUrl = "Copy URL"
+        override val authenticating = "Authenticating"
         override val errorOccurred = "An error has occured."
-        override val microsoftAuth = "Awaiting authentication"
-        override val microsoftToken = "Getting Microsoft access token"
-        override val xboxLiveAuth = "Authenticating with Xbox Live"
-        override val xstsToken = "Obtaining XSTS token"
-        override val minecraftAuth = "Authenticating with Minecraft"
-        override val minecraftProfile = "Getting Minecraft profile"
+        override val awaitingAuth = "Awaiting authentication"
+        override val accountSuccess = "Authentication successful"
+        override val logOut = "Log out"
     }
 }

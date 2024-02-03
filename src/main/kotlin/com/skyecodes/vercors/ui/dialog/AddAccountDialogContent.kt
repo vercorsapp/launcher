@@ -1,5 +1,7 @@
 package com.skyecodes.vercors.ui.dialog
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -9,31 +11,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.dialog.AddAccountDialogComponent
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
+import com.skyecodes.vercors.ui.accounts.AccountImage
 import com.skyecodes.vercors.ui.common.AppTextButton
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.appAnimateContentSize
 import compose.icons.FeatherIcons
-import compose.icons.feathericons.Copy
-import compose.icons.feathericons.ExternalLink
-import compose.icons.feathericons.X
-import compose.icons.feathericons.XCircle
+import compose.icons.feathericons.*
 
 @Composable
 fun AddAccountDialogContent(component: AddAccountDialogComponent) {
     val locale = LocalLocalization.current
     val clipboardManager = LocalClipboardManager.current
     val uiState by component.uiState.collectAsState()
+    val animatedProgress by animateFloatAsState(
+        targetValue = uiState.progress,
+        animationSpec = tween(500)
+    )
 
     Column(
         verticalArrangement = Arrangement.spacedBy(UI.largePadding),
         modifier = Modifier.padding(UI.largePadding).appAnimateContentSize()
     ) {
         Text(locale.addAccount, style = MaterialTheme.typography.h5)
-        Text(locale.addAccountInfo, style = MaterialTheme.typography.h6)
+        if (!uiState.isSuccess) {
+            Text(locale.addAccountInfo, style = MaterialTheme.typography.h6)
+        }
 
         if (uiState.isWaitingLogin) {
             Text(locale.addAccountLogin)
@@ -67,20 +75,40 @@ fun AddAccountDialogContent(component: AddAccountDialogComponent) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                uiState.error?.let {
+                if (uiState.error != null) {
                     Icon(FeatherIcons.XCircle, null, Modifier.size(UI.mediumIconSize), MaterialTheme.colors.error)
+                } else if (uiState.isSuccess) {
+                    Icon(FeatherIcons.Check, null, Modifier.size(UI.mediumIconSize), LocalPalette.current.green)
                 }
                 Text(
-                    text = uiState.phase.localizedText(locale),
-                    color = if (uiState.error == null) MaterialTheme.colors.onSurface else MaterialTheme.colors.error
+                    text = if (uiState.isSuccess) locale.accountSuccess
+                    else if (uiState.isWaitingLogin) locale.awaitingAuth
+                    else "${locale.authenticating}...",
+                    color = if (uiState.error != null) MaterialTheme.colors.error
+                    else if (uiState.isSuccess) LocalPalette.current.green
+                    else MaterialTheme.colors.onSurface,
+                    lineHeight = UI.normalLineHeight,
+                    fontWeight = if (uiState.isSuccess || uiState.error != null) FontWeight.SemiBold else null
                 )
             }
             if (uiState.progress < 0 && uiState.error == null) LinearProgressIndicator()
-            else LinearProgressIndicator(uiState.progress)
+            else if (!uiState.isSuccess) LinearProgressIndicator(animatedProgress)
         }
 
-        uiState.error?.let {
-            Text(it.message ?: locale.errorOccurred, color = MaterialTheme.colors.error)
+        if (uiState.error != null) {
+            Text(uiState.error!!.message ?: locale.errorOccurred, color = MaterialTheme.colors.error)
+        } else if (uiState.account != null) {
+            val account = uiState.account!!
+            Row(
+                modifier = Modifier.height(40.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(UI.largePadding, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Card(Modifier.fillMaxHeight()) {
+                    AccountImage(account, Modifier.fillMaxHeight())
+                }
+                Text(account.name, style = MaterialTheme.typography.h6)
+            }
         }
 
         if (uiState.canClose) {

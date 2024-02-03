@@ -30,7 +30,7 @@ fun AsyncImage(
     key: String,
     url: String,
     painterFor: @Composable (ImageBitmap) -> Painter,
-    contentDescription: String,
+    contentDescription: String?,
     defaultImage: ImageBitmap? = null,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,

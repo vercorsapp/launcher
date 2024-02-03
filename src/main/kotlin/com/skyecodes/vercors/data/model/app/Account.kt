@@ -11,17 +11,15 @@ data class Account(
     constructor(
         name: String,
         uuid: String,
-        msAccessToken: String,
         msRefreshToken: String,
         mcAccessToken: String,
         mcTokenExpiration: AppInstant
-    ) : this(name, uuid, TokenData(msAccessToken, msRefreshToken, mcAccessToken, mcTokenExpiration))
+    ) : this(name, uuid, TokenData(msRefreshToken, mcAccessToken, mcTokenExpiration))
 
     @Serializable
     data class TokenData(
-        val msAccessToken: String,
-        val msRefreshToken: String,
-        val mcAccessToken: String,
-        val mcTokenExpiration: AppInstant
+        val refreshToken: String,
+        val token: String,
+        val exp: AppInstant
     )
 }

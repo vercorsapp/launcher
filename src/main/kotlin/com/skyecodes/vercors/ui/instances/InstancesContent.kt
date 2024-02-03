@@ -23,9 +23,7 @@ import com.skyecodes.vercors.component.screen.InstancesComponent
 import com.skyecodes.vercors.data.model.app.Instance
 import com.skyecodes.vercors.data.model.app.InstanceGroupBy
 import com.skyecodes.vercors.data.model.app.InstanceSortBy
-import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.header
-import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
@@ -174,7 +172,7 @@ fun InstancesContent(
                     } else if (uiState.sorter.groupBy === InstanceGroupBy.None) {
                         items(uiState.instances[""]!!, key = { it.path }) {
                             Card(modifier = Modifier.padding(UI.mediumPadding)) {
-                                InstanceCardContent(it)
+                                InstanceCardContent(it, component.showInstanceDetails, component.launchInstance)
                             }
                         }
                     } else {
@@ -203,7 +201,7 @@ fun InstancesContent(
                             }
                             items(instances, key = { it.path }) {
                                 Card(modifier = Modifier.padding(UI.mediumPadding)) {
-                                    InstanceCardContent(it)
+                                    InstanceCardContent(it, component.showInstanceDetails, component.launchInstance)
                                 }
                             }
                         }
@@ -236,14 +234,18 @@ fun InstancesContent(
 }
 
 @Composable
-fun InstanceCardContent(instance: Instance) {
+fun InstanceCardContent(
+    instance: Instance,
+    onInstanceClick: (Instance) -> Unit,
+    onInstanceLaunchClick: (Instance) -> Unit
+) {
     val locale = LocalLocalization.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     Card(
         modifier = Modifier.hoverable(interactionSource)
-            .pointerHoverIcon(PointerIcon.Hand).clickable { /*onInstanceClick(instance)*/ }
+            .pointerHoverIcon(PointerIcon.Hand).clickable { onInstanceClick(instance) }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -269,7 +271,7 @@ fun InstanceCardContent(instance: Instance) {
                         contentAlignment = Alignment.Center
                     ) {
                         IconButton(
-                            onClick = { /*onInstanceLaunchClick(instance)*/ },
+                            onClick = { onInstanceLaunchClick(instance) },
                             modifier = Modifier.size(64.dp).background(MaterialTheme.colors.primary, CircleShape),
                             content = {
                                 Icon(
@@ -299,14 +301,13 @@ fun InstanceCardContent(instance: Instance) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = (instance.loader?.value ?: Loader.Vanilla) + " " + instance.gameVersion.id,
+                        text = instance.loaderAndVersionString,
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = instance.lastPlayed?.let { "${locale.lastPlayed} ${it.readable()}" }
-                            ?: locale.notPlayedBefore,
+                        text = instance.lastPlayedString,
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

@@ -21,12 +21,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.data.model.app.Instance
-import com.skyecodes.vercors.data.model.app.Loader
-import com.skyecodes.vercors.readable
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AppAnimatedVisibility
+import com.skyecodes.vercors.ui.instances.lastPlayedString
+import com.skyecodes.vercors.ui.instances.loaderAndVersionString
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box
 import compose.icons.feathericons.Play
@@ -128,14 +128,13 @@ private fun RowScope.InstanceCardContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = (instance.loader?.value ?: Loader.Vanilla) + " " + instance.gameVersion.id,
+                        text = instance.loaderAndVersionString,
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = instance.lastPlayed?.let { "${locale.lastPlayed} ${it.readable()}" }
-                            ?: locale.notPlayedBefore,
+                        text = instance.lastPlayedString,
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

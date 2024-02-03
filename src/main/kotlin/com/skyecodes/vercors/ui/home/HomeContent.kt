@@ -41,14 +41,14 @@ fun HomeContent(component: HomeComponent) {
                     when (section) {
                         is HomeComponent.UiState.Section.Instances -> HomeInstancesSectionContent(
                             section.instances,
-                            component::showInstance,
-                            component::launchInstance
+                            component.showInstanceDetails,
+                            component.launchInstance
                         )
 
                         is HomeComponent.UiState.Section.Projects -> HomeProjectsSectionContent(
                             section.projects,
-                            component::showProject,
-                            component::installProject
+                            component.showProjectDetails,
+                            component.installProject
                         )
                     }
                 }

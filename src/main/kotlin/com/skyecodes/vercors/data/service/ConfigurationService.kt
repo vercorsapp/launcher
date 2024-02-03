@@ -26,7 +26,7 @@ interface ConfigurationService {
 
 sealed interface ConfigurationState {
     data object NotLoaded : ConfigurationState
-    data class Errored(val exception: ConfigurationLoadingException) : ConfigurationState
+    data class Errored(val error: ConfigurationLoadingException) : ConfigurationState
     data class Loaded(val config: Configuration) : ConfigurationState
 }
 

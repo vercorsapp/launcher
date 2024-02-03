@@ -7,7 +7,6 @@ import com.skyecodes.vercors.component.AppComponentContext
 import com.skyecodes.vercors.component.get
 import com.skyecodes.vercors.data.model.app.Account
 import com.skyecodes.vercors.data.service.AccountService
-import com.skyecodes.vercors.data.service.AuthenticationPhase
 import com.skyecodes.vercors.data.service.AuthenticationState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,14 +25,14 @@ interface AddAccountDialogComponent {
 
     data class UiState(
         val url: String? = null,
-        val phase: AuthenticationPhase = AuthenticationPhase.MicrosoftAuth,
         val progress: Float = -1f,
         val error: Throwable? = null,
         val account: Account? = null
     ) {
         val canClose = account != null || error != null
-        val isWaitingLogin = progress < 0
+        val isWaitingLogin = progress < 0 && error == null
         val hasUrl = url != null && isWaitingLogin && error == null
+        val isSuccess = account != null && error == null
     }
 }
 
@@ -56,7 +55,6 @@ class DefaultAddAccountDialogComponent(
             accountService.startAuthentication().collect { state ->
                 when (state) {
                     is AuthenticationState.Error -> uiState.update { it.copy(error = state.error) }
-                    is AuthenticationState.Phase -> uiState.update { it.copy(phase = state.phase) }
                     is AuthenticationState.Progress -> uiState.update { it.copy(progress = state.progress) }
                     is AuthenticationState.Success -> uiState.update { it.copy(account = state.account) }
                     is AuthenticationState.Waiting -> uiState.update { it.copy(url = state.url) }

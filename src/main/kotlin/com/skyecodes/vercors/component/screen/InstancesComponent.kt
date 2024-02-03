@@ -24,6 +24,8 @@ interface InstancesComponent : Refreshable {
     val uiState: StateFlow<UiState>
     val instances: StateFlow<List<Instance>>
     val openNewInstanceDialog: () -> Unit
+    val showInstanceDetails: (Instance) -> Unit
+    val launchInstance: (Instance) -> Unit
 
     fun updateNameFilter(nameFilter: String)
     fun updateSortBy(sortBy: InstanceSortBy)
@@ -43,6 +45,8 @@ interface InstancesComponent : Refreshable {
 class DefaultInstancesComponent(
     componentContext: AppComponentContext,
     override val openNewInstanceDialog: () -> Unit,
+    override val showInstanceDetails: (Instance) -> Unit,
+    override val launchInstance: (Instance) -> Unit,
     override val instances: StateFlow<List<Instance>>,
     private val configuration: StateFlow<Configuration>,
     private val instanceService: InstanceService = componentContext.get(),

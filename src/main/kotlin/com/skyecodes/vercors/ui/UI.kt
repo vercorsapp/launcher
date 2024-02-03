@@ -15,7 +15,7 @@ import com.skyecodes.vercors.data.model.app.Configuration
 
 object UI {
     val defaultRoundedCornerShape = RoundedCornerShape(5.dp)
-    val largeRoundedCornerShape = RoundedCornerShape(15.dp)
+    val largeRoundedCornerShape = RoundedCornerShape(10.dp)
     val normalLineHeight = 16.sp
     val mediumIconSize = 16.dp
     val largePadding = 20.dp

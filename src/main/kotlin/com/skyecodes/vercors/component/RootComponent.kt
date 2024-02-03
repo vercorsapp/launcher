@@ -14,18 +14,12 @@ import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.jthemedetecor.OsThemeDetector
 import com.skyecodes.vercors.component.dialog.*
 import com.skyecodes.vercors.component.screen.*
-import com.skyecodes.vercors.data.model.app.AppTab
-import com.skyecodes.vercors.data.model.app.AppTheme
-import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.data.model.app.Instance
+import com.skyecodes.vercors.data.model.app.*
 import com.skyecodes.vercors.data.service.*
 import com.skyecodes.vercors.ui.Palette
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.awt.Dimension
@@ -44,6 +38,7 @@ interface RootComponent {
     val instances: StateFlow<List<Instance>>
     val activeTab: StateFlow<AppTab?>
     val accountData: StateFlow<AccountData>
+    val currentAccount: Flow<Account?>
 
     fun initializeWindowState(windowState: WindowState)
     fun initializeWindow(window: ComposeWindow)
@@ -55,7 +50,11 @@ interface RootComponent {
     fun onPreviousScreen()
     fun onRefreshScreen()
     fun openNewInstanceDialog()
-    fun openAccounts()
+    fun toggleAccountsPopupOrOpenDialog()
+    fun toggleAccountsPopup()
+    fun openAddAccountDialog()
+    fun selectAccount(account: Account)
+    fun removeAccount(account: Account)
     fun openErrorDialog(title: String, vararg message: String)
     fun closeDialog()
 
@@ -66,6 +65,8 @@ interface RootComponent {
             Refreshable by component
         class Search(val component: SearchComponent) : ScreenChild(AppTab.Search, true), Refreshable by component
         class Settings(val component: SettingsComponent) : ScreenChild(AppTab.Settings, true), Refreshable by component
+        class InstanceDetails(val component: InstanceDetailsComponent) : ScreenChild(AppTab.Instances),
+            Refreshable by component
     }
 
     sealed interface DialogChild {
@@ -112,9 +113,11 @@ class DefaultRootComponent(
     private val detector = OsThemeDetector.getDetector()
     private val detectorListener: (Boolean) -> Unit = {
         val state = configurationState.value
-        if (state is ConfigurationState.Loaded && state.config.theme === AppTheme.System) updatePalette()
+        if (state is ConfigurationState.Loaded && state.config.theme === AppTheme.System) updatePalette(state.config)
     }
+    private var isDetectorRegistered = false
     private val screenId = AtomicLong(0)
+    private val nextScreenId get() = screenId.getAndIncrement()
     private val screenNavigation = SimpleNavigation<(AppNavigationState) -> AppNavigationState>()
 
     override val uiState: MutableStateFlow<RootComponent.UiState> =
@@ -172,6 +175,8 @@ class DefaultRootComponent(
         )
     }
     override val accountData: StateFlow<AccountData> = accountService.accountData
+    override val currentAccount: Flow<Account?> =
+        accountData.filterIsInstance<AccountData.Loaded>().map { it.selectedAccount }
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         logger.error(throwable) { "An error occured while loading the application." }
@@ -187,29 +192,60 @@ class DefaultRootComponent(
         logger.info { "Creating RootComponent" }
         scope.launch(handler) {
             configurationService.loadConfiguration()
-            instanceService.loadInstances()
-            accountService.loadAccounts()
             configuration = configurationService.config.stateIn(this)
-            instances = instanceService.instances.stateIn(this)
             initNavigation(configuration.value.defaultTab)
             detector.registerListener(detectorListener)
-            configuration.collect { updatePalette() }
+            isDetectorRegistered = true
+        }
+        scope.launch(handler) {
+            configurationState.collect { state ->
+                when (state) {
+                    is ConfigurationState.Errored -> uiState.update { it.copy(fatalError = state.error) }
+                    is ConfigurationState.Loaded -> updatePalette(state.config)
+                    ConfigurationState.NotLoaded -> {}
+                }
+            }
+        }
+        scope.launch(handler) {
+            instanceService.loadInstances()
+            instances = instanceService.instances.stateIn(this)
+        }
+        scope.launch(handler) {
+            instancesState.collect { state ->
+                when (state) {
+                    is InstancesState.Loaded -> {
+                        if (state.errors.isNotEmpty()) {
+                            // TODO handle errors
+                        } else if (state.warns.isNotEmpty()) {
+                            // TODO handle warns
+                        }
+                    }
+
+                    InstancesState.NotLoaded -> {}
+                }
+            }
+        }
+        scope.launch(handler) {
+            accountService.loadAccounts()
         }
         cancellation = children.subscribe {
             it.active.instance.tab?.let { tab ->
-                logger.info { "Navigated to ${tab.name}" }
+                logger.info { "Navigated to ${tab.name} tab" }
                 activeTab.value = tab
             }
         }
     }
 
     private fun onDestroy() {
-        detector.removeListener(detectorListener)
+        if (isDetectorRegistered) {
+            detector.removeListener(detectorListener)
+            isDetectorRegistered = false
+        }
         cancellation.cancel()
     }
 
-    private fun updatePalette() {
-        val palette = when (configuration.value.theme) {
+    private fun updatePalette(config: Configuration) {
+        val palette = when (config.theme) {
             AppTheme.Dark -> Palette.Mocha
             AppTheme.Light -> Palette.Latte
             else -> if (detector.isDark) Palette.Mocha else Palette.Latte
@@ -265,10 +301,10 @@ class DefaultRootComponent(
     }
 
     private fun createDefaultConfigForTab(tab: AppTab) = when (tab) {
-        AppTab.Home -> ScreenConfig.Home(screenId.getAndIncrement())
-        AppTab.Instances -> ScreenConfig.Instances(screenId.getAndIncrement())
-        AppTab.Search -> ScreenConfig.Search(screenId.getAndIncrement())
-        AppTab.Settings -> ScreenConfig.Settings(screenId.getAndIncrement())
+        AppTab.Home -> ScreenConfig.Home(nextScreenId)
+        AppTab.Instances -> ScreenConfig.Instances(nextScreenId)
+        AppTab.Search -> ScreenConfig.Search(nextScreenId)
+        AppTab.Settings -> ScreenConfig.Settings(nextScreenId)
     }
 
     override fun navigate(tab: AppTab) {
@@ -308,18 +344,22 @@ class DefaultRootComponent(
         dialogNavigation.activate(DialogConfig.CreateNewInstance)
     }
 
-    override fun openAccounts() {
+    override fun toggleAccountsPopupOrOpenDialog() {
         val data = accountData.value
         if (data is AccountData.Loaded) {
             if (data.accounts.isEmpty()) {
-                openAddAcountDialog()
+                openAddAccountDialog()
             } else {
-                uiState.update { it.copy(accountsPopupOpen = true) }
+                toggleAccountsPopup()
             }
         }
     }
 
-    private fun openAddAcountDialog() {
+    override fun toggleAccountsPopup() {
+        uiState.update { it.copy(accountsPopupOpen = !it.accountsPopupOpen) }
+    }
+
+    override fun openAddAccountDialog() {
         dialogNavigation.activate(DialogConfig.AddAccount)
     }
 
@@ -335,6 +375,14 @@ class DefaultRootComponent(
         configurationService.updateConfiguration(config)
     }
 
+    override fun selectAccount(account: Account) {
+        accountService.selectAccount(account)
+    }
+
+    override fun removeAccount(account: Account) {
+        accountService.removeAccount(account) // TODO add confirmation dialog
+    }
+
     private fun createChild(config: ScreenConfig, componentContext: AppComponentContext): RootComponent.ScreenChild =
         when (config) {
             is ScreenConfig.None -> RootComponent.ScreenChild.None
@@ -342,16 +390,28 @@ class DefaultRootComponent(
             is ScreenConfig.Instances -> RootComponent.ScreenChild.Instances(instancesComponent(componentContext))
             is ScreenConfig.Search -> RootComponent.ScreenChild.Search(searchComponent(componentContext))
             is ScreenConfig.Settings -> RootComponent.ScreenChild.Settings(settingsComponent(componentContext))
+            is ScreenConfig.InstanceDetails -> RootComponent.ScreenChild.InstanceDetails(
+                instanceDetailsComponent(
+                    componentContext,
+                    config.instance
+                )
+            )
         }
 
     private fun homeComponent(componentContext: AppComponentContext): HomeComponent = DefaultHomeComponent(
-        componentContext = componentContext
+        componentContext = componentContext,
+        showInstanceDetails = ::showInstanceDetails,
+        launchInstance = ::launchInstance,
+        showProjectDetails = ::showProjectDetails,
+        installProject = ::installProject
     )
 
     private fun instancesComponent(componentContext: AppComponentContext): InstancesComponent =
         DefaultInstancesComponent(
             componentContext = componentContext,
             openNewInstanceDialog = ::openNewInstanceDialog,
+            showInstanceDetails = ::showInstanceDetails,
+            launchInstance = ::launchInstance,
             configuration = configuration,
             instances = instances
         )
@@ -362,6 +422,14 @@ class DefaultRootComponent(
 
     private fun settingsComponent(componentContext: AppComponentContext): SettingsComponent = DefaultSettingsComponent(
         componentContext = componentContext
+    )
+
+    private fun instanceDetailsComponent(
+        componentContext: AppComponentContext,
+        instance: Instance
+    ): InstanceDetailsComponent = DefaultInstanceDetailsComponent(
+        componentContext = componentContext,
+        instance = instance
     )
 
     private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): RootComponent.DialogChild =
@@ -410,18 +478,49 @@ class DefaultRootComponent(
         }
     }
 
+    private fun showInstanceDetails(instance: Instance) {
+        screenNavigation.navigate {
+            it.copy(
+                configurations = it.configurations.filterIndexed { i, _ -> i <= it.index } + ScreenConfig.InstanceDetails(
+                    nextScreenId,
+                    instance
+                ),
+                index = it.index + 1
+            )
+        }
+    }
+
+    private fun launchInstance(instance: Instance) {
+
+    }
+
+    private fun showProjectDetails(project: Project) {
+
+    }
+
+    private fun installProject(instance: Project) {
+
+    }
+
     @Serializable
     sealed interface ScreenConfig {
         @Serializable
         data object None : ScreenConfig
+
         @Serializable
         data class Home(val screenId: Long) : ScreenConfig
+
         @Serializable
         data class Instances(val screenId: Long) : ScreenConfig
+
         @Serializable
         data class Search(val screenId: Long) : ScreenConfig
+
         @Serializable
         data class Settings(val screenId: Long) : ScreenConfig
+
+        @Serializable
+        data class InstanceDetails(val screenId: Long, val instance: Instance) : ScreenConfig
     }
 
     @Serializable
@@ -431,6 +530,7 @@ class DefaultRootComponent(
 
         @Serializable
         data object AddAccount : DialogConfig
+
         @Serializable
         data class Error(val title: String, val message: List<String>) : DialogConfig
     }

@@ -19,17 +19,17 @@ import androidx.compose.ui.window.FrameWindowScope
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
+import com.skyecodes.vercors.data.service.AccountData
+import com.skyecodes.vercors.ui.accounts.AccountsPopup
 import com.skyecodes.vercors.ui.dialog.AddAccountDialogContent
 import com.skyecodes.vercors.ui.dialog.AppDialogContent
 import com.skyecodes.vercors.ui.dialog.CreateNewInstanceDialogContent
 import com.skyecodes.vercors.ui.dialog.ErrorDialogContent
 import com.skyecodes.vercors.ui.home.HomeContent
+import com.skyecodes.vercors.ui.instances.InstanceDetailsContent
 import com.skyecodes.vercors.ui.instances.InstancesContent
 import com.skyecodes.vercors.ui.search.SearchContent
 import com.skyecodes.vercors.ui.settings.SettingsContent
-import io.github.oshai.kotlinlogging.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -46,7 +46,8 @@ fun FrameWindowScope.AppContent(
     val children by component.children.subscribeAsState()
     val currentTab by component.activeTab.collectAsState()
     val dialog by component.dialog.subscribeAsState()
-    //val accounts by component.accounts.subscribeAsState()
+    val accountData by component.accountData.collectAsState()
+    val currentAccount by component.currentAccount.collectAsState(null)
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -62,7 +63,13 @@ fun FrameWindowScope.AppContent(
                         modifier = Modifier.fillMaxHeight().background(color = uiState.palette.surface0)
                             .shadow(4.dp)
                     ) {
-                        Menu(currentTab, component::navigate, component::openNewInstanceDialog, component::openAccounts)
+                        Menu(
+                            currentTab,
+                            currentAccount,
+                            component::navigate,
+                            component::openNewInstanceDialog,
+                            component::toggleAccountsPopupOrOpenDialog
+                        )
                     }
                     Column {
                         WindowDraggableArea(
@@ -80,7 +87,7 @@ fun FrameWindowScope.AppContent(
                                     .background(color = uiState.palette.surface0)
                             ) {
                                 Toolbar(
-                                    currentTab?.localizedTitle?.let { it(LocalLocalization.current) },
+                                    currentTab?.localizedTitle?.let { it(LocalLocalization.current) }, // TODO add links to title bar
                                     children.hasPreviousScreen,
                                     children.hasNextScreen,
                                     children.canRefreshScreen,
@@ -116,11 +123,21 @@ fun FrameWindowScope.AppContent(
                                         is RootComponent.ScreenChild.Instances -> InstancesContent(child.component)
                                         is RootComponent.ScreenChild.Search -> SearchContent(child.component)
                                         is RootComponent.ScreenChild.Settings -> SettingsContent(child.component)
+                                        is RootComponent.ScreenChild.InstanceDetails -> InstanceDetailsContent(child.component)
                                     }
                                 }
                             }
                             if (uiState.accountsPopupOpen) {
-                                // TODO accounts popup
+                                AccountsPopup(
+                                    accountData = accountData as AccountData.Loaded,
+                                    onTogglePopup = component::toggleAccountsPopup,
+                                    onSelectAccount = component::selectAccount,
+                                    onRemoveAccount = component::removeAccount,
+                                    onAddAccount = {
+                                        component.toggleAccountsPopup()
+                                        component.openAddAccountDialog()
+                                    }
+                                )
                             }
                         }
                     }

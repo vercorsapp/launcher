@@ -2,7 +2,6 @@ package com.skyecodes.vercors.data.service
 
 import com.skyecodes.vercors.data.model.app.Account
 import com.skyecodes.vercors.sha256
-import com.skyecodes.vercors.ui.Localization
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -35,13 +34,16 @@ interface AccountService {
     fun addAccount(account: Account)
     fun removeAccount(account: Account)
     fun startAuthentication(): Flow<AuthenticationState>
+    fun selectAccount(account: Account)
 }
 
 sealed interface AccountData {
     data object NotLoaded : AccountData
 
     @Serializable
-    data class Loaded(val selected: String? = null, val accounts: List<Account> = emptyList()) : AccountData
+    data class Loaded(val selected: String? = null, val accounts: List<Account> = emptyList()) : AccountData {
+        val selectedAccount: Account? get() = accounts.find { it.uuid == selected }
+    }
 }
 
 class AccountServiceImpl(
@@ -99,6 +101,15 @@ class AccountServiceImpl(
         }
     }
 
+    override fun selectAccount(account: Account) {
+        accountData.update {
+            when (it) {
+                is AccountData.Loaded -> validate(it.copy(selected = account.uuid))
+                AccountData.NotLoaded -> throw RuntimeException() // impossible
+            }
+        }
+    }
+
     private suspend fun init() {
         val data = AccountData.Loaded()
         accountData.value = data
@@ -123,15 +134,26 @@ class AccountServiceImpl(
     override fun startAuthentication(): Flow<AuthenticationState> = channelFlow {
         withContext(Dispatchers.IO) {
             val result = runCatching {
+                var progress = 0
+                val state = UUID.randomUUID().toString()
                 val codeVerifier = UUID.randomUUID().toString()
                 val codeChallenge = codeVerifier.sha256().take(43)
-                val (authorizationCode, port) = getAuthorizationCode(codeChallenge)
-                val (msAccessToken, msRefreshToken) = getMicrosoftAccessToken(codeVerifier, authorizationCode, port)
+                val (authorizationCode, port) = getAuthorizationCode(state, codeChallenge)
+                progress(++progress)
+                val (msAccessToken, refreshToken) = getMicrosoftAccessToken(codeVerifier, authorizationCode, port)
+                progress(++progress)
                 val (xblToken, userHash) = getXblToken(msAccessToken)
+                progress(++progress)
                 val xstsToken = getXstsToken(xblToken, userHash)
-                val (mcAccessToken, mcTokenExpiration) = getMinecraftAccessToken(userHash, xstsToken)
-                val (uuid, username) = getMinecraftProfile(mcAccessToken, userHash, xstsToken)
-                Account(username, uuid, msAccessToken, msRefreshToken, mcAccessToken, mcTokenExpiration)
+                progress(++progress)
+                val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
+                progress(++progress)
+                val (uuid, username) = getMinecraftProfile(token)
+                progress(++progress)
+                val account = Account(username, uuid, refreshToken, token, exp)
+                validateAccount(account)
+                progress(++progress)
+                account
             }
             result.onFailure {
                 logger.error(it) { "An error has occured" }
@@ -145,17 +167,19 @@ class AccountServiceImpl(
     }
 
     private suspend fun ProducerScope<AuthenticationState>.getAuthorizationCode(
+        state: String,
         codeChallenge: String
     ): Pair<String, Int> = coroutineScope {
         logger.info { "Getting authorization code" }
-        phase(AuthenticationPhase.MicrosoftAuth)
         var authorizationCode: String? = null
+        var responseState: String? = null
         var error: String? = null
         val server = embeddedServer(CIO, 0) {
             routing {
                 get("/") {
                     if (this.context.parameters.contains("code")) {
                         authorizationCode = this.context.parameters["code"]
+                        responseState = this.context.parameters["state"]
                         call.respondText("Authentication success! You can now close this window.")
                     } else if (this.context.parameters.contains("error")) {
                         val errorCode = this.context.parameters["error"]!!
@@ -181,6 +205,8 @@ class AccountServiceImpl(
                             "&redirect_uri=http%3A%2F%2Flocalhost%3A$port" +
                             "&response_mode=query" +
                             "&scope=XboxLive.signin%20offline_access" +
+                            "&state=$state" +
+                            "&prompt=select_account" +
                             "&code_challenge=$codeChallenge" +
                             "&code_challenge_method=S256"
                 )
@@ -189,7 +215,7 @@ class AccountServiceImpl(
             if (!isActive) throw AuthenticationException("Execution stopped")
             error?.let { throw AuthenticationException(it) }
             if (authorizationCode == null) throw AuthenticationException("Authentication failed")
-            progress(1)
+            if (state != responseState) throw AuthenticationException("Response state doesn't match")
             authorizationCode!! to port
         }
         withContext(Dispatchers.IO) {
@@ -199,13 +225,12 @@ class AccountServiceImpl(
         result.getOrThrow()
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getMicrosoftAccessToken(
+    private suspend fun getMicrosoftAccessToken(
         codeVerifier: String,
         authorizationCode: String,
         port: Int
     ): Pair<String, String> {
         logger.info { "Getting access token" }
-        phase(AuthenticationPhase.MicrosoftToken)
         val tokenResult = httpClient.submitForm(
             url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
             formParameters = parameters {
@@ -228,15 +253,13 @@ class AccountServiceImpl(
                 invalidResponse(tokenResult)
             }
         }
-        progress(2)
         return xblAccessToken to refreshToken
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getXblToken(
+    private suspend fun getXblToken(
         xblAccessToken: String
     ): Pair<String, String> {
         logger.info { "Authenticating with Xbox Live" }
-        phase(AuthenticationPhase.XboxLiveAuth)
         val xboxResult = httpClient.post("https://user.auth.xboxlive.com/user/authenticate") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
@@ -254,7 +277,6 @@ class AccountServiceImpl(
         val userHash = xboxResult["DisplayClaims"]?.jsonObject?.get("xui")
             ?.jsonArray?.get(0)?.jsonObject?.get("uhs")?.string
         if (xblToken == null || userHash == null) invalidResponse(xboxResult)
-        progress(3)
         return xblToken to userHash
     }
 
@@ -263,12 +285,11 @@ class AccountServiceImpl(
         throw AuthenticationException("Invalid response, see logs for more info")
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getXstsToken(
+    private suspend fun getXstsToken(
         xblToken: String,
         userHash: String
     ): String {
         logger.info { "Obtaining XSTS token" }
-        phase(AuthenticationPhase.XstsToken)
         val xstsResult = httpClient.post("https://xsts.auth.xboxlive.com/xsts/authorize") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
@@ -287,16 +308,14 @@ class AccountServiceImpl(
 
         if (xstsToken == null) invalidResponse(xstsResult)
         if (userHash != userHash2) throw AuthenticationException("User hashes don't match")
-        progress(4)
         return xstsToken
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getMinecraftAccessToken(
+    private suspend fun getMinecraftAccessToken(
         userHash: String,
         xstsToken: String
     ): Pair<String, Instant> {
         logger.info { "Authenticating with Minecraft" }
-        phase(AuthenticationPhase.MinecraftAuth)
         val minecraftResult = httpClient.post("https://api.minecraftservices.com/authentication/login_with_xbox") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
@@ -305,42 +324,36 @@ class AccountServiceImpl(
             })
         }.body<JsonObject>()
         val mcAccessToken = minecraftResult["access_token"]?.string
-        val expiresIn = minecraftResult["expired_in"]?.jsonPrimitive?.int
+        val expiresIn = minecraftResult["expires_in"]?.jsonPrimitive?.int
         if (mcAccessToken == null || expiresIn == null) {
             if (minecraftResult.containsKey("errorMessage")) throw AuthenticationException(minecraftResult["errorMessage"]?.string)
             else invalidResponse(minecraftResult)
         }
-        progress(5)
         return mcAccessToken to Instant.now().plusSeconds(expiresIn.toLong())
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getMinecraftProfile(
-        mcAccessToken: String,
-        userHash: String,
-        xstsToken: String
+    private suspend fun getMinecraftProfile(
+        mcAccessToken: String
     ): Pair<String, String> {
         logger.info { "Getting Minecraft profile" }
-        phase(AuthenticationPhase.MinecraftProfile)
         val profileResult = httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
             bearerAuth(mcAccessToken)
             accept(ContentType.Application.Json)
-            setBody(buildJsonObject {
-                put("identityToken", "XBL3.0 x=$userHash;$xstsToken")
-            })
         }.body<JsonObject>()
         val uuid = profileResult["id"]?.string
         val username = profileResult["name"]?.string
         if (uuid == null || username == null) invalidResponse(profileResult)
-        progress(6)
         return uuid to username
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.phase(phase: AuthenticationPhase) {
-        send(AuthenticationState.Phase(phase))
+    private fun validateAccount(account: Account) {
+        logger.info { "Validating account" }
+        if (account.uuid in (accountData.value as AccountData.Loaded).accounts.map { it.uuid })
+            throw AuthenticationException("This account has already been added!")
     }
 
     private suspend fun ProducerScope<AuthenticationState>.progress(progress: Int) {
-        send(AuthenticationState.Progress(progress.toFloat() / AuthenticationPhase.entries.size))
+        send(AuthenticationState.Progress(progress.toFloat() / 6))
     }
 
     private val JsonElement.string get() = jsonPrimitive.content
@@ -348,19 +361,9 @@ class AccountServiceImpl(
 
 sealed interface AuthenticationState {
     data class Waiting(val url: String) : AuthenticationState
-    data class Phase(val phase: AuthenticationPhase) : AuthenticationState
     data class Progress(val progress: Float) : AuthenticationState
     data class Error(val error: Throwable) : AuthenticationState
     data class Success(val account: Account) : AuthenticationState
-}
-
-enum class AuthenticationPhase(val localizedText: (Localization) -> String) {
-    MicrosoftAuth(Localization::microsoftAuth),
-    MicrosoftToken(Localization::microsoftToken),
-    XboxLiveAuth(Localization::xboxLiveAuth),
-    XstsToken(Localization::xstsToken),
-    MinecraftAuth(Localization::minecraftAuth),
-    MinecraftProfile(Localization::minecraftProfile),
 }
 
 class AuthenticationException(message: String? = "An error has occurred", cause: Throwable? = null) :
