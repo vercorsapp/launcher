@@ -4,9 +4,11 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.buildAnnotatedString
@@ -24,9 +26,11 @@ import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
 import com.skyecodes.vercors.ui.common.AppButton
 import com.skyecodes.vercors.ui.common.AppTooltip
+import com.skyecodes.vercors.ui.common.appAnimateColorAsState
+import com.skyecodes.vercors.ui.common.appAnimateContentSize
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.LogOut
 import compose.icons.feathericons.UserPlus
-import compose.icons.feathericons.UserX
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -38,7 +42,6 @@ fun AccountsPopup(
     onAddAccount: () -> Unit
 ) {
     val locale = LocalLocalization.current
-    val colors = MaterialTheme.colors
     Popup(
         alignment = Alignment.BottomStart,
         offset = IntOffset.Zero,
@@ -52,14 +55,18 @@ fun AccountsPopup(
         Card(
             modifier = Modifier.defaultMinSize(minWidth = 350.dp).width(IntrinsicSize.Max)
                 .padding(start = UI.mediumPadding, bottom = UI.largePadding).shadow(8.dp)
+                .appAnimateContentSize()
         ) {
             Column {
                 accountData.accounts.forEach {
                     val isSelected = it.uuid == accountData.selected
+                    val backgroundColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.primary else Color.Transparent)
+                    val contentColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
+
                     AccountsPopupEntry(
                         clickable = !isSelected,
                         onClick = { onSelectAccount(it) },
-                        modifier = if (isSelected) Modifier.background(colors.primary) else Modifier
+                        modifier = Modifier.background(backgroundColor)
                     ) {
                         Row(
                             modifier = Modifier.padding(UI.smallPadding).weight(1f),
@@ -76,7 +83,7 @@ fun AccountsPopup(
                                         append(" (${locale.selected})")
                                     }
                                 },
-                                color = if (isSelected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+                                color = contentColor
                             )
                         }
 
@@ -93,7 +100,7 @@ fun AccountsPopup(
                                 colors = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.surface2),
                                 contentPadding = PaddingValues(UI.mediumPadding)
                             ) {
-                                Icon(FeatherIcons.UserX, locale.logOut, Modifier.fillMaxSize())
+                                Icon(FeatherIcons.LogOut, locale.logOut, Modifier.fillMaxSize())
                             }
                         }
                     }

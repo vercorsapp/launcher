@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("serialization.version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:${property("coroutines.version")}")
     implementation("io.ktor:ktor-client-core:${property("ktor.version")}")
     implementation("io.ktor:ktor-client-cio:${property("ktor.version")}")
     implementation("io.ktor:ktor-client-content-negotiation:${property("ktor.version")}")

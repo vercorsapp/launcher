@@ -16,6 +16,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgPainter
 import com.skyecodes.vercors.component.dialog.CreateNewInstanceDialogComponent
 import com.skyecodes.vercors.data.model.app.Loader
 import com.skyecodes.vercors.resourceAsStream

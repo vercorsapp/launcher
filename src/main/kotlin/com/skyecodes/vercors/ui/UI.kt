@@ -2,6 +2,7 @@ package com.skyecodes.vercors.ui
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -11,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
 import com.skyecodes.vercors.data.model.app.Configuration
 
 object UI {
@@ -129,5 +132,13 @@ object UI {
         )
     )
 }
+
+@Composable
+fun imageRequest(key: String, url: String): ImageRequest =
+    ImageRequest.Builder(LocalPlatformContext.current)
+        .data(url)
+        .memoryCacheKey(key)
+        .diskCacheKey(key)
+        .build()
 
 val LocalConfiguration = compositionLocalOf { Configuration.DEFAULT }

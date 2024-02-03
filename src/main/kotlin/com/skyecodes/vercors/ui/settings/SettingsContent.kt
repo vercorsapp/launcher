@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.unit.dp
 import com.skyecodes.vercors.component.screen.SettingsComponent
 import com.skyecodes.vercors.data.model.app.*
@@ -15,7 +16,10 @@ import com.skyecodes.vercors.ui.LocalConfiguration
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.common.*
+import com.skyecodes.vercors.ui.common.AppDropdownMenuBox
+import com.skyecodes.vercors.ui.common.AppSwitch
+import com.skyecodes.vercors.ui.common.SectionContent
+import com.skyecodes.vercors.ui.common.SelectIconChip
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Check
 

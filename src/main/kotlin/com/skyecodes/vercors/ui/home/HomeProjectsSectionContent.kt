@@ -13,19 +13,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
 import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.data.model.app.Project
 import com.skyecodes.vercors.readable
@@ -33,10 +36,8 @@ import com.skyecodes.vercors.resourceAsStream
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
-import com.skyecodes.vercors.ui.common.AsyncImage
 import com.skyecodes.vercors.ui.common.IconTextButton
 import com.skyecodes.vercors.ui.common.appAnimateContentSize
-import com.skyecodes.vercors.ui.common.loadImageBitmap
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
@@ -99,9 +100,9 @@ private fun RowScope.ProjectCardContent(
             Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
                 project.imageUrl?.let { url ->
                     AsyncImage(
-                        key = "project/${project.provider.value}/${project.slug}/image",
-                        url = url,
-                        painterFor = { remember { BitmapPainter(it) } },
+                        model = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(url)
+                            .build(),
                         contentDescription = "${project.name} image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -148,9 +149,9 @@ private fun RowScope.ProjectCardContent(
                     ) {
                         project.logoUrl?.let { url ->
                             AsyncImage(
-                                key = "project/${project.provider.value}/${project.slug}/logo",
-                                url = url,
-                                painterFor = { remember { BitmapPainter(it) } },
+                                model = ImageRequest.Builder(LocalPlatformContext.current)
+                                    .data(url)
+                                    .build(),
                                 contentDescription = "${project.name} logo",
                                 modifier = Modifier.fillMaxSize()
                             )
