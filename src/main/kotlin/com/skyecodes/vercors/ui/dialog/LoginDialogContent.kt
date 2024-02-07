@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.skyecodes.vercors.component.dialog.AddAccountDialogComponent
+import com.skyecodes.vercors.component.dialog.LoginDialogComponent
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
@@ -25,7 +25,7 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
 
 @Composable
-fun AddAccountDialogContent(component: AddAccountDialogComponent) {
+fun LoginDialogContent(component: LoginDialogComponent) {
     val locale = LocalLocalization.current
     val clipboardManager = LocalClipboardManager.current
     val uiState by component.uiState.collectAsState()

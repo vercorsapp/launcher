@@ -21,10 +21,10 @@ import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
 import com.skyecodes.vercors.data.service.AccountState
 import com.skyecodes.vercors.ui.accounts.AccountsPopup
-import com.skyecodes.vercors.ui.dialog.AddAccountDialogContent
 import com.skyecodes.vercors.ui.dialog.AppDialogContent
 import com.skyecodes.vercors.ui.dialog.CreateNewInstanceDialogContent
 import com.skyecodes.vercors.ui.dialog.ErrorDialogContent
+import com.skyecodes.vercors.ui.dialog.LoginDialogContent
 import com.skyecodes.vercors.ui.home.HomeContent
 import com.skyecodes.vercors.ui.instances.InstanceDetailsContent
 import com.skyecodes.vercors.ui.instances.InstancesContent
@@ -64,11 +64,11 @@ fun FrameWindowScope.AppContent(
                             .shadow(4.dp)
                     ) {
                         Menu(
-                            currentTab,
-                            selectedAccount,
-                            component::navigate,
-                            component::openNewInstanceDialog,
-                            component::toggleAccountsPopupOrOpenDialog
+                            currentTab = currentTab,
+                            onNavigate = component::navigate,
+                            selectedAccount = selectedAccount,
+                            onCreateNewInstance = component::openNewInstanceDialog,
+                            onOpenAccounts = component::toggleAccountsPopupOrOpenDialog
                         )
                     }
                     Column {
@@ -87,16 +87,16 @@ fun FrameWindowScope.AppContent(
                                     .background(color = uiState.palette.surface0)
                             ) {
                                 Toolbar(
-                                    currentTab?.localizedTitle?.let { it(LocalLocalization.current) }, // TODO add links to title bar
-                                    children.hasPreviousScreen,
-                                    children.hasNextScreen,
-                                    children.canRefreshScreen,
-                                    component::onNextScreen,
-                                    component::onPreviousScreen,
-                                    component::onRefreshScreen,
-                                    component::onMinimize,
-                                    component::onMaximize,
-                                    onClose
+                                    screenTitle = currentTab?.localizedTitle?.let { it(LocalLocalization.current) }, // TODO add links to title bar
+                                    hasPreviousScreen = children.hasPreviousScreen,
+                                    hasNextScreen = children.hasNextScreen,
+                                    canRefreshScreen = children.canRefreshScreen,
+                                    onNextScreen = component::onNextScreen,
+                                    onPreviousScreen = component::onPreviousScreen,
+                                    onRefreshScreen = component::onRefreshScreen,
+                                    onMinimize = component::onMinimize,
+                                    onMaximize = component::onMaximize,
+                                    onClose = onClose
                                 )
                             }
                         }
@@ -155,11 +155,11 @@ fun FrameWindowScope.AppContent(
                         CreateNewInstanceDialogContent(child.component)
                     }
 
-                    is RootComponent.DialogChild.AddAccount -> AppDialogContent(
+                    is RootComponent.DialogChild.Login -> AppDialogContent(
                         modifier = Modifier.width(500.dp),
                         onClose = child.component::close
                     ) {
-                        AddAccountDialogContent(child.component)
+                        LoginDialogContent(child.component)
                     }
 
                     is RootComponent.DialogChild.Error -> AppDialogContent(

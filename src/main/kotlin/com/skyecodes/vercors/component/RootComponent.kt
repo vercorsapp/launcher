@@ -71,7 +71,7 @@ interface RootComponent {
 
     sealed interface DialogChild {
         class CreateNewInstance(val component: CreateNewInstanceDialogComponent) : DialogChild
-        class AddAccount(val component: AddAccountDialogComponent) : DialogChild
+        class Login(val component: LoginDialogComponent) : DialogChild
         class Error(val component: ErrorDialogComponent) : DialogChild
     }
 
@@ -360,7 +360,7 @@ class DefaultRootComponent(
     }
 
     override fun openAddAccountDialog(authenticationStateCollector: (AuthenticationState) -> Unit) {
-        dialogNavigation.activate(DialogConfig.AddAccount(authenticationStateCollector))
+        dialogNavigation.activate(DialogConfig.Login(authenticationStateCollector))
     }
 
     override fun openErrorDialog(title: String, vararg message: String) {
@@ -438,7 +438,7 @@ class DefaultRootComponent(
                 createNewInstanceComponent(componentContext)
             )
 
-            is DialogConfig.AddAccount -> RootComponent.DialogChild.AddAccount(
+            is DialogConfig.Login -> RootComponent.DialogChild.Login(
                 addAccountComponent(
                     componentContext,
                     config
@@ -456,9 +456,9 @@ class DefaultRootComponent(
 
     private fun addAccountComponent(
         componentContext: AppComponentContext,
-        config: DialogConfig.AddAccount
-    ): AddAccountDialogComponent =
-        DefaultAddAccountDialogComponent(
+        config: DialogConfig.Login
+    ): LoginDialogComponent =
+        DefaultLoginDialogComponent(
             componentContext = componentContext,
             onClose = ::closeDialog,
             authenticationStateCollector = config.authenticationStateCollector
@@ -565,7 +565,7 @@ class DefaultRootComponent(
         data object CreateNewInstance : DialogConfig
 
         @Serializable
-        data class AddAccount(val authenticationStateCollector: (AuthenticationState) -> Unit) : DialogConfig
+        data class Login(val authenticationStateCollector: (AuthenticationState) -> Unit) : DialogConfig
 
         @Serializable
         data class Error(val title: String, val message: List<String>) : DialogConfig

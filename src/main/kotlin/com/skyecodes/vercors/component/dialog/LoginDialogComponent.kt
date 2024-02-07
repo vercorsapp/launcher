@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.awt.Desktop
 import java.net.URI
 
-interface AddAccountDialogComponent {
+interface LoginDialogComponent {
     val uiState: StateFlow<UiState>
     val canOpenInBrowser: Boolean
 
@@ -36,13 +36,13 @@ interface AddAccountDialogComponent {
     }
 }
 
-class DefaultAddAccountDialogComponent(
+class DefaultLoginDialogComponent(
     componentContext: AppComponentContext,
     private val onClose: () -> Unit,
     private val authenticationStateCollector: (AuthenticationState) -> Unit,
     private val accountService: AccountService = componentContext.get()
-) : AbstractComponent(componentContext), AddAccountDialogComponent {
-    override val uiState = MutableStateFlow(AddAccountDialogComponent.UiState())
+) : AbstractComponent(componentContext), LoginDialogComponent {
+    override val uiState = MutableStateFlow(LoginDialogComponent.UiState())
     override val canOpenInBrowser = Desktop.isDesktopSupported()
     private var authenticationJob: Job? = null
 
