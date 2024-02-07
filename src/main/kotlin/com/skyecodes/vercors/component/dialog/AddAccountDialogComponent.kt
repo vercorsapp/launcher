@@ -17,10 +17,10 @@ import java.awt.Desktop
 import java.net.URI
 
 interface AddAccountDialogComponent {
-    val onClose: () -> Unit
     val uiState: StateFlow<UiState>
     val canOpenInBrowser: Boolean
 
+    fun close()
     fun openInBrowser(url: String)
 
     data class UiState(
@@ -38,7 +38,8 @@ interface AddAccountDialogComponent {
 
 class DefaultAddAccountDialogComponent(
     componentContext: AppComponentContext,
-    override val onClose: () -> Unit,
+    private val onClose: () -> Unit,
+    private val authenticationStateCollector: (AuthenticationState) -> Unit,
     private val accountService: AccountService = componentContext.get()
 ) : AbstractComponent(componentContext), AddAccountDialogComponent {
     override val uiState = MutableStateFlow(AddAccountDialogComponent.UiState())
@@ -53,11 +54,13 @@ class DefaultAddAccountDialogComponent(
     private fun onCreate() {
         authenticationJob = scope.launch {
             accountService.startAuthentication().collect { state ->
+                authenticationStateCollector(state)
                 when (state) {
                     is AuthenticationState.Error -> uiState.update { it.copy(error = state.error) }
                     is AuthenticationState.Progress -> uiState.update { it.copy(progress = state.progress) }
                     is AuthenticationState.Success -> uiState.update { it.copy(account = state.account) }
                     is AuthenticationState.Waiting -> uiState.update { it.copy(url = state.url) }
+                    else -> {}
                 }
             }
         }
@@ -69,5 +72,10 @@ class DefaultAddAccountDialogComponent(
 
     override fun openInBrowser(url: String) {
         Desktop.getDesktop().browse(URI(url))
+    }
+
+    override fun close() {
+        onClose()
+        authenticationStateCollector(AuthenticationState.Closed)
     }
 }

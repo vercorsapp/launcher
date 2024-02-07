@@ -74,9 +74,9 @@ interface Localization {
     val providersDescription: String
 
     // Account
-    val addAccount: String
-    val addAccountLogin: String
-    val addAccountInfo: String
+    val logIn: String
+    val logInWaitingForUser: String
+    val logInInfo: String
     val openInBrowser: String
     val copyUrl: String
     val errorOccurred: String
@@ -84,6 +84,7 @@ interface Localization {
     val awaitingAuth: String
     val accountSuccess: String
     val logOut: String
+    val refreshingToken: String
 
     object En : Localization {
         // General
@@ -159,10 +160,10 @@ interface Localization {
             "Choose which service(s) provide popular projects on the home tab."
 
         // Account
-        override val addAccount = "Add account"
-        override val addAccountLogin =
+        override val logIn = "Log in"
+        override val logInWaitingForUser =
             "Please log into the Microsoft account linked to your Minecraft profile through your browser."
-        override val addAccountInfo = "This dialog window needs to stay open during the process."
+        override val logInInfo = "This dialog window needs to stay open during the process."
         override val openInBrowser = "Open in browser"
         override val copyUrl = "Copy URL"
         override val authenticating = "Authenticating"
@@ -170,5 +171,6 @@ interface Localization {
         override val awaitingAuth = "Awaiting authentication"
         override val accountSuccess = "Authentication successful"
         override val logOut = "Log out"
+        override val refreshingToken = "Refreshing access token"
     }
 }

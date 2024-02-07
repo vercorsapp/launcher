@@ -14,6 +14,7 @@
 -keep class org.ocpsoft.prettytime.** { *; }
 -keep class io.ktor.serialization.kotlinx.json.KotlinxSerializationJsonExtensionProvider { *; }
 -keep class com.skyecodes.vercors.** { *; }
+-keep class javax.naming.** { *; }
 
 # When editing this file, update the following files as well:
 # - META-INF/com.android.tools/proguard/coroutines.pro

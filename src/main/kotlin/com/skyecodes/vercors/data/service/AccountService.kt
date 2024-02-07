@@ -1,6 +1,7 @@
 package com.skyecodes.vercors.data.service
 
 import com.skyecodes.vercors.data.model.app.Account
+import com.skyecodes.vercors.encodeBase64
 import com.skyecodes.vercors.sha256
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -28,20 +29,22 @@ import kotlin.io.path.*
 private val logger = KotlinLogging.logger { }
 
 interface AccountService {
-    val accountData: StateFlow<AccountData>
-    val selectedAccount: Flow<Account>
+    val accountState: StateFlow<AccountState>
+    val accountData: StateFlow<AccountState.Loaded?>
+    val selectedAccount: StateFlow<Account?>
     fun loadAccounts(): Job
     fun addAccount(account: Account)
     fun removeAccount(account: Account)
     fun startAuthentication(): Flow<AuthenticationState>
+    suspend fun validateToken(): Boolean
     fun selectAccount(account: Account)
 }
 
-sealed interface AccountData {
-    data object NotLoaded : AccountData
+sealed interface AccountState {
+    data object NotLoaded : AccountState
 
     @Serializable
-    data class Loaded(val selected: String? = null, val accounts: List<Account> = emptyList()) : AccountData {
+    data class Loaded(val selected: String? = null, val accounts: List<Account> = emptyList()) : AccountState {
         val selectedAccount: Account? get() = accounts.find { it.uuid == selected }
     }
 }
@@ -54,14 +57,16 @@ class AccountServiceImpl(
     private val clientId: String,
     private val accountsFile: Path = storageService.configDir.resolve("accounts.json")
 ) : AccountService, CoroutineScope by coroutineScope {
-    override val accountData = MutableStateFlow<AccountData>(AccountData.NotLoaded)
-    override val selectedAccount: Flow<Account> = accountData
-        .filterIsInstance<AccountData.Loaded>()
-        .map { data -> data.accounts.firstOrNull { it.uuid == data.selected } }
-        .filterNotNull()
+    override val accountState = MutableStateFlow<AccountState>(AccountState.NotLoaded)
+    override val accountData: StateFlow<AccountState.Loaded?> = accountState
+        .filterIsInstance<AccountState.Loaded>()
+        .stateIn(this, SharingStarted.Eagerly, null)
+    override val selectedAccount: StateFlow<Account?> = accountData
+        .map { data -> data?.selectedAccount }
+        .stateIn(this, SharingStarted.Eagerly, null)
 
     init {
-        coroutineScope.launch { accountData.filterIsInstance<AccountData.Loaded>().drop(1).collect { save(it) } }
+        launch { accountData.filterNotNull().drop(1).collect { save(it) } }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -69,8 +74,9 @@ class AccountServiceImpl(
         logger.debug { "Loading accounts at location $accountsFile" }
         if (accountsFile.exists()) {
             try {
-                accountData.value =
-                    validate(accountsFile.inputStream().use { json.decodeFromStream<AccountData.Loaded>(it) })
+                accountState.value =
+                    validateAccountData(
+                        accountsFile.inputStream().use { json.decodeFromStream<AccountState.Loaded>(it) })
             } catch (e: SerializationException) {
                 val message = "Unable to load accounts"
                 logger.error(e) { message }
@@ -84,39 +90,37 @@ class AccountServiceImpl(
     }
 
     override fun addAccount(account: Account) {
-        accountData.update {
-            when (it) {
-                is AccountData.Loaded -> validate(it.copy(selected = account.uuid, accounts = it.accounts + account))
-                AccountData.NotLoaded -> throw RuntimeException() // impossible
+        if (account.uuid in accountData.value!!.accounts.map { it.uuid }) {
+            updateAccounts {
+                it.copy(
+                    selected = account.uuid,
+                    accounts = it.accounts.map { oldAccount -> if (oldAccount.uuid == account.uuid) account else oldAccount })
             }
+        } else {
+            updateAccounts { it.copy(selected = account.uuid, accounts = it.accounts + account) }
         }
     }
 
-    override fun removeAccount(account: Account) {
-        accountData.update {
-            when (it) {
-                is AccountData.Loaded -> validate(it.copy(accounts = it.accounts - account))
-                AccountData.NotLoaded -> throw RuntimeException() // impossible
-            }
-        }
-    }
+    override fun removeAccount(account: Account) = updateAccounts { it.copy(accounts = it.accounts - account) }
 
-    override fun selectAccount(account: Account) {
-        accountData.update {
+    override fun selectAccount(account: Account) = updateAccounts { it.copy(selected = account.uuid) }
+
+    private fun updateAccounts(updater: (AccountState.Loaded) -> AccountState.Loaded) {
+        accountState.update {
             when (it) {
-                is AccountData.Loaded -> validate(it.copy(selected = account.uuid))
-                AccountData.NotLoaded -> throw RuntimeException() // impossible
+                is AccountState.Loaded -> validateAccountData(updater(it))
+                else -> it
             }
         }
     }
 
     private suspend fun init() {
-        val data = AccountData.Loaded()
-        accountData.value = data
+        val data = AccountState.Loaded()
+        accountState.value = data
         save(data)
     }
 
-    private fun validate(data: AccountData.Loaded): AccountData.Loaded {
+    private fun validateAccountData(data: AccountState.Loaded): AccountState.Loaded {
         return if (data.accounts.isEmpty() && data.selected != null)
             data.copy(selected = null)
         else if (data.accounts.isNotEmpty() && (data.selected == null || data.selected !in data.accounts.map { it.uuid }))
@@ -126,8 +130,8 @@ class AccountServiceImpl(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private suspend fun save(accountData: AccountData.Loaded) = withContext(Dispatchers.IO) {
-        accountsFile.createParentDirectories().outputStream().use { json.encodeToStream(accountData, it) }
+    private suspend fun save(accountState: AccountState.Loaded) = withContext(Dispatchers.IO) {
+        accountsFile.createParentDirectories().outputStream().use { json.encodeToStream(accountState, it) }
         logger.info { "Accounts saved" }
     }
 
@@ -137,7 +141,7 @@ class AccountServiceImpl(
                 var progress = 0
                 val state = UUID.randomUUID().toString()
                 val codeVerifier = UUID.randomUUID().toString()
-                val codeChallenge = codeVerifier.sha256().take(43)
+                val codeChallenge = codeVerifier.sha256().encodeBase64().take(43)
                 val (authorizationCode, port) = getAuthorizationCode(state, codeChallenge)
                 progress(++progress)
                 val (msAccessToken, refreshToken) = getMicrosoftAccessToken(codeVerifier, authorizationCode, port)
@@ -150,10 +154,7 @@ class AccountServiceImpl(
                 progress(++progress)
                 val (uuid, username) = getMinecraftProfile(token)
                 progress(++progress)
-                val account = Account(username, uuid, refreshToken, token, exp)
-                validateAccount(account)
-                progress(++progress)
-                account
+                Account(username, uuid, refreshToken, token, exp)
             }
             result.onFailure {
                 logger.error(it) { "An error has occured" }
@@ -162,6 +163,37 @@ class AccountServiceImpl(
             result.onSuccess {
                 addAccount(it)
                 send(AuthenticationState.Success(it))
+            }
+        }
+    }
+
+    override suspend fun validateToken(): Boolean = withContext(Dispatchers.IO) {
+        logger.info { "Validating token" }
+        val selectedAccount = selectedAccount.value
+        if (selectedAccount == null) {
+            logger.info { "No account selected - requiring full login" }
+            return@withContext false
+        }
+        if (selectedAccount.tokenData.exp > Instant.now().plusSeconds(60)) {
+            return@withContext true
+        }
+        try {
+            logger.info { "Verifying access token" }
+            getMinecraftProfile(selectedAccount.tokenData.token)
+            return@withContext true
+        } catch (e: Throwable) {
+            logger.info { "Access token expired - refreshing token" }
+            try {
+                val (msAccessToken, refreshToken) = refreshMicrosoftAccessToken(selectedAccount.tokenData.refreshToken)
+                val (xblToken, userHash) = getXblToken(msAccessToken)
+                val xstsToken = getXstsToken(xblToken, userHash)
+                val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
+                val (uuid, username) = getMinecraftProfile(token)
+                addAccount(Account(username, uuid, refreshToken, token, exp))
+                return@withContext true
+            } catch (e: Throwable) {
+                logger.info { "Unable to refresh token - requiring full login" }
+                return@withContext false
             }
         }
     }
@@ -231,15 +263,29 @@ class AccountServiceImpl(
         port: Int
     ): Pair<String, String> {
         logger.info { "Getting access token" }
+        return getMicrosoftAccessTokenWithParams(
+            "code" to authorizationCode,
+            "redirect_uri" to "http://localhost:$port",
+            "grant_type" to "authorization_code",
+            "code_verifier" to codeVerifier,
+        )
+    }
+
+    private suspend fun refreshMicrosoftAccessToken(refreshToken: String): Pair<String, String> {
+        logger.info { "Refreshing access token" }
+        return getMicrosoftAccessTokenWithParams(
+            "refresh_token" to refreshToken,
+            "grant_type" to "refresh_token"
+        )
+    }
+
+    private suspend fun getMicrosoftAccessTokenWithParams(vararg params: Pair<String, String>): Pair<String, String> {
         val tokenResult = httpClient.submitForm(
             url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
             formParameters = parameters {
                 set("client_id", clientId)
-                set("scope", "XboxLive.signin")
-                set("code", authorizationCode)
-                set("redirect_uri", "http://localhost:$port")
-                set("grant_type", "authorization_code")
-                set("code_verifier", codeVerifier)
+                set("scope", "XboxLive.signin offline_access")
+                params.forEach { (a, b) -> set(a, b) }
             }
         ).body<JsonObject>()
         val xblAccessToken = tokenResult["access_token"]?.string
@@ -346,12 +392,6 @@ class AccountServiceImpl(
         return uuid to username
     }
 
-    private fun validateAccount(account: Account) {
-        logger.info { "Validating account" }
-        if (account.uuid in (accountData.value as AccountData.Loaded).accounts.map { it.uuid })
-            throw AuthenticationException("This account has already been added!")
-    }
-
     private suspend fun ProducerScope<AuthenticationState>.progress(progress: Int) {
         send(AuthenticationState.Progress(progress.toFloat() / 6))
     }
@@ -364,6 +404,7 @@ sealed interface AuthenticationState {
     data class Progress(val progress: Float) : AuthenticationState
     data class Error(val error: Throwable) : AuthenticationState
     data class Success(val account: Account) : AuthenticationState
+    data object Closed : AuthenticationState
 }
 
 class AuthenticationException(message: String? = "An error has occurred", cause: Throwable? = null) :

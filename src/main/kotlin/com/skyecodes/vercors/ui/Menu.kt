@@ -29,7 +29,7 @@ import compose.icons.feathericons.User
 @Composable
 fun Menu(
     currentTab: AppTab?,
-    currentAccount: Account?,
+    selectedAccount: Account?,
     onNavigate: (AppTab) -> Unit,
     onCreateNewInstance: () -> Unit,
     onOpenAccounts: () -> Unit
@@ -44,8 +44,8 @@ fun Menu(
         IconNavigationItem(LocalLocalization.current.createNewInstance, FeatherIcons.Plus, false, onCreateNewInstance)
         Spacer(Modifier.weight(1f))
         TabNavigationItem(AppTab.Settings, currentTab, onNavigate)
-        if (currentAccount != null) {
-            ImageNavigationItem(LocalLocalization.current.accounts, currentAccount, onOpenAccounts)
+        if (selectedAccount != null) {
+            ImageNavigationItem(LocalLocalization.current.accounts, selectedAccount, onOpenAccounts)
         } else {
             IconNavigationItem(LocalLocalization.current.accounts, FeatherIcons.User, false, onOpenAccounts)
         }

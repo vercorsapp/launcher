@@ -62,6 +62,7 @@ fun main() {
                         properties.getProperty("microsoftClientId")
                     )
                 }
+                single<LauncherService> { LauncherServiceImpl(coroutineScope, get(), get(), get(), get(), get()) }
             })
         }) {
             val lifecycle = LifecycleRegistry()

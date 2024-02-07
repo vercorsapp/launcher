@@ -95,6 +95,8 @@ compose.desktop {
             vendor = "skyecodes"
             licenseFile = file("LICENSE")
 
+            modules("java.instrument", "java.management", "jdk.unsupported", "java.naming")
+
             windows {
                 shortcut = true
                 menu = true

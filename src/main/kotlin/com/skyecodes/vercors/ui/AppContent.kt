@@ -19,7 +19,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.skyecodes.vercors.component.RootComponent
 import com.skyecodes.vercors.data.model.app.Configuration
-import com.skyecodes.vercors.data.service.AccountData
+import com.skyecodes.vercors.data.service.AccountState
 import com.skyecodes.vercors.ui.accounts.AccountsPopup
 import com.skyecodes.vercors.ui.dialog.AddAccountDialogContent
 import com.skyecodes.vercors.ui.dialog.AppDialogContent
@@ -46,8 +46,8 @@ fun FrameWindowScope.AppContent(
     val children by component.children.subscribeAsState()
     val currentTab by component.activeTab.collectAsState()
     val dialog by component.dialog.subscribeAsState()
-    val accountData by component.accountData.collectAsState()
-    val currentAccount by component.currentAccount.collectAsState(null)
+    val accountState by component.accountState.collectAsState()
+    val selectedAccount by component.selectedAccount.collectAsState(null)
 
     CompositionLocalProvider(
         LocalPalette provides uiState.palette,
@@ -65,7 +65,7 @@ fun FrameWindowScope.AppContent(
                     ) {
                         Menu(
                             currentTab,
-                            currentAccount,
+                            selectedAccount,
                             component::navigate,
                             component::openNewInstanceDialog,
                             component::toggleAccountsPopupOrOpenDialog
@@ -129,7 +129,7 @@ fun FrameWindowScope.AppContent(
                             }
                             if (uiState.accountsPopupOpen) {
                                 AccountsPopup(
-                                    accountData = accountData as AccountData.Loaded,
+                                    accountState = accountState as AccountState.Loaded,
                                     onTogglePopup = component::toggleAccountsPopup,
                                     onSelectAccount = component::selectAccount,
                                     onRemoveAccount = component::removeAccount,
@@ -150,21 +150,21 @@ fun FrameWindowScope.AppContent(
                 when (val child = it.child?.instance) {
                     is RootComponent.DialogChild.CreateNewInstance -> AppDialogContent(
                         modifier = Modifier.width(570.dp),
-                        onClose = component::closeDialog
+                        onClose = child.component::close
                     ) {
                         CreateNewInstanceDialogContent(child.component)
                     }
 
                     is RootComponent.DialogChild.AddAccount -> AppDialogContent(
                         modifier = Modifier.width(500.dp),
-                        onClose = component::closeDialog
+                        onClose = child.component::close
                     ) {
                         AddAccountDialogContent(child.component)
                     }
 
                     is RootComponent.DialogChild.Error -> AppDialogContent(
                         modifier = Modifier.width(500.dp),
-                        onClose = component::closeDialog
+                        onClose = child.component.onClose
                     ) {
                         ErrorDialogContent(child.component)
                     }

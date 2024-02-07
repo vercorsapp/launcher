@@ -30,6 +30,7 @@ import com.skyecodes.vercors.ui.instances.loaderAndVersionString
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box
 import compose.icons.feathericons.Play
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
@@ -69,6 +70,16 @@ private fun RowScope.InstanceCardContent(
     val locale = LocalLocalization.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    var lastPlayedString by remember { mutableStateOf(instance.lastPlayedString(locale)) }
+    var i by remember { mutableStateOf(0L) }
+
+    // Required to automatically update "Last played" text,
+    // otherwise it only updates the text when the component is interacted with
+    LaunchedEffect(i) {
+        delay(1000L)
+        lastPlayedString = instance.lastPlayedString(locale)
+        i++
+    }
 
     Card(
         modifier = Modifier.weight(1f).hoverable(interactionSource)
@@ -134,7 +145,7 @@ private fun RowScope.InstanceCardContent(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = instance.lastPlayedString,
+                        text = lastPlayedString,
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

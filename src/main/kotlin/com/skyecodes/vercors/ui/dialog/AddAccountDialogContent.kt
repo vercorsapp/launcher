@@ -38,13 +38,13 @@ fun AddAccountDialogContent(component: AddAccountDialogComponent) {
         verticalArrangement = Arrangement.spacedBy(UI.largePadding),
         modifier = Modifier.padding(UI.largePadding).appAnimateContentSize()
     ) {
-        Text(locale.addAccount, style = MaterialTheme.typography.h5)
+        Text(locale.logIn, style = MaterialTheme.typography.h5)
         if (!uiState.isSuccess) {
-            Text(locale.addAccountInfo, style = MaterialTheme.typography.h6)
+            Text(locale.logInInfo, style = MaterialTheme.typography.h6)
         }
 
         if (uiState.isWaitingLogin) {
-            Text(locale.addAccountLogin)
+            Text(locale.logInWaitingForUser)
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
@@ -116,7 +116,7 @@ fun AddAccountDialogContent(component: AddAccountDialogComponent) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                AppTextButton(component.onClose) {
+                AppTextButton(component::close) {
                     Icon(
                         imageVector = FeatherIcons.X,
                         contentDescription = null,

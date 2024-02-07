@@ -3,6 +3,7 @@ package com.skyecodes.vercors.data.model.app
 import com.skyecodes.vercors.data.model.mojang.MojangVersionManifest
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.Duration
 import java.time.Instant
 
 @Serializable
@@ -15,7 +16,8 @@ data class Instance(
     val loaderVersion: String? = null,
     val dateCreated: AppInstant = Instant.now(),
     val dateModified: AppInstant = Instant.now(),
-    val lastPlayed: AppInstant? = null
+    val lastPlayed: AppInstant? = null,
+    val timePlayed: AppDuration = Duration.ZERO
 ) {
     @Serializable
     data class Icon(

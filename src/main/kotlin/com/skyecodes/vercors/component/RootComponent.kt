@@ -37,8 +37,8 @@ interface RootComponent {
     val instancesState: StateFlow<InstancesState>
     val instances: StateFlow<List<Instance>>
     val activeTab: StateFlow<AppTab?>
-    val accountData: StateFlow<AccountData>
-    val currentAccount: Flow<Account?>
+    val accountState: StateFlow<AccountState>
+    val selectedAccount: Flow<Account?>
 
     fun initializeWindowState(windowState: WindowState)
     fun initializeWindow(window: ComposeWindow)
@@ -52,7 +52,7 @@ interface RootComponent {
     fun openNewInstanceDialog()
     fun toggleAccountsPopupOrOpenDialog()
     fun toggleAccountsPopup()
-    fun openAddAccountDialog()
+    fun openAddAccountDialog(authenticationStateCollector: (AuthenticationState) -> Unit = {})
     fun selectAccount(account: Account)
     fun removeAccount(account: Account)
     fun openErrorDialog(title: String, vararg message: String)
@@ -102,7 +102,8 @@ class DefaultRootComponent(
     componentContext: AppComponentContext,
     private val configurationService: ConfigurationService = componentContext.get(),
     private val instanceService: InstanceService = componentContext.get(),
-    private val accountService: AccountService = componentContext.get()
+    private val accountService: AccountService = componentContext.get(),
+    private val launcherService: LauncherService = componentContext.get()
 ) : AbstractComponent(componentContext), RootComponent {
     private lateinit var window: ComposeWindow
     private lateinit var windowState: WindowState
@@ -174,9 +175,8 @@ class DefaultRootComponent(
             )
         )
     }
-    override val accountData: StateFlow<AccountData> = accountService.accountData
-    override val currentAccount: Flow<Account?> =
-        accountData.filterIsInstance<AccountData.Loaded>().map { it.selectedAccount }
+    override val accountState: StateFlow<AccountState> = accountService.accountState
+    override val selectedAccount: StateFlow<Account?> = accountService.selectedAccount
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         logger.error(throwable) { "An error occured while loading the application." }
@@ -345,8 +345,8 @@ class DefaultRootComponent(
     }
 
     override fun toggleAccountsPopupOrOpenDialog() {
-        val data = accountData.value
-        if (data is AccountData.Loaded) {
+        val data = accountState.value
+        if (data is AccountState.Loaded) {
             if (data.accounts.isEmpty()) {
                 openAddAccountDialog()
             } else {
@@ -359,8 +359,8 @@ class DefaultRootComponent(
         uiState.update { it.copy(accountsPopupOpen = !it.accountsPopupOpen) }
     }
 
-    override fun openAddAccountDialog() {
-        dialogNavigation.activate(DialogConfig.AddAccount)
+    override fun openAddAccountDialog(authenticationStateCollector: (AuthenticationState) -> Unit) {
+        dialogNavigation.activate(DialogConfig.AddAccount(authenticationStateCollector))
     }
 
     override fun openErrorDialog(title: String, vararg message: String) {
@@ -438,7 +438,12 @@ class DefaultRootComponent(
                 createNewInstanceComponent(componentContext)
             )
 
-            is DialogConfig.AddAccount -> RootComponent.DialogChild.AddAccount(addAccountComponent(componentContext))
+            is DialogConfig.AddAccount -> RootComponent.DialogChild.AddAccount(
+                addAccountComponent(
+                    componentContext,
+                    config
+                )
+            )
             is DialogConfig.Error -> RootComponent.DialogChild.Error(createErrorComponent(componentContext, config))
         }
 
@@ -449,10 +454,14 @@ class DefaultRootComponent(
             onClose = ::closeDialog
         )
 
-    private fun addAccountComponent(componentContext: AppComponentContext): AddAccountDialogComponent =
+    private fun addAccountComponent(
+        componentContext: AppComponentContext,
+        config: DialogConfig.AddAccount
+    ): AddAccountDialogComponent =
         DefaultAddAccountDialogComponent(
             componentContext = componentContext,
-            onClose = ::closeDialog
+            onClose = ::closeDialog,
+            authenticationStateCollector = config.authenticationStateCollector
         )
 
     private fun createErrorComponent(
@@ -491,7 +500,34 @@ class DefaultRootComponent(
     }
 
     private fun launchInstance(instance: Instance) {
+        scope.launch {
+            launcherService.launch(instance).collect {
+                when (it) {
+                    is LaunchStatus.Errored -> openErrorDialog(
+                        "An error occured while launching instance",
+                        it.error.localizedMessage
+                    )
 
+                    is LaunchStatus.Preparing -> {} // TODO
+                    is LaunchStatus.RequiresLogin -> {
+                        openAddAccountDialog { auth ->
+                            when (auth) {
+                                is AuthenticationState.Success -> {
+                                    it.job.complete()
+                                    closeDialog()
+                                }
+
+                                AuthenticationState.Closed -> it.job.cancel()
+                                else -> {}
+                            }
+                        }
+                    }
+
+                    LaunchStatus.Running -> {} // TODO
+                    LaunchStatus.Stopped -> {} // TODO
+                }
+            }
+        }
     }
 
     private fun showProjectDetails(project: Project) {
@@ -529,7 +565,7 @@ class DefaultRootComponent(
         data object CreateNewInstance : DialogConfig
 
         @Serializable
-        data object AddAccount : DialogConfig
+        data class AddAccount(val authenticationStateCollector: (AuthenticationState) -> Unit) : DialogConfig
 
         @Serializable
         data class Error(val title: String, val message: List<String>) : DialogConfig

@@ -41,7 +41,7 @@ fun InstanceDetailsContent(component: InstanceDetailsComponent) {
                         Text(component.instance.name, style = MaterialTheme.typography.h5)
                         Column {
                             Text(component.instance.loaderAndVersionString)
-                            Text(component.instance.lastPlayedString)
+                            Text(component.instance.lastPlayedString(locale))
                         }
                     }
                 }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MojangVersionInfo(
-    val arguments: Arguments,
+    val arguments: Arguments?,
     val assetIndex: AssetIndex,
     val assets: String,
     val complianceLevel: Int,
@@ -14,8 +14,9 @@ data class MojangVersionInfo(
     val id: String,
     val javaVersion: JavaVersion,
     val libraries: List<Library>,
-    val logging: Logging,
+    val logging: Logging?,
     val mainClass: String,
+    val minecraftArguments: String?,
     val minimumLauncherVersion: Int,
     val releaseTime: MojangInstant,
     val time: MojangInstant,
@@ -40,10 +41,10 @@ data class MojangVersionInfo(
     data class Downloads(
         val client: Download,
         @SerialName("client_mappings")
-        val clientMappings: Download,
-        val server: Download,
+        val clientMappings: Download?,
+        val server: Download?,
         @SerialName("server_mappings")
-        val serverMappings: Download
+        val serverMappings: Download?
     ) {
         @Serializable
         data class Download(
@@ -62,12 +63,15 @@ data class MojangVersionInfo(
     @Serializable
     data class Library(
         val downloads: Downloads,
+        val extract: Extract?,
         val name: String,
+        val natives: Map<String, String>?,
         val rules: List<Rule>? = null
     ) {
         @Serializable
         data class Downloads(
-            val artifact: Artifact
+            val artifact: Artifact?,
+            val classifiers: Map<String, Artifact>?
         ) {
             @Serializable
             data class Artifact(
@@ -77,6 +81,11 @@ data class MojangVersionInfo(
                 override val url: String
             ) : MojangFile
         }
+
+        @Serializable
+        data class Extract(
+            val exclude: List<String>
+        )
     }
 
     @Serializable
@@ -108,6 +117,7 @@ data class MojangVersionInfo(
         @Serializable
         data class Os(
             val name: String? = null,
+            val version: String? = null,
             val arch: String? = null
         )
     }

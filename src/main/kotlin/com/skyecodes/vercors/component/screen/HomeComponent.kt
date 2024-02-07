@@ -11,14 +11,11 @@ import com.skyecodes.vercors.data.service.ConfigurationService
 import com.skyecodes.vercors.data.service.CurseforgeService
 import com.skyecodes.vercors.data.service.InstanceService
 import com.skyecodes.vercors.data.service.ModrinthService
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 interface HomeComponent : Refreshable {
     val uiState: StateFlow<UiState>
@@ -121,7 +118,14 @@ class DefaultHomeComponent(
         providers: List<Provider>
     ): HomeComponent.UiState.Section =
         if (sectionType === HomeSectionType.JumpBackIn) createInstancesSection(instances.value)
-        else HomeComponent.UiState.Section.Projects(providers.map { scope.async { getProjectsData(sectionType, it) } }
+        else HomeComponent.UiState.Section.Projects(providers.map {
+            scope.async(Dispatchers.IO) {
+                getProjectsData(
+                    sectionType,
+                    it
+                )
+            }
+        }
             .awaitAll().map { it.toMutableList() }.filter { it.isNotEmpty() }.let { lists ->
                 buildList {
                     if (lists.isNotEmpty()) {

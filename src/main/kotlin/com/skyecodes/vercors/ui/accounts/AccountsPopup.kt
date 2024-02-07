@@ -20,7 +20,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.skyecodes.vercors.applyIf
 import com.skyecodes.vercors.data.model.app.Account
-import com.skyecodes.vercors.data.service.AccountData
+import com.skyecodes.vercors.data.service.AccountState
 import com.skyecodes.vercors.ui.LocalLocalization
 import com.skyecodes.vercors.ui.LocalPalette
 import com.skyecodes.vercors.ui.UI
@@ -35,7 +35,7 @@ import compose.icons.feathericons.UserPlus
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AccountsPopup(
-    accountData: AccountData.Loaded,
+    accountState: AccountState.Loaded,
     onTogglePopup: () -> Unit,
     onSelectAccount: (Account) -> Unit,
     onRemoveAccount: (Account) -> Unit,
@@ -58,8 +58,8 @@ fun AccountsPopup(
                 .appAnimateContentSize()
         ) {
             Column {
-                accountData.accounts.forEach {
-                    val isSelected = it.uuid == accountData.selected
+                accountState.accounts.forEach {
+                    val isSelected = it.uuid == accountState.selected
                     val backgroundColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.primary else Color.Transparent)
                     val contentColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
 
@@ -107,7 +107,7 @@ fun AccountsPopup(
                 }
                 AccountsPopupEntry(true, onAddAccount) {
                     Icon(FeatherIcons.UserPlus, null, Modifier.padding(UI.smallPadding).fillMaxHeight().aspectRatio(1f))
-                    Text(locale.addAccount)
+                    Text(locale.logIn)
                 }
             }
         }

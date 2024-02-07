@@ -5,18 +5,32 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
 import java.awt.Desktop
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 import java.net.URI
+import java.net.URL
+import java.nio.file.Path
 import java.security.MessageDigest
 import java.time.Instant
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.swing.SwingUtilities
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.io.path.*
+
 
 private class Utils
+
+private val logger = KotlinLogging.logger { }
 
 @OptIn(ExperimentalSerializationApi::class)
 val AppJson = Json {
@@ -79,10 +93,98 @@ fun <T> runOnUiThread(block: () -> T): T {
     return result as T
 }
 
-fun String.sha256(): String = hash("SHA-256")
+fun String.sha256(): ByteArray = toByteArray().hash("SHA-256")
+
+fun ByteArray.sha1(): ByteArray = hash("SHA-1")
+
+private fun ByteArray.hash(method: String): ByteArray = MessageDigest.getInstance(method).digest(this)
 
 @OptIn(ExperimentalEncodingApi::class)
-fun String.hash(method: String): String {
-    val bytes = MessageDigest.getInstance(method).digest(toByteArray())
-    return Base64.UrlSafe.encode(bytes)
+fun ByteArray.encodeBase64(): String = Base64.UrlSafe.encode(this)
+
+@OptIn(ExperimentalStdlibApi::class)
+fun ByteArray.encodeHex(): String = toHexString()
+
+suspend fun validate(path: Path, url: String, sha1: String? = null, size: Int? = null, attempts: Int = 3) =
+    coroutineScope {
+        logger.trace { "Validating file at location $path" }
+        repeat(attempts) {
+            if (!path.exists()) {
+                logger.debug { "File at location $path does not exist - Downloading it from $url" }
+                URL(url).openStream()
+                    .use { i -> path.createParentDirectories().outputStream().use { o -> i.copyTo(o) } }
+            }
+
+            if (sha1 == null && size == null) {
+                return@coroutineScope
+            }
+
+            val fileBytes = path.readBytes()
+            var complete = true
+
+            if (sha1 != null) {
+                val fileSha1 = fileBytes.sha1().encodeHex()
+                if (fileSha1 != sha1) {
+                    logger.warn { "SHA1 doesn't match $sha1 for file $path" }
+                    complete = false
+                }
+            }
+
+            if (complete && size != null) {
+                val fileSize = fileBytes.size
+                if (fileSize != size) {
+                    logger.warn { "File size doesn't match $size for file $path" }
+                    complete = false
+                }
+            }
+
+            if (complete) {
+                return@coroutineScope
+            } else {
+                logger.warn { "Validation for file $path failed - retrying" }
+                path.deleteExisting()
+            }
+            delay(1000L)
+        }
+        logger.error { "Couldn't validate file at location $path after $attempts attempts - aborting" }
+        throw FetchException("Could not fetch or/and validate file at URL $url and path $path")
+    }
+
+suspend fun unzipFile(src: Path, dest: Path, exclude: List<String>) = coroutineScope {
+    logger.trace { "Unzipping file $src to location $dest" }
+    val zis = ZipInputStream(FileInputStream(src.toFile()))
+    var zipEntry = zis.nextEntry
+    while (zipEntry != null) {
+        if (exclude.none { zipEntry!!.name.startsWith(it) }) {
+            val newFile = newFile(dest, zipEntry)
+            if (zipEntry.isDirectory) {
+                if (!newFile.isDirectory()) newFile.createDirectories()
+            } else {
+                val parent = newFile.parent
+                if (!parent.isDirectory()) parent.createDirectories()
+                newFile.outputStream().use { zis.copyTo(it) }
+            }
+        }
+        zipEntry = zis.nextEntry
+    }
+    zis.closeEntry()
+    zis.close()
 }
+
+fun String.withQuotes() = "\"$this\""
+
+@Throws(IOException::class)
+private fun newFile(destinationDir: Path, zipEntry: ZipEntry): Path {
+    val destFile = destinationDir.resolve(zipEntry.name)
+
+    val destDirPath = destinationDir.absolutePathString()
+    val destFilePath = destFile.absolutePathString()
+
+    if (!destFilePath.startsWith(destDirPath + File.separator)) {
+        throw IOException("Entry is outside of the target dir: " + zipEntry.name)
+    }
+
+    return destFile
+}
+
+class FetchException(message: String) : Exception(message)

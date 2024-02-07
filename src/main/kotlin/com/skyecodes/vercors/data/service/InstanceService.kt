@@ -23,6 +23,7 @@ interface InstanceService {
     fun reloadInstances(): Job
     fun createInstance(instance: Instance): Deferred<Instance>
     fun deleteInstance(instance: Instance): Job
+    fun updateInstance(instance: Instance)
 }
 
 sealed interface InstancesState {
@@ -32,6 +33,17 @@ sealed interface InstancesState {
         val errors: List<InstanceLoadingException> = emptyList(),
         val warns: List<InstanceLoadingException> = emptyList()
     ) : InstancesState
+}
+
+data class InstanceData(
+    val data: Instance,
+    val status: InstanceStatus
+)
+
+sealed interface InstanceStatus {
+    data object NotRunning : InstanceStatus
+    data class Launching(val progress: Float)
+    data object Running : InstanceStatus
 }
 
 class InstanceLoadingException(message: String, val directory: Path, cause: Throwable? = null) :
@@ -81,17 +93,15 @@ class InstanceServiceImpl(
         return loadInstances()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun createInstance(instance: Instance) = async(Dispatchers.IO) {
-        val sanitizedName = instance.name.filter { it !in "/\\" }
+        val sanitizedName = instance.name.replace("[^a-zA-Z0-9._]+".toRegex(), "_")
         var path = storageService.instancesDir.resolve(sanitizedName)
         var suffix = 1
         while (path.exists()) {
             path = storageService.instancesDir.resolve("${sanitizedName}_${suffix++}")
         }
         val instanceWithPath = instance.copy(path = path.name)
-        path.resolve("instance.json").createParentDirectories().outputStream()
-            .use { json.encodeToStream(instanceWithPath, it) }
+        writeInstance(instanceWithPath)
         addInstance(instanceWithPath)
         logger.debug { "Created instance ${instance.name}" }
         instanceWithPath
@@ -101,6 +111,25 @@ class InstanceServiceImpl(
     override fun deleteInstance(instance: Instance) = launch(Dispatchers.IO) {
         storageService.instancesDir.resolve(instance.name).deleteRecursively()
         state.update { (it as InstancesState.Loaded).copy(instances = it.instances - instance) }
+    }
+
+    override fun updateInstance(instance: Instance) {
+        launch {
+            writeInstance(instance)
+            state.update {
+                when (it) {
+                    is InstancesState.Loaded -> it.copy(instances = it.instances.map { oldInstance -> if (instance.path == oldInstance.path) instance else oldInstance })
+                    InstancesState.NotLoaded -> it
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private suspend fun writeInstance(instance: Instance) = withContext(Dispatchers.IO) {
+        storageService.getInstanceDir(instance)
+            .resolve("instance.json").createParentDirectories()
+            .outputStream().use { json.encodeToStream(instance, it) }
     }
 
     private fun addInstance(instance: Instance) {

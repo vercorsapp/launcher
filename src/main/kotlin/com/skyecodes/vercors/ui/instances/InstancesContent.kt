@@ -307,7 +307,7 @@ fun InstanceCardContent(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = instance.lastPlayedString,
+                        text = instance.lastPlayedString(locale),
                         style = MaterialTheme.typography.subtitle2,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
