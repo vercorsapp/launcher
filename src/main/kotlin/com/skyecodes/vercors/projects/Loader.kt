@@ -1,0 +1,38 @@
+package com.skyecodes.vercors.projects
+
+import com.skyecodes.vercors.projects.curseforge.CurseforgeModLoaderType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+enum class Loader(val value: String, val text: String) {
+    @SerialName("forge")
+    Forge("forge", "Forge"),
+
+    @SerialName("neoforge")
+    NeoForge("neoforge", "NeoForge"),
+
+    @SerialName("fabric")
+    Fabric("fabric", "Fabric"),
+
+    @SerialName("quilt")
+    Quilt("quilt", "Quilt");
+
+    companion object {
+        const val Vanilla = "Vanilla"
+    }
+}
+
+fun List<String>.toLoadersModrinth() = mapNotNull { it.toLoader() }
+
+fun String.toLoader(): Loader? = Loader.entries.firstOrNull { it.value == this }
+
+fun List<CurseforgeModLoaderType>.toLoadersCurseforge() = mapNotNull { it.toLoader() }
+
+fun CurseforgeModLoaderType.toLoader(): Loader? = when (this) {
+    CurseforgeModLoaderType.Forge -> Loader.Forge
+    CurseforgeModLoaderType.NeoForge -> Loader.NeoForge
+    CurseforgeModLoaderType.Fabric -> Loader.Fabric
+    CurseforgeModLoaderType.Quilt -> Loader.Quilt
+    else -> null
+}

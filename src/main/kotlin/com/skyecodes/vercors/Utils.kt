@@ -6,8 +6,18 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.ocpsoft.prettytime.PrettyTime
@@ -15,6 +25,7 @@ import java.awt.Desktop
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.net.InetAddress
 import java.net.URI
 import java.net.URL
 import java.nio.file.Path
@@ -188,3 +199,39 @@ private fun newFile(destinationDir: Path, zipEntry: ZipEntry): Path {
 }
 
 class FetchException(message: String) : Exception(message)
+
+fun appHttpClient(json: Json) = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        json(json)
+    }
+    install(HttpTimeout) {
+        requestTimeoutMillis = 3000
+    }
+    install(HttpRequestRetry) {
+        retryOnServerErrors(1)
+        retryOnException(1, true)
+        constantDelay()
+    }
+    install(UserAgent) {
+        agent = "skyecodes/vercors/$APP_VERSION (contact@skye.codes)"
+    }
+    install(Logging) {
+        logger = Logger.DEFAULT
+        level = LogLevel.INFO
+    }
+}
+
+inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
+    setBody(body)
+    contentType(ContentType.Application.Json)
+    expectSuccess = true
+}
+
+suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
+    try {
+        val address = InetAddress.getByName("api.mojang.com")
+        address != null && !address.equals("") && address.isReachable(5000)
+    } catch (e: IOException) {
+        false
+    }
+}
