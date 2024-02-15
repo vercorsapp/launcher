@@ -1,5 +1,6 @@
 package com.skyecodes.vercors.accounts
 
+import androidx.compose.runtime.Immutable
 import com.skyecodes.vercors.common.StorageService
 import com.skyecodes.vercors.encodeBase64
 import com.skyecodes.vercors.sha256
@@ -44,6 +45,7 @@ sealed interface AccountState {
     data object NotLoaded : AccountState
 
     @Serializable
+    @Immutable
     data class Loaded(val selected: String? = null, val accounts: List<Account> = emptyList()) : AccountState {
         val selectedAccount: Account? get() = accounts.find { it.uuid == selected }
     }

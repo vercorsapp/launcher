@@ -182,8 +182,6 @@ suspend fun unzipFile(src: Path, dest: Path, exclude: List<String>) = coroutineS
     zis.close()
 }
 
-fun String.withQuotes() = "\"$this\""
-
 @Throws(IOException::class)
 private fun newFile(destinationDir: Path, zipEntry: ZipEntry): Path {
     val destFile = destinationDir.resolve(zipEntry.name)

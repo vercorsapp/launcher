@@ -5,6 +5,7 @@ import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.skyecodes.vercors.accounts.Account
 import com.skyecodes.vercors.accounts.AccountService
 import com.skyecodes.vercors.accounts.AuthenticationState
+import com.skyecodes.vercors.openURL
 import com.skyecodes.vercors.root.AbstractComponent
 import com.skyecodes.vercors.root.AppComponentContext
 import com.skyecodes.vercors.root.get
@@ -71,7 +72,7 @@ class DefaultLoginDialogComponent(
     }
 
     override fun openInBrowser(url: String) {
-        Desktop.getDesktop().browse(URI(url))
+        openURL(URI(url))
     }
 
     override fun close() {

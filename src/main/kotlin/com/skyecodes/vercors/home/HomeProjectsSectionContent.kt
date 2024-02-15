@@ -27,17 +27,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import com.skyecodes.vercors.UI
-import com.skyecodes.vercors.applyIf
+import com.skyecodes.vercors.*
 import com.skyecodes.vercors.common.IconTextButton
 import com.skyecodes.vercors.common.LocalLocalization
 import com.skyecodes.vercors.common.LocalPalette
 import com.skyecodes.vercors.common.appAnimateContentSize
 import com.skyecodes.vercors.projects.Project
-import com.skyecodes.vercors.readable
-import com.skyecodes.vercors.resourceAsStream
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
@@ -100,9 +95,7 @@ private fun RowScope.ProjectCardContent(
             Box(modifier = Modifier.align(Alignment.BottomCenter).height(maxHeight - 80.dp).fillMaxWidth()) {
                 project.imageUrl?.let { url ->
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalPlatformContext.current)
-                            .data(url)
-                            .build(),
+                        model = imageRequest("project/${project.provider}/${project.slug}/image", url),
                         contentDescription = "${project.name} image",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -149,9 +142,7 @@ private fun RowScope.ProjectCardContent(
                     ) {
                         project.logoUrl?.let { url ->
                             AsyncImage(
-                                model = ImageRequest.Builder(LocalPlatformContext.current)
-                                    .data(url)
-                                    .build(),
+                                model = imageRequest("project/${project.provider}/${project.slug}/logo", url),
                                 contentDescription = "${project.name} logo",
                                 modifier = Modifier.fillMaxSize()
                             )

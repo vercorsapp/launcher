@@ -2,7 +2,6 @@ package com.skyecodes.vercors.root
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.jetbrains.skiko.MainUIDispatcher
@@ -10,8 +9,6 @@ import org.koin.core.Koin
 import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.qualifier.Qualifier
 import org.koin.mp.KoinPlatformTools
-
-private val logger = KotlinLogging.logger { }
 
 interface AppComponentContext : ComponentContext {
     val koin: Koin
