@@ -1,0 +1,122 @@
+<resources>
+    <!-- Error -->
+    <string name="fatalError">An error occured while loading Vercors.</string>
+    <string name="fatalErrorDetails">Please check the log file for more details.</string>
+
+    <!-- Setup -->
+    <string name="welcome">Welcome to %1$s!</string>
+    <string name="selectDataDir">Please select the directory where the instances, game libraries and launcher data will
+        be stored.
+    </string>
+    <string name="browse">Browse...</string>
+    <string name="showTutorial">Show tutorial</string>
+    <string name="launch">Launch</string>
+
+    <!-- General -->
+    <string name="home">Home</string>
+    <string name="instances">Instances</string>
+    <string name="search">Search</string>
+    <string name="createInstance">Create instance</string>
+    <string name="accounts">Accounts</string>
+    <string name="settings">Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="ascending">Ascending order</string>
+    <string name="descending">Descending order</string>
+    <string name="none">None</string>
+
+    <!-- Home -->
+    <string name="jumpBackIn">Jump back in</string>
+    <string name="popularMods">Popular mods</string>
+    <string name="popularModpacks">Popular modpacks</string>
+    <string name="popularResourcePacks">Popular resource packs</string>
+    <string name="popularShaderPacks">Popular shader packs</string>
+    <string name="mods">Mods</string>
+    <string name="modpacks">Modpacks</string>
+    <string name="resourcePacks">Resource packs</string>
+    <string name="shaderPacks">Shader packs</string>
+    <string name="lastPlayedTime">Last played %1$s</string>
+    <string name="notPlayedBefore">Not played before</string>
+    <string name="play">Play</string>
+    <string name="view">View</string>
+    <string name="install">Install</string>
+    <string name="selected">Selected</string>
+    <string name="remove">Remove</string>
+
+    <!-- Instances -->
+    <string name="sortBy">Sort by</string>
+    <string name="lastPlayed">Last played</string>
+    <string name="dateModified">Date modified</string>
+    <string name="dateCreated">Date created</string>
+    <string name="gameVersion">Game version</string>
+    <string name="name">Name</string>
+    <string name="groupBy">Group by</string>
+    <string name="saveFilters">Save filters</string>
+    <string name="noInstancesFound">No instances found</string>
+    <string name="instanceName">Instance name</string>
+    <string name="icon">Icon</string>
+    <string name="minecraftVersion">Minecraft version</string>
+    <string name="includeSnapshots">Include snapshots</string>
+    <string name="latestRelease">Latest release (%1$s)</string>
+    <string name="latestSnapshot">Latest snapshot (%1$s)</string>
+    <string name="loader">Loader</string>
+    <string name="loaderVersion">Loader version</string>
+    <string name="create">Create</string>
+
+    <!-- Settings -->
+    <string name="userInterface">User interface</string>
+    <string name="theme">Theme</string>
+    <string name="themeDescription">Change the global theme of the launcher.</string>
+    <string name="system">System</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="darkTheme">Dark theme</string>
+    <string name="darkThemeDescription">Change the shade of the dark theme.</string>
+    <string name="lighter">Lighter</string>
+    <string name="normal">Normal</string>
+    <string name="darker">Darker</string>
+    <string name="accentColor">Accent color</string>
+    <string name="accentColorDescription">Change the accent color used in some buttons.</string>
+    <string name="rosewater">Rosewater</string>
+    <string name="flamingo">Flamingo</string>
+    <string name="pink">Pink</string>
+    <string name="mauve">Mauve</string>
+    <string name="red">Red</string>
+    <string name="maroon">Maroon</string>
+    <string name="peach">Peach</string>
+    <string name="yellow">Yellow</string>
+    <string name="green">Green</string>
+    <string name="teal">Teal</string>
+    <string name="sky">Sky</string>
+    <string name="sapphire">Sapphire</string>
+    <string name="blue">Blue</string>
+    <string name="lavender">Lavender</string>
+    <string name="systemWindow">Use system window frame</string>
+    <string name="systemWindowDescription">Use the system window frame instead of the custom window frame provided by
+        the launcher.
+    </string>
+    <string name="animations">Animations</string>
+    <string name="animationsDescription">Enables UI animations such as fade in, smooth element size change, etc.
+    </string>
+    <string name="defaultTab">Default tab</string>
+    <string name="defaultTabDescription">Change the tab that shows up when the launcher is opened.</string>
+    <string name="sections">Sections</string>
+    <string name="sectionsDescription">Choose which section(s) to show on the home tab.</string>
+    <string name="providers">Providers</string>
+    <string name="providersDescription">Choose which service(s) provide popular projects on the home tab.</string>
+
+    <!-- Account -->
+    <string name="logIn">Log in</string>
+    <string name="logInWaitingForUser">Please log into the Microsoft account linked to your Minecraft profile through
+        your browser.
+    </string>
+    <string name="logInInfo">This dialog window needs to stay open during the process.</string>
+    <string name="openInBrowser">Open in browser</string>
+    <string name="copyUrl">Copy URL</string>
+    <string name="authenticating">Authenticating</string>
+    <string name="errorOccurred">An error has occured.</string>
+    <string name="awaitingAuth">Awaiting authentication</string>
+    <string name="accountSuccess">Authentication successful</string>
+    <string name="logOut">Log out</string>
+    <string name="refreshingToken">Refreshing access token</string>
+</resources>

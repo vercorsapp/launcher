@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+
+<configuration>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+    <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
+    <import class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"/>
+    <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} -%kvp- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEBUG_ROLLING_FILE" class="RollingFileAppender">
+        <file>logs/debug.log</file>
+        <rollingPolicy class="TimeBasedRollingPolicy">
+            <fileNamePattern>logs/debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} -%kvp- %msg%n</pattern>
+        </encoder>
+        <filter class="ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <appender name="ROLLING_FILE" class="RollingFileAppender">
+        <file>logs/vercors.log</file>
+        <rollingPolicy class="TimeBasedRollingPolicy">
+            <fileNamePattern>logs/vercors.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} -%kvp- %msg%n</pattern>
+        </encoder>
+        <filter class="ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+    <root level="trace">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEBUG_ROLLING_FILE"/>
+        <appender-ref ref="ROLLING_FILE"/>
+    </root>
+</configuration>

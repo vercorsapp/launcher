@@ -5,4 +5,5 @@ pluginManagement {
     }
 }
 
+include("core", "app")
 rootProject.name = "vercors"
