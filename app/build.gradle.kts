@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.mockposable)
+    alias(libs.plugins.graalvm)
 }
 
 dependencies {
@@ -36,7 +37,7 @@ kotlin {
     compilerOptions {
         freeCompilerArgs = listOf(
             "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=${rootProject.path}/compose_compiler_config.conf"
+            "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=${project.path}/compose_compiler_config.conf"
         )
     }
 }
@@ -50,8 +51,6 @@ mockposable {
 }
 
 compose {
-
-
     desktop {
         application {
             mainClass = "app.vercors.MainKt"
@@ -95,6 +94,15 @@ compose {
                     isEnabled = true
                 }
             }
+        }
+    }
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            mainClass.set("app.vercors.MainKt")
+            buildArgs("-Djava.awt.headless=false", "-H:+AddAllCharsets")
         }
     }
 }

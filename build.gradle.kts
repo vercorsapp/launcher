@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.jetbrains.compose) apply false
     alias(libs.plugins.mockposable) apply false
+    alias(libs.plugins.graalvm) apply false
 }
 
 group = "app.vercors"

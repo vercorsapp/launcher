@@ -21,6 +21,7 @@ jna = "5.14.0"
 junit = "5.10.2"
 mockk = "1.13.10"
 mockposable = "0.7"
+graalvm = "0.10.1"
 
 [libraries]
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
@@ -58,3 +59,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 mockposable = { id = "com.jeppeman.mockposable", version.ref = "mockposable" }
+graalvm = { id = "org.graalvm.buildtools.native", version.ref = "graalvm" }
