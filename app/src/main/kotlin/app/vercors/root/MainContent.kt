@@ -12,12 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.rememberWindowState
 import app.vercors.LocalImageLoader
 import app.vercors.LocalPalette
 import app.vercors.account.AccountsContent
@@ -32,22 +30,18 @@ import app.vercors.toolbar.ToolbarContent
 import coil3.ImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.disk.DiskCache
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import okio.Path.Companion.toOkioPath
 import java.awt.Dimension
 import java.awt.Toolkit
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainContent(component: MainComponent, lifecycle: LifecycleRegistry, onClose: () -> Unit) {
+fun MainContent(component: MainComponent, windowState: WindowState, onClose: () -> Unit) {
     val uiState = component.uiState.collectAsState().value
 
     if (uiState is MainUiState.Loaded) {
-        val windowState = rememberWindowState(size = DpSize(1280.dp, 720.dp))
-
         MainAppWindow(
             config = uiState.config,
-            lifecycle = lifecycle,
             windowState = windowState,
             onClose = onClose
         ) {
@@ -55,10 +49,6 @@ fun MainContent(component: MainComponent, lifecycle: LifecycleRegistry, onClose:
 
             LaunchedEffect(composeWindow) {
                 composeWindow.minimumSize = Dimension(1280, 720)
-            }
-
-            LaunchedEffect(uiState.config.useSystemWindowFrame) {
-                //component.resetNavigation()
             }
 
             var currentMode by remember { mutableStateOf(composeWindow.placement) }
@@ -162,14 +152,12 @@ fun MainContent(component: MainComponent, lifecycle: LifecycleRegistry, onClose:
 @Composable
 private fun MainAppWindow(
     config: ConfigurationData,
-    lifecycle: LifecycleRegistry,
     windowState: WindowState,
     onClose: () -> Unit,
     content: @Composable (WindowScope.() -> Unit)
 ) {
     if (config.useSystemWindowFrame) {
         AppWindow(
-            lifecycle = lifecycle,
             onClose = onClose,
             windowState = windowState,
             undecorated = false,
@@ -177,7 +165,6 @@ private fun MainAppWindow(
         )
     } else {
         AppWindow(
-            lifecycle = lifecycle,
             onClose = onClose,
             windowState = windowState,
             undecorated = true,

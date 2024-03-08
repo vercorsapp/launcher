@@ -1,34 +1,37 @@
 package app.vercors.root
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.WindowState
 import app.vercors.root.error.ErrorComponent
 import app.vercors.root.main.MainComponent
 import app.vercors.root.setup.SetupComponent
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 
 @Composable
-fun RootContent(component: RootComponent, lifecycle: LifecycleRegistry, onClose: () -> Unit) {
+fun RootContent(component: RootComponent, windowState: WindowState, onClose: () -> Unit) {
     val state by component.child.subscribeAsState()
+
     when (val childComponent = state.child?.instance) {
         is ErrorComponent -> AppWindow(
-            lifecycle = lifecycle,
-            onClose = onClose,
-            windowState = rememberWindowState(size = DpSize(600.dp, 400.dp))
+                onClose = onClose,
+                windowState = windowState
         ) {
+            LaunchedEffect(Unit) {
+                window.setSize(600, 400)
+            }
             ErrorContent(childComponent)
         }
 
-        is MainComponent -> MainContent(childComponent, lifecycle, onClose)
+        is MainComponent -> MainContent(childComponent, windowState, onClose)
         is SetupComponent -> AppWindow(
-            lifecycle = lifecycle,
-            onClose = onClose,
-            windowState = rememberWindowState(size = DpSize(800.dp, 320.dp))
+                onClose = onClose,
+                windowState = windowState
         ) {
+            LaunchedEffect(Unit) {
+                window.setSize(800, 320)
+            }
             SetupContent(childComponent)
         }
     }

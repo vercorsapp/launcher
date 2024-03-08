@@ -5,9 +5,7 @@
 
     <!-- Setup -->
     <string name="welcome">Welcome to %1$s!</string>
-    <string name="selectDataDir">Please select the directory where the instances, game libraries and launcher data will
-        be stored.
-    </string>
+    <string name="selectDataDir">Please select the directory where the instances, game libraries and launcher data will be stored.</string>
     <string name="browse">Browse...</string>
     <string name="showTutorial">Show tutorial</string>
     <string name="launch">Launch</string>
@@ -93,12 +91,9 @@
     <string name="blue">Blue</string>
     <string name="lavender">Lavender</string>
     <string name="systemWindow">Use system window frame</string>
-    <string name="systemWindowDescription">Use the system window frame instead of the custom window frame provided by
-        the launcher.
-    </string>
+    <string name="systemWindowDescription">Use the system window frame instead of the custom window frame provided by the launcher.</string>
     <string name="animations">Animations</string>
-    <string name="animationsDescription">Enables UI animations such as fade in, smooth element size change, etc.
-    </string>
+    <string name="animationsDescription">Enables UI animations such as fade in, smooth element size change, etc.</string>
     <string name="defaultTab">Default tab</string>
     <string name="defaultTabDescription">Change the tab that shows up when the launcher is opened.</string>
     <string name="sections">Sections</string>
@@ -108,9 +103,7 @@
 
     <!-- Account -->
     <string name="logIn">Log in</string>
-    <string name="logInWaitingForUser">Please log into the Microsoft account linked to your Minecraft profile through
-        your browser.
-    </string>
+    <string name="logInWaitingForUser">Please log into the Microsoft account linked to your Minecraft profile through your browser.</string>
     <string name="logInInfo">This dialog window needs to stay open during the process.</string>
     <string name="openInBrowser">Open in browser</string>
     <string name="copyUrl">Copy URL</string>

@@ -53,7 +53,8 @@ class MainComponentImpl(
                 }
             }.collect { (config, palette) ->
                 _uiState.update {
-                    MainUiState.Loaded(config, palette, Path.of(config.path!!, "cache", "coil"), null)
+                    if (config.path == null) MainUiState.NotLoaded
+                    else MainUiState.Loaded(config, palette, Path.of(config.path, "cache", "coil"), null)
                 }
             }
         }
