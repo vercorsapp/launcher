@@ -11,7 +11,6 @@ import app.vercors.root.RootContent
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jetbrains.skiko.MainUIDispatcher
 
 private val logger = KotlinLogging.logger {}
 
@@ -19,7 +18,6 @@ fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
     val properties = loadProperties()
     logger.info { "Loaded application properties" }
-    MainDispatcher = MainUIDispatcher
     application(exitProcessOnExit = false) {
         val coroutineScope = rememberCoroutineScope()
         val lifecycle = LifecycleRegistry()

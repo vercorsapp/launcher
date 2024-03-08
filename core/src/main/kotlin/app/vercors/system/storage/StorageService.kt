@@ -6,7 +6,6 @@ import java.nio.file.Path
 interface StorageService {
     val defaultBasePath: Path
     val basePath: Path
-    val cachePath: Path
     val instancesPath: Path
     val assetsPath: Path
 

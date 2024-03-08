@@ -38,14 +38,14 @@ fun HomeContent(component: HomeComponent) {
                     when (it) {
                         is HomeSection.Instances -> HomeInstancesSectionContent(
                             it.instances,
-                            component.onShowInstanceDetails,
-                            component.onLaunchInstance
+                            component::onShowInstanceDetails,
+                            component::onLaunchInstance
                         )
 
                         is HomeSection.Projects -> HomeProjectsSectionContent(
                             it.projects,
-                            component.onShowProjectDetails,
-                            component.onInstallProject
+                            component::onShowProjectDetails,
+                            component::onInstallProject
                         )
                     }
                 }

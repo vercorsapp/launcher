@@ -18,7 +18,7 @@ class ConfigurationServiceImpl(
     override val configState: StateFlow<ConfigurationData?> = loadingState
         .map { if (it is ConfigurationLoadingState.Loaded) it.config else null }
         .stateIn(this, SharingStarted.Eagerly, null)
-    override val config: ConfigurationData get() = configState.value!!
+    override val config: ConfigurationData get() = (loadingState.value as ConfigurationLoadingState.Loaded).config
 
     init {
         launch { configState.filterNotNull().drop(1).collect { save() } }

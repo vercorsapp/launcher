@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface InstanceListComponent : NavigationChildComponent, Refreshable {
     val uiState: StateFlow<InstanceListUiState>
-    val onShowInstanceDetails: (InstanceData) -> Unit
-    val onLaunchInstance: (InstanceData) -> Unit
-    val onOpenCreateInstanceDialog: () -> Unit
 
+    fun showInstanceDetails(instance: InstanceData)
+    fun launchInstance(instance: InstanceData)
+    fun openCreateInstanceDialog()
     fun updateNameFilter(nameFilter: String)
     fun updateSortBy(sortBy: InstanceSortBy)
     fun toggleSortByOrder()

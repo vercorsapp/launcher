@@ -5,7 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger { }
 
-abstract class AbstractAppComponent(componentContext: AppComponentContext) : AppComponentContext by componentContext {
+abstract class AbstractAppComponent(
+    componentContext: AppComponentContext
+) : AppComponentContext by componentContext {
     init {
         componentContext.lifecycle.subscribe(
             onCreate = ::onCreate,

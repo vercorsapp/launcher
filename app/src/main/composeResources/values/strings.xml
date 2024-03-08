@@ -52,6 +52,7 @@
     <string name="name">Name</string>
     <string name="groupBy">Group by</string>
     <string name="saveFilters">Save filters</string>
+    <string name="loading">Loading...</string>
     <string name="noInstancesFound">No instances found</string>
     <string name="instanceName">Instance name</string>
     <string name="icon">Icon</string>

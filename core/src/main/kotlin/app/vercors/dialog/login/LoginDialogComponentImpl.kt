@@ -27,7 +27,7 @@ class LoginDialogComponentImpl(
 
     override fun onCreate() {
         super.onCreate()
-        scope.launch {
+        launch {
             authenticationService.startAuthentication()
                 .catch { error -> _uiState.update { it.copy(error = error) } }
                 .collect { state ->

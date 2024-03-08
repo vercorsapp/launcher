@@ -24,7 +24,7 @@ class CreateInstanceDialogComponentImpl(
 
     override fun onCreate() {
         super.onCreate()
-        scope.launch { loadMinecraftVersions() }
+        launch { loadMinecraftVersions() }
     }
 
     private suspend fun loadMinecraftVersions() {

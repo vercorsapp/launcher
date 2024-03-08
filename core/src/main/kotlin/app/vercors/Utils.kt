@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.cache.*
+import io.ktor.client.plugins.cache.storage.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
@@ -48,8 +50,6 @@ fun loadProperties() = Properties().apply { load(resourceAsStream("/app.properti
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
 
-fun resource(name: String) = Utils::class.java.getResource(name)!!
-
 fun openURL(uri: URI) = Desktop.getDesktop().browse(uri)
 
 private val numberFormats = listOf("" to 1e0, "k" to 1e4, "M" to 1e6, "B" to 1e9)
@@ -66,6 +66,8 @@ fun Long.readable(decimals: Int = 1): String {
 
 
 fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this
+
+fun <T, V> T.applyNotNull(condition: V?, runnable: T.(V) -> T): T = condition?.let { runnable(it) } ?: this
 
 fun String.sha256(): ByteArray = toByteArray().hash("SHA-256")
 
@@ -187,8 +189,9 @@ fun appHttpClient(json: Json) = HttpClient(CIO) {
     }
     install(Logging) {
         logger = Logger.DEFAULT
-        level = LogLevel.INFO
+        level = LogLevel.HEADERS
     }
+    install(HttpCache)
 }
 
 inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {

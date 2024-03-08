@@ -1,31 +1,35 @@
 package app.vercors.instance
 
 import app.vercors.applyIf
-import app.vercors.common.*
+import app.vercors.common.AbstractAppComponent
+import app.vercors.common.AppComponentContext
+import app.vercors.common.SortOrder
+import app.vercors.common.inject
 import app.vercors.configuration.ConfigurationService
+import app.vercors.dialog.DialogEvent
+import app.vercors.dialog.DialogService
+import app.vercors.instance.launch.LauncherService
+import app.vercors.navigation.NavigationEvent
+import app.vercors.navigation.NavigationService
 import app.vercors.project.ModLoader
-import app.vercors.toolbar.ToolbarTitle
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.*
 
 class InstanceListComponentImpl(
     componentContext: AppComponentContext,
-    override val onShowInstanceDetails: (InstanceData) -> Unit,
-    override val onLaunchInstance: (InstanceData) -> Unit,
-    override val onOpenCreateInstanceDialog: () -> Unit,
     private val configurationService: ConfigurationService = componentContext.inject(),
-    private val instanceService: InstanceService = componentContext.inject()
+    private val instanceService: InstanceService = componentContext.inject(),
+    private val navigationService: NavigationService = componentContext.inject(),
+    private val launcherService: LauncherService = componentContext.inject(),
+    private val dialogService: DialogService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), InstanceListComponent {
-    override val tab = AppTab.Instances
-    override val isDefault = true
-    override val title = ToolbarTitle.Instances
 
     private val _uiState =
         MutableStateFlow(InstanceListUiState(sorter = configurationService.config.savedInstanceSorter))
@@ -34,8 +38,13 @@ class InstanceListComponentImpl(
 
     override fun onStart() {
         super.onStart()
-        job = scope.launch {
-            instanceService.instancesState.filterNotNull().collect { updateInstances(instances = it) }
+        job = launch {
+            instanceService.loadingState.collect {
+                when (it) {
+                    is InstanceLoadingState.Loading -> updateState(isLoading = true, instances = it.instances)
+                    is InstanceLoadingState.Loaded -> updateState(isLoading = false, instances = it.instances)
+                }
+            }
         }
     }
 
@@ -44,7 +53,8 @@ class InstanceListComponentImpl(
         job.cancel()
     }
 
-    private fun updateInstances(
+    private fun updateState(
+        isLoading: Boolean = uiState.value.isLoading,
         instances: List<InstanceData> = instanceService.instances,
         nameFilter: String = uiState.value.nameFilter,
         sortBy: InstanceSortBy = uiState.value.sorter.sortBy,
@@ -66,6 +76,7 @@ class InstanceListComponentImpl(
         val groupedInstances = sortedInstances.applyGroupBy(groupBy.behavior, groupByOrder)
         _uiState.update {
             InstanceListUiState(
+                isLoading = isLoading,
                 instanceList = instances.toImmutableList(),
                 instanceGroups = groupedInstances.toImmutableMap(),
                 nameFilter = nameFilter,
@@ -88,24 +99,36 @@ class InstanceListComponentImpl(
         return result
     }
 
+    override fun showInstanceDetails(instance: InstanceData) {
+        navigationService.handle(NavigationEvent.InstanceDetails(instance))
+    }
+
+    override fun launchInstance(instance: InstanceData) {
+        launch { launcherService.launch(instance).collect() }
+    }
+
+    override fun openCreateInstanceDialog() {
+        dialogService.openDialog(DialogEvent.CreateInstance)
+    }
+
     override fun updateNameFilter(nameFilter: String) {
-        updateInstances(nameFilter = nameFilter)
+        updateState(nameFilter = nameFilter)
     }
 
     override fun updateSortBy(sortBy: InstanceSortBy) {
-        updateInstances(sortBy = sortBy, canSaveFilters = true)
+        updateState(sortBy = sortBy, canSaveFilters = true)
     }
 
     override fun toggleSortByOrder() {
-        updateInstances(sortByOrder = uiState.value.sorter.sortByOrder.opposite, canSaveFilters = true)
+        updateState(sortByOrder = uiState.value.sorter.sortByOrder.opposite, canSaveFilters = true)
     }
 
     override fun updateGroupBy(groupBy: InstanceGroupBy) {
-        updateInstances(groupBy = groupBy, canSaveFilters = true)
+        updateState(groupBy = groupBy, canSaveFilters = true)
     }
 
     override fun toggleGroupByOrder() {
-        updateInstances(groupByOrder = uiState.value.sorter.groupByOrder.opposite, canSaveFilters = true)
+        updateState(groupByOrder = uiState.value.sorter.groupByOrder.opposite, canSaveFilters = true)
     }
 
     override fun saveFilters() {

@@ -33,7 +33,7 @@ class RootComponentImpl(
 
     init {
         configurationService.load()
-        scope.launch {
+        launch {
             configurationService.loadingState.collect {
                 when (it) {
                     is ConfigurationLoadingState.Errored -> onError(it.error)

@@ -2,14 +2,15 @@ package app.vercors.home
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
-import app.vercors.common.AppTab
 import app.vercors.common.inject
 import app.vercors.configuration.ConfigurationService
 import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceService
+import app.vercors.instance.launch.LauncherService
+import app.vercors.navigation.NavigationEvent
+import app.vercors.navigation.NavigationService
 import app.vercors.project.ProjectData
 import app.vercors.project.ProjectProviderType
-import app.vercors.toolbar.ToolbarTitle
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -24,29 +25,24 @@ private val logger = KotlinLogging.logger { }
 
 class HomeComponentImpl(
     componentContext: AppComponentContext,
-    override val onShowInstanceDetails: (InstanceData) -> Unit,
-    override val onLaunchInstance: (InstanceData) -> Unit,
-    override val onShowProjectDetails: (ProjectData) -> Unit,
-    override val onInstallProject: (ProjectData) -> Unit,
     private val homeService: HomeService = componentContext.inject(),
     private val configurationService: ConfigurationService = componentContext.inject(),
-    private val instanceService: InstanceService = componentContext.inject()
+    private val instanceService: InstanceService = componentContext.inject(),
+    private val launcherService: LauncherService = componentContext.inject(),
+    private val navigationService: NavigationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), HomeComponent {
-    override val tab = AppTab.Home
-    override val isDefault = true
-    override val title = ToolbarTitle.Home
 
     private val configState = configurationService.configState
         .filterNotNull()
         .map { it.homeSections to it.homeProviders }
-        .stateIn(scope, SharingStarted.Eagerly, null)
+        .stateIn(this, SharingStarted.Eagerly, null)
     private val _uiState = MutableStateFlow(HomeUiState(persistentListOf()))
     override val uiState: StateFlow<HomeUiState> = _uiState
     private lateinit var job: Job
 
     override fun onStart() {
         super.onStart()
-        job = scope.launch {
+        job = launch {
             configState.filterNotNull()
                 .combine(instanceService.instancesState) { c, _ -> c }
                 .collect { (sectionTypes, providerTypes) ->
@@ -96,13 +92,29 @@ class HomeComponentImpl(
     override fun refresh() {
         cachedProjectData.clear()
         val (sectionType, providerType) = configState.value!!
-        scope.launch {
+        launch {
             loadSections(sectionType, providerType)
         }
     }
 
     private fun List<HomeSection.Projects>.merge(): HomeSection.Projects {
         return first()
+    }
+
+    override fun onShowInstanceDetails(instance: InstanceData) {
+        navigationService.handle(NavigationEvent.InstanceDetails(instance))
+    }
+
+    override fun onLaunchInstance(instance: InstanceData) {
+        launch { launcherService.launch(instance).collect() }
+    }
+
+    override fun onShowProjectDetails(project: ProjectData) {
+        navigationService.handle(NavigationEvent.ProjectDetails(project))
+    }
+
+    override fun onInstallProject(project: ProjectData) {
+        // TODO
     }
 
     companion object {

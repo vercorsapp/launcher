@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface HomeComponent : NavigationChildComponent, Refreshable {
     val uiState: StateFlow<HomeUiState>
-    val onShowInstanceDetails: (InstanceData) -> Unit
-    val onLaunchInstance: (InstanceData) -> Unit
-    val onShowProjectDetails: (ProjectData) -> Unit
-    val onInstallProject: (ProjectData) -> Unit
+    fun onShowInstanceDetails(instance: InstanceData)
+    fun onLaunchInstance(instance: InstanceData)
+    fun onShowProjectDetails(project: ProjectData)
+    fun onInstallProject(project: ProjectData)
 }

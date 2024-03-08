@@ -8,11 +8,12 @@ import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.launch
 
 class DialogComponentImpl(
-    componentContext: AppComponentContext
-) : AbstractAppComponent(componentContext), DialogComponent {
+    componentContext: AppComponentContext,
+    private val dialogService: DialogService = componentContext.inject()
+) : AbstractAppComponent(componentContext), DialogEventHandler by dialogService, DialogComponent {
     private val dialogNavigation = SlotNavigation<DialogConfig>()
     private val _dialog: Value<ChildSlot<DialogConfig, DialogChildComponent>> = childSlot(
         source = dialogNavigation,
@@ -23,33 +24,19 @@ class DialogComponentImpl(
     }
     override val dialog: Value<ChildSlot<*, DialogChildComponent>> = _dialog
 
+    override fun onCreate() {
+        super.onCreate()
+        launch {
+            dialogService.dialogState.collect { config ->
+                config?.let { dialogNavigation.activate(it) } ?: dialogNavigation.dismiss()
+            }
+        }
+    }
+
     private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): DialogChildComponent =
         when (config) {
             is DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(componentContext, ::closeDialog)
             is DialogConfig.Login -> inject<LoginDialogComponent>(componentContext, ::closeDialog)
             is DialogConfig.Error -> inject<ErrorDialogComponent>(componentContext, ::closeDialog)
         }
-
-    override fun openDialog(event: DialogEvent) {
-        when (event) {
-            DialogEvent.CreateInstance -> dialogNavigation.activate(DialogConfig.CreateInstance)
-            DialogEvent.Login -> dialogNavigation.activate(DialogConfig.Login())
-        }
-    }
-
-    override fun closeDialog() {
-        dialogNavigation.dismiss()
-    }
-
-    @Serializable
-    private sealed interface DialogConfig {
-        @Serializable
-        data object CreateInstance : DialogConfig
-
-        @Serializable
-        data class Login(val authenticationStateCollector: () -> Unit = {}) : DialogConfig
-
-        @Serializable
-        data class Error(val title: String, val message: List<String>) : DialogConfig
-    }
 }

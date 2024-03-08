@@ -2,19 +2,14 @@ package app.vercors.configuration
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
-import app.vercors.common.AppTab
 import app.vercors.common.inject
 import app.vercors.home.HomeSectionType
 import app.vercors.project.ProjectProviderType
-import app.vercors.toolbar.ToolbarTitle
 
 class ConfigurationComponentImpl(
     componentContext: AppComponentContext,
     private val configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), ConfigurationComponent {
-    override val tab = AppTab.Settings
-    override val isDefault = true
-    override val title = ToolbarTitle.Settings
 
     override fun onConfigChange(config: ConfigurationData) {
         configurationService.update(config)

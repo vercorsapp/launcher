@@ -11,7 +11,6 @@ class StorageServiceImpl(
 ) : StorageService {
     override val defaultBasePath: Path by lazy { Path.of(appDirs.getUserConfigDir()) }
     override val basePath: Path get() = Path.of(configurationService.config.path!!)
-    override val cachePath: Path get() = basePath.resolve("cache")
     override val instancesPath: Path get() = basePath.resolve("instances")
     private val versionsDir: Path get() = basePath.resolve("versions")
     override val assetsPath: Path get() = basePath.resolve("assets")
@@ -37,5 +36,4 @@ class StorageServiceImpl(
     override fun getAssetPath(sha1: String): Path = assetObjectsDir.resolve(sha1.take(2)).resolve(sha1)
 
     override fun getLogConfigPath(type: String, id: String): Path = loggingDir.resolve(type).resolve(id)
-
 }

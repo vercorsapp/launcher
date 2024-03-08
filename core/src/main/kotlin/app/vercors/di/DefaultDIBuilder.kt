@@ -14,7 +14,7 @@ class DefaultDIBuilder(
         providerMap[kClass] = DIProvider.LazySingle(provider)
     }
 
-    override fun <T : Any> single(kClass: KClass<T>, provider: DI.() -> T) {
+    override fun <T : Any> single(kClass: KClass<T>, provider: suspend DI.() -> T) {
         providerMap[kClass] = DIProvider.Single(provider)
     }
 

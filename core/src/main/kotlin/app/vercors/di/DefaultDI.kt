@@ -49,11 +49,13 @@ class DefaultDI(
     }
 
     @Suppress("unchecked_cast")
-    private fun <T : Any> provide(kClass: KClass<T>, provider: () -> Any): T {
+    private fun <T : Any> provide(kClass: KClass<T>, provider: suspend () -> Any): T {
         logger.debug { "Providing $kClass" }
         val result: T
         measureTimeMillis {
+            runBlocking {
             result = provider() as T
+            }
         }.let { logger.debug { "Provided $kClass in ${it}ms" } }
         return result
     }

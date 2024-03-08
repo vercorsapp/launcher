@@ -24,11 +24,9 @@ import app.vercors.LocalConfiguration
 import app.vercors.LocalPalette
 import app.vercors.UI
 import app.vercors.applyIf
+import app.vercors.navigation.title
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.stringResource
-import vercors.app.generated.resources.*
 
 @Composable
 fun ToolbarContent(component: ToolbarComponent) {
@@ -59,10 +57,19 @@ fun ToolbarContent(component: ToolbarComponent) {
                 interactionSource,
                 uiState.canRefreshScreen
             ) { component.onToolbarClick(ToolbarButton.Refresh) }
-            uiState.title?.let {
-                Text(
-                    text = it.text,
+            uiState.title.forEachIndexed { index, config ->
+                if (index != 0) Text(
+                    text = " > ",
                     lineHeight = UI.normalLineHeight
+                )
+                Text(
+                    text = config.title,
+                    lineHeight = UI.normalLineHeight,
+                    modifier = Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { component.onTitleClick(config) }
+                    ).pointerHoverIcon(PointerIcon.Hand)
                 )
             }
         }
@@ -79,16 +86,6 @@ fun ToolbarContent(component: ToolbarComponent) {
         }
     }
 }
-
-@OptIn(ExperimentalResourceApi::class)
-private val ToolbarTitle.text
-    @Composable get() = when (this) {
-        ToolbarTitle.Home -> stringResource(Res.string.home)
-        ToolbarTitle.Instances -> stringResource(Res.string.instances)
-        ToolbarTitle.Search -> stringResource(Res.string.search)
-        ToolbarTitle.Settings -> stringResource(Res.string.settings)
-        ToolbarTitle.InstanceInfo -> "Instance" // TODO
-    }
 
 @Composable
 private fun ToolbarButton(

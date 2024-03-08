@@ -10,13 +10,13 @@ import kotlinx.coroutines.launch
 class SystemThemeServiceImpl(
     coroutineScope: CoroutineScope,
     osThemeDetectorProvider: () -> OsThemeDetector = { OsThemeDetector.getDetector() }
-) : SystemThemeService {
+) : SystemThemeService, CoroutineScope by coroutineScope {
     private lateinit var osThemeDetector: OsThemeDetector
     private val _isDark = MutableStateFlow(true)
     override val isDark: StateFlow<Boolean> = _isDark
 
     init {
-        coroutineScope.launch {
+        launch {
             osThemeDetector = osThemeDetectorProvider()
             _isDark.update { osThemeDetector.isDark }
             osThemeDetector.registerListener { _isDark.update { _ -> it } }

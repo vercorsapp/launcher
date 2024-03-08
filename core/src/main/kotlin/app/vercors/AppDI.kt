@@ -12,6 +12,8 @@ import app.vercors.di.inject
 import app.vercors.di.single
 import app.vercors.dialog.DialogComponent
 import app.vercors.dialog.DialogComponentImpl
+import app.vercors.dialog.DialogService
+import app.vercors.dialog.DialogServiceImpl
 import app.vercors.dialog.error.ErrorDialogComponent
 import app.vercors.dialog.error.ErrorDialogComponentImpl
 import app.vercors.dialog.instance.CreateInstanceDialogComponent
@@ -78,7 +80,8 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     single<AccountService> { AccountServiceImpl(inject(), inject()) }
     single<AccountRepository> { AccountRepositoryImpl(inject(), inject()) }
     single<AuthenticationService> { AuthenticationServiceImpl(inject(), properties.getProperty("microsoftClientId")) }
-    single<NavigationService> { NavigationServiceImpl(inject()) }
+    single<NavigationService> { NavigationServiceImpl(inject(), inject()) }
+    single<DialogService> { DialogServiceImpl() }
     single<HomeService> { HomeServiceImpl(inject(), inject(), inject()) }
     single<MojangService> { MojangServiceImpl(inject(), inject()) }
     single<ModrinthService> { ModrinthServiceImpl(inject(), properties.getProperty("modrinthApiKey")) }
@@ -90,14 +93,14 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     factory<MainComponent> { MainComponentImpl(param(), param()) }
     factory<MenuComponent> { MenuComponentImpl(param(), param()) }
     factory<ToolbarComponent> { ToolbarComponentImpl(param(), param()) }
-    factory<NavigationComponent> { NavigationComponentImpl(param(), param(), param(), param(), param()) }
+    factory<NavigationComponent> { NavigationComponentImpl(param()) }
     factory<DialogComponent> { DialogComponentImpl(param()) }
     factory<CreateInstanceDialogComponent> { CreateInstanceDialogComponentImpl(param(), param()) }
     factory<LoginDialogComponent> { LoginDialogComponentImpl(param(), param()) }
     factory<ErrorDialogComponent> { ErrorDialogComponentImpl(param()) }
-    factory<AccountsComponent> { AccountsComponentImpl(param(), param()) }
-    factory<HomeComponent> { HomeComponentImpl(param(), param(), param(), param(), param()) }
-    factory<InstanceListComponent> { InstanceListComponentImpl(param(), param(), param(), param()) }
+    factory<AccountsComponent> { AccountsComponentImpl(param()) }
+    factory<HomeComponent> { HomeComponentImpl(param()) }
+    factory<InstanceListComponent> { InstanceListComponentImpl(param()) }
     factory<InstanceDetailsComponent> { InstanceDetailsComponentImpl(param()) }
     factory<SearchComponent> { SearchComponentImpl(param()) }
     factory<ProjectDetailsComponent> { ProjectDetailsComponentImpl(param()) }

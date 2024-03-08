@@ -166,7 +166,7 @@ fun InstanceListContent(component: InstanceListComponent) {
                     } else if (uiState.sorter.groupBy === InstanceGroupBy.None) {
                         items(uiState.instanceGroups[""]!!, key = { it.path }) {
                             Card(modifier = Modifier.padding(UI.mediumPadding)) {
-                                InstanceCardContent(it, component.onShowInstanceDetails, component.onLaunchInstance)
+                                InstanceCardContent(it, component::showInstanceDetails, component::launchInstance)
                             }
                         }
                     } else {
@@ -195,7 +195,7 @@ fun InstanceListContent(component: InstanceListComponent) {
                             }
                             items(instances, key = { it.path }) {
                                 Card(modifier = Modifier.padding(UI.mediumPadding)) {
-                                    InstanceCardContent(it, component.onShowInstanceDetails, component.onLaunchInstance)
+                                    InstanceCardContent(it, component::showInstanceDetails, component::launchInstance)
                                 }
                             }
                         }
@@ -213,16 +213,22 @@ fun InstanceListContent(component: InstanceListComponent) {
             verticalArrangement = Arrangement.spacedBy(UI.largePadding, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(Res.string.noInstancesFound),
-                style = MaterialTheme.typography.h4
-            )
-
-            IconTextButton(
-                onClick = component.onOpenCreateInstanceDialog,
-                imageVector = FeatherIcons.Plus,
-                text = stringResource(Res.string.createInstance)
-            )
+            if (uiState.isLoading) {
+                Text(
+                    text = stringResource(Res.string.loading),
+                    style = MaterialTheme.typography.h4
+                )
+            } else {
+                Text(
+                    text = stringResource(Res.string.noInstancesFound),
+                    style = MaterialTheme.typography.h4
+                )
+                IconTextButton(
+                    onClick = component::openCreateInstanceDialog,
+                    imageVector = FeatherIcons.Plus,
+                    text = stringResource(Res.string.createInstance)
+                )
+            }
         }
     }
 }

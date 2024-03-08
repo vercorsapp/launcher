@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 data class InstanceListUiState(
+    val isLoading: Boolean = true,
     val instanceList: ImmutableList<InstanceData> = persistentListOf(),
     val instanceGroups: ImmutableMap<String, List<InstanceData>> = persistentMapOf(),
     val nameFilter: String = "",
