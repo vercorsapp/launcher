@@ -7,7 +7,6 @@ import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceService
 import app.vercors.instance.mojang.MojangService
 import app.vercors.project.ModLoader
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -35,7 +34,7 @@ class CreateInstanceDialogComponentImpl(
                 isLatestRelease = manifest.isLatestRelease(it),
                 isLatestSnapshot = manifest.isLatestSnapshot(it)
             )
-        }.toImmutableList()
+        }
         _uiState.update {
             it.copy(allMinecraftVersions = data).let { state ->
                 state.copy(minecraftVersion = state.filteredMinecraftVersions.firstOrNull())

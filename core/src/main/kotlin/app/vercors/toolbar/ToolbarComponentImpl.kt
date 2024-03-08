@@ -5,7 +5,6 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationService
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -24,7 +23,7 @@ class ToolbarComponentImpl(
             navigationService.navigationState.collect { state ->
                 _uiState.update {
                     it.copy(
-                        title = persistentListOf(state.active),
+                        title = listOf(state.active),
                         hasPreviousScreen = state.hasPreviousScreen,
                         hasNextScreen = state.hasNextScreen
                     )

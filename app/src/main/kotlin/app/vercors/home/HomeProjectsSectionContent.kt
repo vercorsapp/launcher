@@ -33,7 +33,6 @@ import app.vercors.project.ProjectData
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
-import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
@@ -44,7 +43,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun HomeProjectsSectionContent(
-    projects: ImmutableList<ProjectData>?,
+    projects: List<ProjectData>?,
     onProjectClick: (ProjectData) -> Unit,
     onProjectInstallClick: (ProjectData) -> Unit
 ) {

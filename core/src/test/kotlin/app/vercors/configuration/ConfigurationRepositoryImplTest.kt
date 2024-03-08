@@ -52,6 +52,7 @@ class ConfigurationRepositoryImplTest {
     fun setup() {
         mockkStatic(*staticClasses)
         every { Path.of(any<String>(), *anyVararg()) } returns path
+        every { appDirs.getUserConfigDir(false) } returns "path"
         every { path.toString() } returns "path"
     }
 

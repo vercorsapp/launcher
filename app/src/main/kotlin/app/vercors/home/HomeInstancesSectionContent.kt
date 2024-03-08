@@ -29,12 +29,11 @@ import app.vercors.instance.loaderAndVersionString
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box
 import compose.icons.feathericons.Play
-import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.roundToInt
 
 @Composable
 fun HomeInstancesSectionContent(
-    instances: ImmutableList<InstanceData>?,
+    instances: List<InstanceData>?,
     onInstanceClick: (InstanceData) -> Unit,
     onInstanceLaunchClick: (InstanceData) -> Unit
 ) {

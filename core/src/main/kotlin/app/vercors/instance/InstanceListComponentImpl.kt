@@ -12,8 +12,6 @@ import app.vercors.instance.launch.LauncherService
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationService
 import app.vercors.project.ModLoader
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -77,8 +75,8 @@ class InstanceListComponentImpl(
         _uiState.update {
             InstanceListUiState(
                 isLoading = isLoading,
-                instanceList = instances.toImmutableList(),
-                instanceGroups = groupedInstances.toImmutableMap(),
+                instanceList = instances,
+                instanceGroups = groupedInstances,
                 nameFilter = nameFilter,
                 sorter = InstanceSorter(sortBy, sortByOrder, groupBy, groupByOrder),
                 canSaveFilters = canSaveFilters

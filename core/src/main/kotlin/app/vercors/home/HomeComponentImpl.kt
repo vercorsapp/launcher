@@ -12,9 +12,6 @@ import app.vercors.navigation.NavigationService
 import app.vercors.project.ProjectData
 import app.vercors.project.ProjectProviderType
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
@@ -36,7 +33,7 @@ class HomeComponentImpl(
         .filterNotNull()
         .map { it.homeSections to it.homeProviders }
         .stateIn(this, SharingStarted.Eagerly, null)
-    private val _uiState = MutableStateFlow(HomeUiState(persistentListOf()))
+    private val _uiState = MutableStateFlow(HomeUiState())
     override val uiState: StateFlow<HomeUiState> = _uiState
     private lateinit var job: Job
 
@@ -51,13 +48,13 @@ class HomeComponentImpl(
         }
     }
 
-    private fun emptySections(sectionTypes: List<HomeSectionType>): ImmutableList<HomeSection> {
+    private fun emptySections(sectionTypes: List<HomeSectionType>): List<HomeSection> {
         return sectionTypes.map {
             when (it) {
                 HomeSectionType.JumpBackIn -> HomeSection.Instances()
                 else -> HomeSection.Projects(it)
             }
-        }.toImmutableList()
+        }
     }
 
     override fun onStop() {
@@ -80,7 +77,7 @@ class HomeComponentImpl(
                 _uiState.update { state ->
                     state.copy(sections = state.sections.map {
                         if (it.type === sectionType) section else it
-                    }.toImmutableList())
+                    })
                 }
             }
         }

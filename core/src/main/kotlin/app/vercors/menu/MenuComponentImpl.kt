@@ -8,7 +8,6 @@ import app.vercors.dialog.DialogEvent
 import app.vercors.dialog.DialogService
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationService
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -24,7 +23,7 @@ class MenuComponentImpl(
 ) : AbstractAppComponent(componentContext), MenuComponent {
     private val _uiState = MutableStateFlow(
         MenuUiState(
-            topButtons = persistentListOf(
+            topButtons = listOf(
                 MenuButton.Home,
                 MenuButton.Instances,
                 MenuButton.Search,
@@ -32,7 +31,7 @@ class MenuComponentImpl(
             ),
             selectedTab = navigationService.navigationState.value.currentTab,
             selectedAccount = accountService.selectedAccountState.value,
-            bottomButtons = persistentListOf(MenuButton.Settings, MenuButton.Accounts)
+            bottomButtons = listOf(MenuButton.Settings, MenuButton.Accounts)
         )
     )
     override val uiState: StateFlow<MenuUiState> = _uiState

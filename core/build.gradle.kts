@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.jetbrains.compose)
 }
 
 dependencies {
+    implementation(compose.runtime)
     implementation(libs.serialization.json)
-    implementation(libs.collections.immutable)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)

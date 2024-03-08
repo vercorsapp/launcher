@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.serialization) apply false
@@ -15,4 +17,38 @@ subprojects {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         google()
     }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            if (project.findProperty("composeCompilerReports") == "true") {
+                freeCompilerArgs += listOf(
+                    "-P",
+                    "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${
+                        project.layout.buildDirectory.dir(
+                            "compose_compiler"
+                        ).get().asFile
+                    }"
+                )
+            }
+            if (project.findProperty("composeCompilerMetrics") == "true") {
+                freeCompilerArgs += listOf(
+                    "-P",
+                    "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${
+                        project.layout.buildDirectory.dir(
+                            "compose_compiler"
+                        ).get().asFile
+                    }"
+                )
+            }
+            freeCompilerArgs += listOf(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=${
+                    rootProject.layout.projectDirectory.file(
+                        "compose_compiler_config.conf"
+                    ).asFile
+                }"
+            )
+        }
+    }
+
 }

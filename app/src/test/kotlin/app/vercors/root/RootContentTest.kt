@@ -2,6 +2,7 @@ package app.vercors.root
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.window.WindowScope
+import androidx.compose.ui.window.WindowState
 import app.vercors.root.error.ErrorComponent
 import app.vercors.root.main.MainComponent
 import app.vercors.root.setup.SetupComponent
@@ -9,7 +10,6 @@ import com.arkivanov.decompose.Cancellation
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -27,7 +27,7 @@ class RootContentTest {
     lateinit var windowScope: WindowScope
 
     @MockK
-    lateinit var lifecycle: LifecycleRegistry
+    lateinit var windowState: WindowState
 
     @MockK
     lateinit var component: RootComponent
@@ -71,7 +71,7 @@ class RootContentTest {
     @Test
     fun testEmptyChildShowsNothing() {
         every { childValue.child } returns null
-        rule.setContent { RootContent(component, lifecycle) {} }
+        rule.setContent { RootContent(component, windowState) {} }
         verifyCommon()
     }
 

@@ -10,7 +10,6 @@ plugins {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
-    implementation(libs.collections.immutable)
     implementation(libs.coroutines.swing)
     implementation(libs.decompose)
     implementation(libs.decompose.extensions.compose)
@@ -28,17 +27,6 @@ dependencies {
     implementation(project(":core"))
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(libs.mockk)
-}
-
-kotlin {
-    jvmToolchain(17)
-
-    compilerOptions {
-        freeCompilerArgs = listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=${rootProject.path}/compose_compiler_config.conf"
-        )
-    }
 }
 
 tasks.test {

@@ -6,7 +6,6 @@ import app.vercors.project.ProjectData
 import app.vercors.project.ProjectProviderType
 import app.vercors.project.curseforge.CurseforgeService
 import app.vercors.project.modrinth.ModrinthService
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 
@@ -26,7 +25,7 @@ class HomeServiceImpl(
                 HomeSectionType.PopularResourcePacks -> fetch(provider, HomeProvider::getPopularResourcePacks)
                 HomeSectionType.PopularShaderPacks -> fetch(provider, HomeProvider::getPopularShaderPacks)
                 else -> throw IllegalArgumentException("Section type $sectionType not supported by this method")
-            }.toImmutableList()
+            }
         )
 
     private suspend fun fetch(
@@ -42,6 +41,6 @@ class HomeServiceImpl(
     override suspend fun loadInstances(): HomeSection.Instances = HomeSection.Instances(
         instanceService.loadingState
             .filterIsInstance<InstanceLoadingState.Loaded>().first()
-            .instances.sortedByDescending { it.lastPlayed ?: it.dateCreated }.toImmutableList()
+            .instances.sortedByDescending { it.lastPlayed ?: it.dateCreated }
     )
 }
