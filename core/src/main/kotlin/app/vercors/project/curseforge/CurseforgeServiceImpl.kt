@@ -1,7 +1,7 @@
 package app.vercors.project.curseforge
 
 import app.vercors.common.SortOrder
-import app.vercors.jsonBody
+import app.vercors.common.jsonBody
 import app.vercors.project.curseforge.data.CurseforgeCategoriesResponse
 import app.vercors.project.curseforge.data.CurseforgeProjectSearchResponse
 import app.vercors.project.curseforge.data.CurseforgeProjectSearchSortField

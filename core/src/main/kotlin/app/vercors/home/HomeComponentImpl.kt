@@ -12,7 +12,6 @@ import app.vercors.navigation.NavigationService
 import app.vercors.project.ProjectData
 import app.vercors.project.ProjectProviderType
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -35,17 +34,13 @@ class HomeComponentImpl(
         .stateIn(this, SharingStarted.Eagerly, null)
     private val _uiState = MutableStateFlow(HomeUiState())
     override val uiState: StateFlow<HomeUiState> = _uiState
-    private lateinit var job: Job
 
-    override fun onStart() {
-        super.onStart()
-        job = launch {
-            configState.filterNotNull()
-                .combine(instanceService.instancesState) { c, _ -> c }
-                .collect { (sectionTypes, providerTypes) ->
-                    loadSections(sectionTypes, providerTypes)
-                }
-        }
+    init {
+        configState.filterNotNull()
+            .combine(instanceService.instancesState) { c, _ -> c }
+            .collectInLifecycle { (sectionTypes, providerTypes) ->
+                loadSections(sectionTypes, providerTypes)
+            }
     }
 
     private fun emptySections(sectionTypes: List<HomeSectionType>): List<HomeSection> {
@@ -55,11 +50,6 @@ class HomeComponentImpl(
                 else -> HomeSection.Projects(it)
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        job.cancel()
     }
 
     private suspend fun loadSections(

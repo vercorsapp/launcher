@@ -6,10 +6,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,24 +36,27 @@ fun ToolbarContent(component: ToolbarComponent) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding)
         ) {
-            ToolbarButton(
-                FeatherIcons.ChevronLeft,
-                "Previous",
-                interactionSource,
-                uiState.hasPreviousScreen
-            ) { component.onToolbarClick(ToolbarButton.Previous) }
-            ToolbarButton(
-                FeatherIcons.ChevronRight,
-                "Next",
-                interactionSource,
-                uiState.hasNextScreen
-            ) { component.onToolbarClick(ToolbarButton.Next) }
-            ToolbarButton(
-                FeatherIcons.RefreshCw,
-                "Refresh",
-                interactionSource,
-                uiState.canRefreshScreen
-            ) { component.onToolbarClick(ToolbarButton.Refresh) }
+            ToolbarButtonContent(
+                icon = FeatherIcons.ChevronLeft,
+                name = "Previous",
+                interactionSource = interactionSource,
+                enabled = uiState.hasPreviousScreen,
+                onClick = { component.onToolbarClick(ToolbarButton.Previous) }
+            )
+            ToolbarButtonContent(
+                icon = FeatherIcons.ChevronRight,
+                name = "Next",
+                interactionSource = interactionSource,
+                enabled = uiState.hasNextScreen,
+                onClick = { component.onToolbarClick(ToolbarButton.Next) }
+            )
+            ToolbarButtonContent(
+                icon = FeatherIcons.RefreshCw,
+                name = "Refresh",
+                interactionSource = interactionSource,
+                enabled = uiState.canRefreshScreen,
+                onClick = { component.onToolbarClick(ToolbarButton.Refresh) }
+            )
             uiState.title.forEachIndexed { index, config ->
                 if (index != 0) Text(
                     text = " > ",
@@ -73,10 +73,25 @@ fun ToolbarContent(component: ToolbarComponent) {
                 )
             }
         }
+        Spacer(Modifier.weight(1f))
+
+        Row(Modifier.padding(horizontal = UI.mediumPadding)) {
+            if (uiState.hasUnreadNotifications) {
+                BadgedBox(
+                    badge = { Badge(Modifier.size(UI.smallBadgeSize)) }
+                ) {
+                    NotificationButtonContent(interactionSource, component.onNotificationButtonClick)
+                }
+            } else {
+                NotificationButtonContent(interactionSource, component.onNotificationButtonClick)
+            }
+        }
         if (!LocalConfiguration.current.useSystemWindowFrame) {
-            Spacer(Modifier.weight(1f))
             Row {
-                WindowButton(FeatherIcons.Minus, "Minimize Window") { component.onToolbarClick(ToolbarButton.Minimize) }
+                WindowButton(
+                    FeatherIcons.Minus,
+                    "Minimize Window"
+                ) { component.onToolbarClick(ToolbarButton.Minimize) }
                 WindowButton(
                     FeatherIcons.Square,
                     "Maximize Window"
@@ -84,21 +99,23 @@ fun ToolbarContent(component: ToolbarComponent) {
                 WindowButton(FeatherIcons.X, "Close Window", true) { component.onToolbarClick(ToolbarButton.Close) }
             }
         }
+
     }
 }
 
 @Composable
-private fun ToolbarButton(
+private fun ToolbarButtonContent(
     icon: ImageVector,
     name: String,
     interactionSource: MutableInteractionSource,
-    enabled: Boolean,
-    onClick: () -> Unit
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Icon(
         imageVector = icon,
         contentDescription = name,
-        modifier = Modifier.size(UI.mediumIconSize).applyIf(enabled) {
+        modifier = modifier.size(UI.mediumIconSize).applyIf(enabled) {
             pointerHoverIcon(PointerIcon.Hand).clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -126,4 +143,14 @@ private fun WindowButton(
     ) {
         Icon(icon, name, Modifier.align(Alignment.Center).size(UI.mediumIconSize))
     }
+}
+
+@Composable
+private fun NotificationButtonContent(interactionSource: MutableInteractionSource, onClick: () -> Unit) {
+    ToolbarButtonContent(
+        icon = FeatherIcons.Bell,
+        name = "Notifications",
+        interactionSource = interactionSource,
+        onClick = onClick,
+    )
 }

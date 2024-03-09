@@ -38,7 +38,7 @@ import vercors.app.generated.resources.selected
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalResourceApi::class)
 @Composable
-fun AccountsContent(component: AccountsComponent) {
+fun AccountListContent(component: AccountListComponent) {
     val uiState by component.uiState.collectAsState()
 
     if (uiState.isPopupOpen) {

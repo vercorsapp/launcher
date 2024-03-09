@@ -12,9 +12,7 @@ import app.vercors.project.ProjectDetailsComponent
 import app.vercors.project.SearchComponent
 import com.arkivanov.decompose.router.stack.*
 import com.arkivanov.decompose.value.Value
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 class NavigationComponentImpl(
     componentContext: AppComponentContext,
@@ -31,18 +29,13 @@ class NavigationComponentImpl(
     )
     override val children: Value<ChildStack<*, NavigationChildComponent>> = _children
 
-    override fun onCreate() {
-        super.onCreate()
-        launch {
-            navigationService.navigationState.filterNotNull().collect {
-                navigation.bringToFront(it.active)
-            }
+    init {
+        navigationService.navigationState.filterNotNull().collectInLifecycle {
+            navigation.bringToFront(it.active)
         }
-        launch {
-            navigationService.refreshChannel.consumeEach {
-                val active = children.active.instance
-                if (active is Refreshable) active.refresh()
-            }
+        navigationService.refreshChannel.consumeInLifecycle {
+            val active = children.active.instance
+            if (active is Refreshable) active.refresh()
         }
     }
 

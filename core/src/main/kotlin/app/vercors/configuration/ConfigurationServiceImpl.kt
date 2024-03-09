@@ -40,8 +40,9 @@ class ConfigurationServiceImpl(
         _loadingState.update { newState }
     }
 
-    override fun update(config: ConfigurationData) {
+    override fun update(config: ConfigurationData, forceSave: Boolean) {
         _loadingState.update { ConfigurationLoadingState.Loaded(config) }
+        if (forceSave) save()
     }
 
     private fun save(): Job = launch {

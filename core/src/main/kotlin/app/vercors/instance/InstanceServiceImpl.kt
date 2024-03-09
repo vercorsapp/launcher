@@ -36,14 +36,8 @@ class InstanceServiceImpl(
             }
             .onCompletion { _ ->
                 val state = loadingState.value as InstanceLoadingState.Loading
-                if (state.errors.isNotEmpty()) logger.error { "Errors occured while loading instances:" }
-                state.errors.forEach {
-                    logger.error(it) { "An error occured while loading the instance" }
-                }
-                if (state.warns.isNotEmpty()) logger.warn { "Warns occured while loading instances:" }
-                state.warns.forEach {
-                    logger.warn { "The instance at path $it is invalid" }
-                }
+                state.errors.forEach { logger.error(it) { "Error occured while loading instance" } }
+                state.warns.forEach { logger.warn { "Could not find instance at location $it" } }
                 _loadingState.updateAs<InstanceLoadingState.Loading> {
                     InstanceLoadingState.Loaded(it.instances, it.warns, it.errors)
                 }

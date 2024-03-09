@@ -5,6 +5,8 @@ import app.vercors.account.auth.AuthenticationService
 import app.vercors.account.auth.AuthenticationServiceImpl
 import app.vercors.common.AppComponentContext
 import app.vercors.common.AppComponentContextImpl
+import app.vercors.common.AppHttpClient
+import app.vercors.common.AppJson
 import app.vercors.configuration.*
 import app.vercors.di.DI
 import app.vercors.di.factory
@@ -37,6 +39,10 @@ import app.vercors.navigation.NavigationComponent
 import app.vercors.navigation.NavigationComponentImpl
 import app.vercors.navigation.NavigationService
 import app.vercors.navigation.NavigationServiceImpl
+import app.vercors.notification.NotificationListComponent
+import app.vercors.notification.NotificationListComponentImpl
+import app.vercors.notification.NotificationService
+import app.vercors.notification.NotificationServiceImpl
 import app.vercors.project.ProjectDetailsComponent
 import app.vercors.project.ProjectDetailsComponentImpl
 import app.vercors.project.SearchComponent
@@ -68,20 +74,27 @@ import java.util.*
 fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
     single<CoroutineScope> { coroutineScope }
     single<Json> { AppJson }
-    single<HttpClient> { appHttpClient(inject()) }
+    single<HttpClient> { AppHttpClient(inject()) }
     single<AppDirs> { AppDirs(APP_NAME) }
-    single<StorageService> { StorageServiceImpl(inject(), inject()) }
+    single<StorageService> { StorageServiceImpl() }
     single<SystemThemeService> { SystemThemeServiceImpl(inject()) }
     single<ConfigurationService> { ConfigurationServiceImpl(inject(), inject()) }
-    single<ConfigurationRepository> { ConfigurationRepositoryImpl(inject(), inject(), inject()) }
+    single<ConfigurationRepository> { ConfigurationRepositoryImpl(inject(), inject()) }
     single<InstanceService> { InstanceServiceImpl(inject(), inject(), inject()) }
     single<InstanceRepository> { InstanceRepositoryImpl(inject(), inject()) }
     single<LauncherService> { LauncherServiceImpl(inject(), inject(), inject(), inject(), inject(), inject()) }
     single<AccountService> { AccountServiceImpl(inject(), inject()) }
     single<AccountRepository> { AccountRepositoryImpl(inject(), inject()) }
-    single<AuthenticationService> { AuthenticationServiceImpl(inject(), properties.getProperty("microsoftClientId")) }
+    single<AuthenticationService> {
+        AuthenticationServiceImpl(
+            inject(),
+            inject(),
+            properties.getProperty("microsoftClientId")
+        )
+    }
     single<NavigationService> { NavigationServiceImpl(inject(), inject()) }
     single<DialogService> { DialogServiceImpl() }
+    single<NotificationService> { NotificationServiceImpl() }
     single<HomeService> { HomeServiceImpl(inject(), inject(), inject()) }
     single<MojangService> { MojangServiceImpl(inject(), inject()) }
     single<ModrinthService> { ModrinthServiceImpl(inject(), properties.getProperty("modrinthApiKey")) }
@@ -89,16 +102,17 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     factory<AppComponentContext> { AppComponentContextImpl(param(), param()) }
     factory<RootComponent> { RootComponentImpl(param(), param()) }
     factory<ErrorComponent> { ErrorComponentImpl(param(), param(), param()) }
-    factory<SetupComponent> { SetupComponentImpl(param(), param(), param()) }
+    factory<SetupComponent> { SetupComponentImpl(param(), param()) }
     factory<MainComponent> { MainComponentImpl(param(), param()) }
     factory<MenuComponent> { MenuComponentImpl(param(), param()) }
-    factory<ToolbarComponent> { ToolbarComponentImpl(param(), param()) }
+    factory<ToolbarComponent> { ToolbarComponentImpl(param(), param(), param()) }
     factory<NavigationComponent> { NavigationComponentImpl(param()) }
     factory<DialogComponent> { DialogComponentImpl(param()) }
     factory<CreateInstanceDialogComponent> { CreateInstanceDialogComponentImpl(param(), param()) }
     factory<LoginDialogComponent> { LoginDialogComponentImpl(param(), param()) }
     factory<ErrorDialogComponent> { ErrorDialogComponentImpl(param()) }
-    factory<AccountsComponent> { AccountsComponentImpl(param()) }
+    factory<AccountListComponent> { AccountListComponentImpl(param()) }
+    factory<NotificationListComponent> { NotificationListComponentImpl(param()) }
     factory<HomeComponent> { HomeComponentImpl(param()) }
     factory<InstanceListComponent> { InstanceListComponentImpl(param()) }
     factory<InstanceDetailsComponent> { InstanceDetailsComponentImpl(param()) }

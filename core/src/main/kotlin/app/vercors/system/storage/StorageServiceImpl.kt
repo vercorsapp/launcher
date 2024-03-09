@@ -1,16 +1,14 @@
 package app.vercors.system.storage
 
-import app.vercors.configuration.ConfigurationService
+import app.vercors.appBasePath
 import app.vercors.instance.InstanceData
-import ca.gosyer.appdirs.AppDirs
 import java.nio.file.Path
 
-class StorageServiceImpl(
-    appDirs: AppDirs,
-    private val configurationService: ConfigurationService
-) : StorageService {
-    override val defaultBasePath: Path by lazy { Path.of(appDirs.getUserConfigDir()) }
-    override val basePath: Path get() = Path.of(configurationService.config.path!!)
+class StorageServiceImpl : StorageService {
+    override val basePath: Path get() = appBasePath!!
+    override val configPath: Path get() = basePath.resolve("config.json")
+    private val cachePath: Path get() = basePath.resolve("cache")
+    override val coilCachePath: Path get() = cachePath.resolve("coil")
     override val instancesPath: Path get() = basePath.resolve("instances")
     private val versionsDir: Path get() = basePath.resolve("versions")
     override val assetsPath: Path get() = basePath.resolve("assets")

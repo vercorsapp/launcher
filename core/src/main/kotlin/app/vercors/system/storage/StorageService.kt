@@ -4,8 +4,9 @@ import app.vercors.instance.InstanceData
 import java.nio.file.Path
 
 interface StorageService {
-    val defaultBasePath: Path
     val basePath: Path
+    val configPath: Path
+    val coilCachePath: Path
     val instancesPath: Path
     val assetsPath: Path
 

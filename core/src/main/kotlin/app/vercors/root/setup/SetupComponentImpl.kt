@@ -1,26 +1,28 @@
 package app.vercors.root.setup
 
+import app.vercors.LoggerConfigurator
+import app.vercors.appBasePath
 import app.vercors.common.AbstractAppComponent
+import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.configuration.ConfigurationData
 import app.vercors.configuration.ConfigurationService
-import app.vercors.system.storage.StorageService
+import ca.gosyer.appdirs.AppDirs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.io.path.absolutePathString
+import java.nio.file.Path
 
 class SetupComponentImpl(
-    componentContext: app.vercors.common.AppComponentContext,
+    componentContext: AppComponentContext,
     override val onClose: () -> Unit,
-    config: ConfigurationData,
-    storageService: StorageService = componentContext.inject(),
+    appDirs: AppDirs = componentContext.inject(),
     private val configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), SetupComponent {
     private val _uiState = MutableStateFlow(
         SetupUiState(
-            config = config,
-            path = storageService.defaultBasePath.absolutePathString()
+            config = ConfigurationData(),
+            path = appDirs.getUserConfigDir()
         )
     )
     override val uiState: StateFlow<SetupUiState> = _uiState
@@ -43,11 +45,11 @@ class SetupComponentImpl(
 
     override fun launch() {
         val currentState = uiState.value
+        appBasePath = Path.of(currentState.path)
+        LoggerConfigurator.reload()
         configurationService.update(
-            currentState.config.copy(
-                path = currentState.path,
-                showTutorial = currentState.showTutorial
-            )
+            currentState.config.copy(showTutorial = currentState.showTutorial),
+            forceSave = true
         )
     }
 }

@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger {}
 @OptIn(ExperimentalDecomposeApi::class)
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
-    val properties = loadProperties()
+    val properties = loadProperties("/app.properties")
     logger.info { "Loaded application properties" }
     application(exitProcessOnExit = false) {
         val coroutineScope = rememberCoroutineScope()

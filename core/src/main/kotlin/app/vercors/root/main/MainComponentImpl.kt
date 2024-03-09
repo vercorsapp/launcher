@@ -1,21 +1,27 @@
 package app.vercors.root.main
 
+import app.vercors.account.AccountListComponent
 import app.vercors.account.AccountService
-import app.vercors.account.AccountsComponent
 import app.vercors.common.*
 import app.vercors.configuration.ConfigurationService
 import app.vercors.dialog.DialogComponent
 import app.vercors.dialog.DialogEvent
+import app.vercors.instance.InstanceLoadingState
 import app.vercors.instance.InstanceService
 import app.vercors.menu.MenuComponent
 import app.vercors.navigation.NavigationComponent
 import app.vercors.navigation.NavigationEvent
+import app.vercors.notification.NotificationData
+import app.vercors.notification.NotificationLevel
+import app.vercors.notification.NotificationListComponent
+import app.vercors.notification.NotificationText
+import app.vercors.system.storage.StorageService
 import app.vercors.system.theme.SystemThemeService
 import app.vercors.toolbar.ToolbarButton
 import app.vercors.toolbar.ToolbarComponent
+import com.arkivanov.decompose.value.ObserveLifecycleMode
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.nio.file.Path
 
 class MainComponentImpl(
     componentContext: AppComponentContext,
@@ -23,13 +29,16 @@ class MainComponentImpl(
     private val configurationService: ConfigurationService = componentContext.inject(),
     private val instanceService: InstanceService = componentContext.inject(),
     private val accountService: AccountService = componentContext.inject(),
-    private val systemThemeService: SystemThemeService = componentContext.inject()
+    private val systemThemeService: SystemThemeService = componentContext.inject(),
+    private val storageService: StorageService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), MainComponent {
     override val dialogComponent = inject<DialogComponent>(appChildContext("dialog"))
-    override val accountsComponent = inject<AccountsComponent>(appChildContext("accounts"))
+    override val accountListComponent = inject<AccountListComponent>(appChildContext("account"))
     override val menuComponent = inject<MenuComponent>(appChildContext("menu"), ::onAccountsMenuButtonClick)
-    override val toolbarComponent = inject<ToolbarComponent>(appChildContext("toolbar"), ::onToolbarClick)
+    override val toolbarComponent =
+        inject<ToolbarComponent>(appChildContext("toolbar"), ::onToolbarClick, ::onNotificationButtonClick)
     override val navigationComponent = inject<NavigationComponent>(appChildContext("navigation"))
+    override val notificationListComponent = inject<NotificationListComponent>(appChildContext("notification"))
     private val _uiState: MutableStateFlow<MainUiState> = MutableStateFlow(MainUiState.NotLoaded)
     override val uiState: StateFlow<MainUiState> = _uiState
 
@@ -53,8 +62,29 @@ class MainComponentImpl(
                 }
             }.collect { (config, palette) ->
                 _uiState.update {
-                    if (config.path == null) MainUiState.NotLoaded
-                    else MainUiState.Loaded(config, palette, Path.of(config.path, "cache", "coil"), null)
+                    MainUiState.Loaded(config, palette, storageService.coilCachePath, null)
+                }
+            }
+        }
+        instanceService.loadingState.collectInLifecycle(ObserveLifecycleMode.CREATE_DESTROY) { state ->
+            if (state is InstanceLoadingState.Loaded) {
+                state.warns.forEach {
+                    notificationListComponent.sendNotification(
+                        NotificationData(
+                            NotificationLevel.WARN,
+                            NotificationText.Template.InstanceNotFound,
+                            arrayOf(it)
+                        )
+                    )
+                }
+                state.errors.forEach {
+                    notificationListComponent.sendNotification(
+                        NotificationData(
+                            NotificationLevel.ERROR,
+                            NotificationText.Template.Error,
+                            arrayOf(it.localizedMessage)
+                        )
+                    )
                 }
             }
         }
@@ -64,7 +94,7 @@ class MainComponentImpl(
         if (accountService.selectedAccountState.value == null) {
             dialogComponent.openDialog(DialogEvent.Login)
         } else {
-            accountsComponent.onTogglePopup()
+            accountListComponent.onTogglePopup()
         }
     }
 
@@ -77,6 +107,10 @@ class MainComponentImpl(
             ToolbarButton.Maximize -> onMaximize()
             ToolbarButton.Close -> updateWindowEvent(MainWindowEvent.Close)
         }
+    }
+
+    private fun onNotificationButtonClick() {
+        notificationListComponent.onTogglePopup()
     }
 
     override fun onMaximize() {

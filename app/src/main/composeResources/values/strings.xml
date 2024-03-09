@@ -23,6 +23,15 @@
     <string name="descending">Descending order</string>
     <string name="none">None</string>
 
+    <!-- Notifications -->
+    <string name="notificationCount">%1$d notification</string>
+    <string name="notificationsCount">%1$d notifications</string>
+    <string name="markAllAsRead">Mark all as read</string>
+    <string name="deleteAll">Delete all</string>
+    <string name="noNotifications">No notifications</string>
+    <string name="instanceNotFound">Could not find instance at location %1$s.</string>
+    <string name="notificationError">%1$s\nCheck the logs for more details.</string>
+
     <!-- Home -->
     <string name="jumpBackIn">Jump back in</string>
     <string name="popularMods">Popular mods</string>

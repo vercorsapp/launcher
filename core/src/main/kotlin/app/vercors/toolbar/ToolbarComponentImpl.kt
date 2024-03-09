@@ -5,31 +5,37 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationService
+import app.vercors.notification.NotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class ToolbarComponentImpl(
     componentContext: AppComponentContext,
     override val onToolbarClick: (ToolbarButton) -> Unit,
-    private val navigationService: NavigationService = componentContext.inject()
+    override val onNotificationButtonClick: () -> Unit,
+    private val navigationService: NavigationService = componentContext.inject(),
+    private val notificationService: NotificationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), ToolbarComponent {
     private val _uiState = MutableStateFlow(ToolbarUiState())
     override val uiState: StateFlow<ToolbarUiState> = _uiState
 
-    override fun onCreate() {
-        launch {
-            navigationService.navigationState.collect { state ->
-                _uiState.update {
-                    it.copy(
-                        title = listOf(state.active),
-                        hasPreviousScreen = state.hasPreviousScreen,
-                        hasNextScreen = state.hasNextScreen
-                    )
-                }
+    init {
+        navigationService.navigationState.collectInLifecycle { state ->
+            _uiState.update {
+                it.copy(
+                    title = listOf(state.active),
+                    hasPreviousScreen = state.hasPreviousScreen,
+                    hasNextScreen = state.hasNextScreen
+                )
             }
         }
+        notificationService.notificationsState
+            .map { state -> state.any { !it.isRead } }
+            .collectInLifecycle { hasUnreadNotifications ->
+                _uiState.update { it.copy(hasUnreadNotifications = hasUnreadNotifications) }
+            }
     }
 
     override fun onTitleClick(config: NavigationConfig) {

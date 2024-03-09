@@ -8,5 +8,5 @@ interface ConfigurationService {
     val configState: StateFlow<ConfigurationData?>
     val config: ConfigurationData
     fun load(): Job
-    fun update(config: ConfigurationData)
+    fun update(config: ConfigurationData, forceSave: Boolean = false)
 }

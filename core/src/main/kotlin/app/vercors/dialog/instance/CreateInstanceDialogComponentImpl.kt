@@ -10,7 +10,6 @@ import app.vercors.project.ModLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class CreateInstanceDialogComponentImpl(
     componentContext: AppComponentContext,
@@ -21,9 +20,8 @@ class CreateInstanceDialogComponentImpl(
     private val _uiState = MutableStateFlow(CreateInstanceDialogUiState())
     override val uiState: StateFlow<CreateInstanceDialogUiState> = _uiState
 
-    override fun onCreate() {
-        super.onCreate()
-        launch { loadMinecraftVersions() }
+    init {
+        launchInLifecycle { loadMinecraftVersions() }
     }
 
     private suspend fun loadMinecraftVersions() {

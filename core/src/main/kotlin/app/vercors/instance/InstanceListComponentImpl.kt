@@ -11,8 +11,8 @@ import app.vercors.dialog.DialogService
 import app.vercors.instance.launch.LauncherService
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationService
+import app.vercors.notification.NotificationService
 import app.vercors.project.ModLoader
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -26,29 +26,21 @@ class InstanceListComponentImpl(
     private val instanceService: InstanceService = componentContext.inject(),
     private val navigationService: NavigationService = componentContext.inject(),
     private val launcherService: LauncherService = componentContext.inject(),
-    private val dialogService: DialogService = componentContext.inject()
+    private val dialogService: DialogService = componentContext.inject(),
+    private val notificationService: NotificationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), InstanceListComponent {
 
     private val _uiState =
         MutableStateFlow(InstanceListUiState(sorter = configurationService.config.savedInstanceSorter))
     override val uiState: StateFlow<InstanceListUiState> = _uiState
-    private lateinit var job: Job
 
-    override fun onStart() {
-        super.onStart()
-        job = launch {
-            instanceService.loadingState.collect {
-                when (it) {
-                    is InstanceLoadingState.Loading -> updateState(isLoading = true, instances = it.instances)
-                    is InstanceLoadingState.Loaded -> updateState(isLoading = false, instances = it.instances)
-                }
+    init {
+        instanceService.loadingState.collectInLifecycle {
+            when (it) {
+                is InstanceLoadingState.Loading -> updateState(isLoading = true, instances = it.instances)
+                is InstanceLoadingState.Loaded -> updateState(isLoading = false, instances = it.instances)
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        job.cancel()
     }
 
     private fun updateState(

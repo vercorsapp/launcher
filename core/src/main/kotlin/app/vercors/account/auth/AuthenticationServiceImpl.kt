@@ -14,13 +14,9 @@ import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.*
 import java.time.Instant
 import java.util.*
@@ -29,28 +25,44 @@ import kotlin.coroutines.CoroutineContext
 private val logger = KotlinLogging.logger { }
 
 class AuthenticationServiceImpl(
+    coroutineScope: CoroutineScope,
     private val httpClient: HttpClient,
     private val clientId: String
-) : AuthenticationService {
+) : AuthenticationService, CoroutineScope by coroutineScope {
+    private var server: CIOApplicationEngine? = null
+
     override fun startAuthentication(context: CoroutineContext): Flow<AuthenticationState> = channelFlow {
+        val emitter: suspend (AuthenticationState) -> Unit = { send(it) }
         withContext(context) {
             var progress = 0
             val state = UUID.randomUUID().toString()
             val codeVerifier = UUID.randomUUID().toString()
             val codeChallenge = codeVerifier.sha256().encodeBase64().take(43)
-            val (authorizationCode, port) = getAuthorizationCode(state, codeChallenge, context)
-            progress(++progress)
+            val (authorizationCode, port) = getAuthorizationCode(emitter, state, codeChallenge, context)
+            progress(emitter, ++progress)
             val (msAccessToken, refreshToken) = getMicrosoftAccessToken(codeVerifier, authorizationCode, port)
-            progress(++progress)
+            progress(emitter, ++progress)
             val (xblToken, userHash) = getXblToken(msAccessToken)
-            progress(++progress)
+            progress(emitter, ++progress)
             val xstsToken = getXstsToken(xblToken, userHash)
-            progress(++progress)
+            progress(emitter, ++progress)
             val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
-            progress(++progress)
+            progress(emitter, ++progress)
             val (uuid, username) = getMinecraftProfile(token)
-            progress(++progress)
-            send(AuthenticationState.Success(AccountData(username, uuid, refreshToken, token, exp)))
+            progress(emitter, ++progress)
+            emitter(AuthenticationState.Success(AccountData(username, uuid, refreshToken, token, exp)))
+        }
+    }
+
+    override fun cancelAuthentication() {
+        launch { stopServer() }
+    }
+
+    private suspend fun stopServer(context: CoroutineContext = Dispatchers.IO) = withContext(context) {
+        server?.let {
+            it.stop()
+            server = null
+            logger.debug { "Server stopped" }
         }
     }
 
@@ -58,7 +70,8 @@ class AuthenticationServiceImpl(
         return true // TODO
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.getAuthorizationCode(
+    private suspend fun getAuthorizationCode(
+        emitter: suspend (AuthenticationState) -> Unit,
         state: String,
         codeChallenge: String,
         context: CoroutineContext
@@ -67,7 +80,7 @@ class AuthenticationServiceImpl(
         var authorizationCode: String? = null
         var responseState: String? = null
         var error: String? = null
-        val server = embeddedServer(CIO, 0) {
+        server = embeddedServer(CIO, 0) {
             routing {
                 get("/") {
                     if (this.context.parameters.contains("code")) {
@@ -88,9 +101,9 @@ class AuthenticationServiceImpl(
         }
 
         val result = runCatching {
-            server.start()
-            val port = server.resolvedConnectors()[0].port
-            send(
+            server!!.start()
+            val port = server!!.resolvedConnectors()[0].port
+            emitter(
                 AuthenticationState.Waiting(
                     "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?" +
                             "client_id=$clientId" +
@@ -104,17 +117,15 @@ class AuthenticationServiceImpl(
                             "&code_challenge_method=S256"
                 )
             )
-            while (isActive && authorizationCode == null && error == null) delay(250)
-            if (!isActive) throw AuthenticationException("Execution stopped")
+            while (authorizationCode == null && error == null) {
+                delay(250)
+                ensureActive()
+            }
             error?.let { throw AuthenticationException(it) }
-            if (authorizationCode == null) throw AuthenticationException("Authentication failed")
             if (state != responseState) throw AuthenticationException("Response state doesn't match")
             authorizationCode!! to port
         }
-        withContext(context) {
-            server.stop()
-            logger.debug { "Server stopped" }
-        }
+        stopServer(context)
         result.getOrThrow()
     }
 
@@ -253,8 +264,8 @@ class AuthenticationServiceImpl(
         return uuid to username
     }
 
-    private suspend fun ProducerScope<AuthenticationState>.progress(progress: Int) {
-        send(AuthenticationState.Progress(progress.toFloat() / 6))
+    private suspend fun progress(emitter: suspend (AuthenticationState) -> Unit, progress: Int) {
+        emitter(AuthenticationState.Progress(progress.toFloat() / 6))
     }
 
     private val JsonElement.string get() = jsonPrimitive.content

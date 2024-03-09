@@ -2,10 +2,19 @@ package app.vercors.common
 
 import app.vercors.di.DI
 import app.vercors.di.inject
+import app.vercors.onError
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
+import com.arkivanov.decompose.value.ObserveLifecycleMode
 import com.arkivanov.essenty.lifecycle.Lifecycle
+import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 
 interface AppComponentContext : ComponentContext, CoroutineScope {
     val di: DI
@@ -13,6 +22,90 @@ interface AppComponentContext : ComponentContext, CoroutineScope {
     fun appChildContext(key: String, lifecycle: Lifecycle? = null): AppComponentContext =
         appChildContext(childContext(key, lifecycle))
     fun appChildContext(context: ComponentContext): AppComponentContext = inject<AppComponentContext>(context, di)
+
+    fun launchInLifecycle(
+        mode: ObserveLifecycleMode = ObserveLifecycleMode.START_STOP,
+        errorHandler: Job.(Throwable) -> Unit = {},
+        observer: suspend CoroutineScope.() -> Unit,
+    ) {
+        var job: Job? = null
+
+        when (mode) {
+            ObserveLifecycleMode.CREATE_DESTROY ->
+                lifecycle.subscribe(
+                    onCreate = { job = launch { observer() }.onError(errorHandler) },
+                    onDestroy = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.START_STOP ->
+                lifecycle.subscribe(
+                    onStart = { job = launch { observer() }.onError(errorHandler) },
+                    onStop = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.RESUME_PAUSE ->
+                lifecycle.subscribe(
+                    onResume = { job = launch { observer() }.onError(errorHandler) },
+                    onPause = { job?.cancel() },
+                )
+        }
+    }
+
+    fun <T> Flow<T>.collectInLifecycle(
+        mode: ObserveLifecycleMode = ObserveLifecycleMode.START_STOP,
+        errorHandler: Job.(Throwable) -> Unit = {},
+        collector: FlowCollector<T>,
+    ) {
+        var job: Job? = null
+
+        when (mode) {
+            ObserveLifecycleMode.CREATE_DESTROY ->
+                lifecycle.subscribe(
+                    onCreate = { job = launch { collect(collector) }.onError(errorHandler) },
+                    onDestroy = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.START_STOP ->
+                lifecycle.subscribe(
+                    onStart = { job = launch { collect(collector) }.onError(errorHandler) },
+                    onStop = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.RESUME_PAUSE ->
+                lifecycle.subscribe(
+                    onResume = { job = launch { collect(collector) }.onError(errorHandler) },
+                    onPause = { job?.cancel() },
+                )
+        }
+    }
+
+    fun <T> ReceiveChannel<T>.consumeInLifecycle(
+        mode: ObserveLifecycleMode = ObserveLifecycleMode.START_STOP,
+        errorHandler: Job.(Throwable) -> Unit = {},
+        collector: (T) -> Unit,
+    ) {
+        var job: Job? = null
+
+        when (mode) {
+            ObserveLifecycleMode.CREATE_DESTROY ->
+                lifecycle.subscribe(
+                    onCreate = { job = launch { consumeEach(collector) }.onError(errorHandler) },
+                    onDestroy = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.START_STOP ->
+                lifecycle.subscribe(
+                    onStart = { job = launch { consumeEach(collector) }.onError(errorHandler) },
+                    onStop = { job?.cancel() },
+                )
+
+            ObserveLifecycleMode.RESUME_PAUSE ->
+                lifecycle.subscribe(
+                    onResume = { job = launch { consumeEach(collector) }.onError(errorHandler) },
+                    onPause = { job?.cancel() },
+                )
+        }
+    }
 }
 
 inline fun <reified T : Any> AppComponentContext.inject(vararg args: Any): T = di.inject(*args)

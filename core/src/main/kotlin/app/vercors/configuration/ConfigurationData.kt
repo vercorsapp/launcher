@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ConfigurationData(
     val version: Int = 0,
-    val path: String? = null,
     val showTutorial: Boolean = false,
     val theme: AppTheme = AppTheme.System,
     val darkTheme: AppDarkTheme = AppDarkTheme.Normal,

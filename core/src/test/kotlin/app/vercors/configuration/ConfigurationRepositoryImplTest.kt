@@ -1,6 +1,6 @@
 package app.vercors.configuration
 
-import ca.gosyer.appdirs.AppDirs
+import app.vercors.system.storage.StorageService
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -25,7 +25,7 @@ import kotlin.io.path.*
 @ExtendWith(MockKExtension::class)
 class ConfigurationRepositoryImplTest {
     @MockK
-    lateinit var appDirs: AppDirs
+    lateinit var storageService: StorageService
 
     @MockK
     lateinit var path: Path
@@ -51,8 +51,7 @@ class ConfigurationRepositoryImplTest {
     @BeforeEach
     fun setup() {
         mockkStatic(*staticClasses)
-        every { Path.of(any<String>(), *anyVararg()) } returns path
-        every { appDirs.getUserConfigDir(false) } returns "path"
+        every { storageService.configPath } returns path
         every { path.toString() } returns "path"
     }
 
@@ -64,7 +63,7 @@ class ConfigurationRepositoryImplTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileExistsAndIsValid() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.isRegularFile(*anyVararg()) } returns true
         every { path.inputStream(*anyVararg()) } returns inputStream
         every { inputStream.close() } returns Unit
@@ -82,7 +81,7 @@ class ConfigurationRepositoryImplTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileExistsAndIsInvalid() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.isRegularFile(*anyVararg()) } returns true
         every { path.inputStream(*anyVararg()) } returns inputStream
         every { inputStream.close() } returns Unit
@@ -99,7 +98,7 @@ class ConfigurationRepositoryImplTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileDoesNotExist() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.isRegularFile(*anyVararg()) } returns false
         every { path.exists(*anyVararg()) } returns false
         every { path.createParentDirectories(*anyVararg()) } returns path
@@ -120,7 +119,7 @@ class ConfigurationRepositoryImplTest {
 
     @Test
     fun testLoadConfigurationWhenFileInvalid() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.isRegularFile(*anyVararg()) } returns false
         every { path.exists(*anyVararg()) } returns true
 
@@ -132,7 +131,7 @@ class ConfigurationRepositoryImplTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testSaveConfigurationSuccess() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.createParentDirectories(*anyVararg()) } returns path
         every { path.outputStream(*anyVararg()) } returns outputStream
         every { outputStream.close() } returns Unit
@@ -149,7 +148,7 @@ class ConfigurationRepositoryImplTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testSaveConfigurationError() = runTest {
-        val store = ConfigurationRepositoryImpl(appDirs, this, json, StandardTestDispatcher(testScheduler))
+        val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
         every { path.createParentDirectories(*anyVararg()) } returns path
         every { path.outputStream(*anyVararg()) } returns outputStream
         every { outputStream.close() } returns Unit

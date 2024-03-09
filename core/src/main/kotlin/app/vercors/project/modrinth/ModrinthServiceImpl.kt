@@ -1,6 +1,6 @@
 package app.vercors.project.modrinth
 
-import app.vercors.jsonBody
+import app.vercors.common.jsonBody
 import app.vercors.project.modrinth.data.ModrinthProjectSearchIndex
 import app.vercors.project.modrinth.data.ModrinthProjectSearchResult
 import io.ktor.client.*

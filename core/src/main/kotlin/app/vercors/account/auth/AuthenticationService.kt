@@ -6,5 +6,6 @@ import kotlin.coroutines.CoroutineContext
 
 interface AuthenticationService {
     fun startAuthentication(context: CoroutineContext = Dispatchers.IO): Flow<AuthenticationState>
+    fun cancelAuthentication()
     suspend fun validateToken(): Boolean
 }

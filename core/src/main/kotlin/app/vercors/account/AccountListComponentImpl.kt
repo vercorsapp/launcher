@@ -9,22 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
-class AccountsComponentImpl(
+class AccountListComponentImpl(
     componentContext: AppComponentContext,
     private val accountService: AccountService = componentContext.inject(),
     private val dialogService: DialogService = componentContext.inject()
-) : AbstractAppComponent(componentContext), AccountsComponent {
+) : AbstractAppComponent(componentContext), AccountListComponent {
     private val _uiState: MutableStateFlow<AccountsUiState> = MutableStateFlow(AccountsUiState())
     override val uiState: StateFlow<AccountsUiState> = _uiState
 
-    override fun onCreate() {
-        super.onCreate()
-        launch {
-            accountService.accountListState.filterNotNull().collect { accounts ->
-                _uiState.update { it.copy(data = accounts) }
-            }
+    init {
+        accountService.accountListState.filterNotNull().collectInLifecycle { accounts ->
+            _uiState.update { it.copy(data = accounts) }
         }
     }
 

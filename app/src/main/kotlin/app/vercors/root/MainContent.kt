@@ -18,11 +18,12 @@ import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
 import app.vercors.LocalImageLoader
 import app.vercors.LocalPalette
-import app.vercors.account.AccountsContent
+import app.vercors.account.AccountListContent
 import app.vercors.configuration.ConfigurationData
 import app.vercors.dialog.DialogContent
 import app.vercors.menu.MenuContent
 import app.vercors.navigation.NavigationContent
+import app.vercors.notification.NotificationListContent
 import app.vercors.root.main.MainComponent
 import app.vercors.root.main.MainUiState
 import app.vercors.root.main.MainWindowEvent
@@ -137,7 +138,8 @@ fun MainContent(component: MainComponent, windowState: WindowState, onClose: () 
                                     ) {
                                         NavigationContent(component.navigationComponent)
                                     }
-                                    AccountsContent(component.accountsComponent)
+                                    AccountListContent(component.accountListComponent)
+                                    NotificationListContent(component.notificationListComponent)
                                 }
                             }
                         }

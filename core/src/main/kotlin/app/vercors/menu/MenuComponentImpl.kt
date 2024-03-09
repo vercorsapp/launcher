@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class MenuComponentImpl(
     componentContext: AppComponentContext,
@@ -36,6 +35,15 @@ class MenuComponentImpl(
     )
     override val uiState: StateFlow<MenuUiState> = _uiState
 
+    init {
+        navigationService.navigationState.map { it.active.tab }.collectInLifecycle { tab ->
+            _uiState.update { it.copy(selectedTab = tab) }
+        }
+        accountService.selectedAccountState.collectInLifecycle { account ->
+            _uiState.update { it.copy(selectedAccount = account) }
+        }
+    }
+
     override fun onMenuButtonClick(button: MenuButton) {
         when (button) {
             MenuButton.Accounts -> onAccountsMenuButtonClick()
@@ -44,20 +52,6 @@ class MenuComponentImpl(
             MenuButton.Instances -> navigationService.handle(NavigationEvent.InstanceList)
             MenuButton.Search -> navigationService.handle(NavigationEvent.Search)
             MenuButton.Settings -> navigationService.handle(NavigationEvent.Configuration)
-        }
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        launch {
-            navigationService.navigationState.map { it.active.tab }.collect { tab ->
-                _uiState.update { it.copy(selectedTab = tab) }
-            }
-        }
-        launch {
-            accountService.selectedAccountState.collect { account ->
-                _uiState.update { it.copy(selectedAccount = account) }
-            }
         }
     }
 }

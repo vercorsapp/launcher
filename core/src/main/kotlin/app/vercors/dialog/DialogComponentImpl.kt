@@ -8,7 +8,6 @@ import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
-import kotlinx.coroutines.launch
 
 class DialogComponentImpl(
     componentContext: AppComponentContext,
@@ -24,12 +23,9 @@ class DialogComponentImpl(
     }
     override val dialog: Value<ChildSlot<*, DialogChildComponent>> = _dialog
 
-    override fun onCreate() {
-        super.onCreate()
-        launch {
-            dialogService.dialogState.collect { config ->
-                config?.let { dialogNavigation.activate(it) } ?: dialogNavigation.dismiss()
-            }
+    init {
+        dialogService.dialogState.collectInLifecycle { config ->
+            config?.let { dialogNavigation.activate(it) } ?: dialogNavigation.dismiss()
         }
     }
 

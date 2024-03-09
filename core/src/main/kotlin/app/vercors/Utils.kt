@@ -1,20 +1,7 @@
 package app.vercors
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.cache.*
-import io.ktor.client.plugins.cache.storage.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.util.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 import java.awt.Desktop
 import java.io.File
 import java.io.FileInputStream
@@ -38,15 +25,28 @@ private val logger = KotlinLogging.logger { }
 const val APP_VERSION = "0.1.0"
 const val APP_NAME = "Vercors"
 
-@OptIn(ExperimentalSerializationApi::class)
-val AppJson = Json {
-    encodeDefaults = true
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
-}
+private val appDataFile = Path.of("vercors.properties")
+val appDataFileExists: Boolean get() = appDataFile.isRegularFile()
+private var _appBasePath: Path? = null
+var appBasePath: Path?
+    get() {
+        if (_appBasePath == null && appDataFileExists) {
+            _appBasePath =
+                Path.of(Properties().apply { appDataFile.inputStream().use { load(it) } }.getProperty("path"))
+        }
+        return _appBasePath
+    }
+    set(value) {
+        if (value != null) {
+            Properties().apply {
+                set("path", value.absolutePathString())
+                appDataFile.outputStream().use { store(it, null) }
+            }
+            _appBasePath = value
+        }
+    }
 
-fun loadProperties() = Properties().apply { load(resourceAsStream("/app.properties")) }
+fun loadProperties(file: String) = Properties().apply { load(resourceAsStream(file)) }
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!
 
@@ -62,8 +62,6 @@ fun Long.readable(decimals: Int = 1): String {
     }
     return ""
 }
-
-
 
 fun <T> T.applyIf(condition: Boolean, runnable: T.() -> T): T = if (condition) run(runnable) else this
 
@@ -146,7 +144,7 @@ private suspend fun processZipEntry(
     dest: Path,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): Unit = withContext(dispatcher) {
-    val newFile = createFile(dest, zipEntry, dispatcher)
+    val newFile = createFileForZipEntry(dest, zipEntry, dispatcher)
     if (zipEntry.isDirectory) {
         if (!newFile.isDirectory()) newFile.createDirectories()
     } else {
@@ -157,7 +155,7 @@ private suspend fun processZipEntry(
 }
 
 @Throws(IOException::class)
-private suspend fun createFile(
+private suspend fun createFileForZipEntry(
     destinationDir: Path,
     zipEntry: ZipEntry,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -171,34 +169,6 @@ private suspend fun createFile(
 }
 
 class FetchException(message: String) : Exception(message)
-
-fun appHttpClient(json: Json) = HttpClient(CIO) {
-    install(ContentNegotiation) {
-        json(json)
-    }
-    install(HttpTimeout) {
-        requestTimeoutMillis = 3000
-    }
-    install(HttpRequestRetry) {
-        retryOnServerErrors(1)
-        retryOnException(1, true)
-        constantDelay()
-    }
-    install(UserAgent) {
-        agent = "skyecodes/vercors/$APP_VERSION (contact@skye.codes)"
-    }
-    install(Logging) {
-        logger = Logger.DEFAULT
-        level = LogLevel.HEADERS
-    }
-    install(HttpCache)
-}
-
-inline fun <reified T> HttpRequestBuilder.jsonBody(body: T) {
-    setBody(body)
-    contentType(ContentType.Application.Json)
-    expectSuccess = true
-}
 
 suspend fun isInternetAvailable(dispatcher: CoroutineDispatcher = Dispatchers.IO): Boolean = withContext(dispatcher) {
     try {
