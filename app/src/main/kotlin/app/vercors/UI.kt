@@ -42,7 +42,6 @@ object UI {
     val mediumLargePadding = 15.dp
     val mediumPadding = 10.dp
     val smallPadding = 5.dp
-    val smallBadgeSize = 12.dp
     val darker = Color(0x3f000000)
 }
 

@@ -4,6 +4,7 @@ import app.vercors.APP_NAME
 import app.vercors.APP_VERSION
 import app.vercors.account.AccountData
 import app.vercors.account.AccountService
+import app.vercors.account.auth.AuthenticationService
 import app.vercors.configuration.ConfigurationService
 import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceService
@@ -17,7 +18,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -35,13 +35,16 @@ class LauncherServiceImpl(
     private val storageService: StorageService,
     private val mojangService: MojangService,
     private val accountService: AccountService,
+    private val authenticationService: AuthenticationService,
     private val instanceService: InstanceService,
     private val configurationService: ConfigurationService
 ) : LauncherService {
     override fun launch(instance: InstanceData, context: CoroutineContext): Flow<LaunchStatus> = channelFlow {
+        val selectedAccount = accountService.selectedAccountState.value
         val preparation = runCatching {
             logger.info { "Launching instance ${instance.name}" }
-            /*if (!accountService.validateToken()) {
+            val account = authenticationService.validateToken(selectedAccount)
+            if (account == null) {
                 val job = Job()
                 send(LaunchStatus.RequiresLogin(job))
                 job.join()
@@ -49,7 +52,9 @@ class LauncherServiceImpl(
                     send(LaunchStatus.Errored(CancellationException("Login cancelled. You must log into an account in order to launch the game.")))
                     return@channelFlow
                 }
-            }*/
+            } else {
+                accountService.addAccount(account)
+            }
             logger.info { "Access token validated - preparing to launch instance" }
             send(LaunchStatus.Preparing(0f))
             val versionInfo = validateVersionInfo(instance.gameVersion)
@@ -64,8 +69,7 @@ class LauncherServiceImpl(
                 addAll(libraryPaths)
                 add(".")
             }.joinToString(";", "\"", "\"")
-            val account = accountService.selectedAccountState.first()
-            buildProcess(instance, versionInfo, classpath, logConfigPath, account!!)
+            buildProcess(instance, versionInfo, classpath, logConfigPath, accountService.selectedAccountState.value!!)
         }
         if (preparation.isFailure) {
             val e = preparation.exceptionOrNull()!!
@@ -88,7 +92,7 @@ class LauncherServiceImpl(
                         )
                     )
                     lastInstant = now
-                    delay(10_000)
+                    delay(1000)
                 }
             }
             logger.info { "Instance ${instance.name} stopped" }

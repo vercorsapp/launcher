@@ -34,6 +34,7 @@ import vercors.app.generated.resources.*
 fun NotificationListContent(component: NotificationListComponent) {
     val uiState by component.uiState.collectAsState()
     val notificationsCount = uiState.notifications.count()
+    val unreadNotificationsCount = uiState.notifications.count { !it.isRead }
 
     if (uiState.isPopupOpen) {
         Popup(
@@ -47,11 +48,14 @@ fun NotificationListContent(component: NotificationListComponent) {
             )
         ) {
             Card(
-                modifier = Modifier.widthIn(350.dp, 600.dp).heightIn(100.dp, 600.dp)
+                modifier = Modifier.width(600.dp).heightIn(100.dp, 600.dp)
                     .padding(top = UI.mediumPadding, end = UI.largePadding).shadow(8.dp)
                     .appAnimateContentSize()
             ) {
-                Column(Modifier.padding(horizontal = UI.mediumPadding, vertical = UI.smallPadding)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                    modifier = Modifier.padding(horizontal = UI.mediumLargePadding, vertical = UI.mediumPadding)
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
@@ -59,9 +63,10 @@ fun NotificationListContent(component: NotificationListComponent) {
                     ) {
                         Text(
                             text = stringResource(
-                                if (notificationsCount > 1) Res.string.notificationsCount
-                                else Res.string.notificationCount,
-                                notificationsCount
+                                if (unreadNotificationsCount > 1) Res.string.notificationsCount
+                                else if (unreadNotificationsCount == 1) Res.string.notificationCount
+                                else Res.string.noNotificationCount,
+                                unreadNotificationsCount
                             ),
                             style = MaterialTheme.typography.h6,
                             modifier = Modifier.weight(1f),
@@ -72,7 +77,7 @@ fun NotificationListContent(component: NotificationListComponent) {
                             text = stringResource(Res.string.markAllAsRead),
                             onClick = component::markAllNotificationsAsRead,
                             colors = ButtonDefaults.buttonColors(backgroundColor = LocalPalette.current.surface2),
-                            enabled = notificationsCount > 0
+                            enabled = unreadNotificationsCount > 0
                         )
                         IconTextButton(
                             imageVector = FeatherIcons.Trash2,
@@ -82,27 +87,33 @@ fun NotificationListContent(component: NotificationListComponent) {
                             enabled = notificationsCount > 0
                         )
                     }
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
-                        modifier = Modifier.padding(UI.mediumPadding)
-                    ) {
-                        items(
-                            items = uiState.notifications,
-                            key = NotificationData::id
+                    Box {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                            modifier = Modifier.padding(end = UI.mediumPadding + 6.dp)
                         ) {
-                            NotificationContent(it, component::clearNotification, component::updateNotification)
-                        }
-                        if (uiState.notifications.isEmpty()) {
-                            item {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = UI.largePadding)
-                                ) {
-                                    Text(
-                                        text = stringResource(Res.string.noNotifications),
-                                        style = MaterialTheme.typography.h6
-                                    )
+                            items(
+                                items = uiState.notifications,
+                                key = NotificationData::id
+                            ) {
+                                NotificationContent(
+                                    it,
+                                    component::toggleNotificationReadStatus,
+                                    component::clearNotification
+                                )
+                            }
+                            if (uiState.notifications.isEmpty()) {
+                                item {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = UI.mediumLargePadding)
+                                    ) {
+                                        Text(
+                                            text = stringResource(Res.string.noNotifications),
+                                            style = MaterialTheme.typography.h6
+                                        )
+                                    }
                                 }
                             }
                         }

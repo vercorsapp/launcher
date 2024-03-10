@@ -6,11 +6,17 @@ import kotlinx.coroutines.flow.update
 
 class NotificationServiceImpl : NotificationService {
     private val _notificationsState: MutableStateFlow<List<NotificationData>> = MutableStateFlow(
-        listOf(
-            NotificationData(NotificationLevel.INFO, "Test notification info"),
-            NotificationData(NotificationLevel.WARN, "Test notification warn"),
-            NotificationData(NotificationLevel.ERROR, "Test notification error")
-        )
+        buildList {
+            repeat(5) {
+                addAll(
+                    listOf(
+                        NotificationData(NotificationLevel.INFO, "Test notification info"),
+                        NotificationData(NotificationLevel.WARN, "Test notification warn"),
+                        NotificationData(NotificationLevel.ERROR, "Test notification error"),
+                    )
+                )
+            }
+        }
     )
     override val notificationsState: StateFlow<List<NotificationData>> = _notificationsState
 
@@ -22,8 +28,8 @@ class NotificationServiceImpl : NotificationService {
         _notificationsState.update { it - notification }
     }
 
-    override fun updateNotification(notification: NotificationData) {
-        _notificationsState.update { state -> state.map { if (it.id == notification.id) notification else it } }
+    override fun toggleNotificationReadStatus(notification: NotificationData) {
+        _notificationsState.update { state -> state.map { if (it.id == notification.id) notification.copy(isRead = !notification.isRead) else it } }
     }
 
     override fun clearAllNotifications() {

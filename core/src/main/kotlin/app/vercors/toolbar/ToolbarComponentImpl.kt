@@ -5,6 +5,7 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationService
+import app.vercors.notification.NotificationLevel
 import app.vercors.notification.NotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,9 +33,15 @@ class ToolbarComponentImpl(
             }
         }
         notificationService.notificationsState
-            .map { state -> state.any { !it.isRead } }
-            .collectInLifecycle { hasUnreadNotifications ->
-                _uiState.update { it.copy(hasUnreadNotifications = hasUnreadNotifications) }
+            .map { state -> state.filter { !it.isRead } }
+            .collectInLifecycle { unreadNotifications ->
+                _uiState.update {
+                    it.copy(
+                        unreadNotifications = unreadNotifications.count(),
+                        maxUnreadNotificationLevel = unreadNotifications.maxOfOrNull { n -> n.level }
+                            ?: NotificationLevel.INFO
+                    )
+                }
             }
     }
 

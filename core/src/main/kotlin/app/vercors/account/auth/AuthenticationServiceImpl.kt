@@ -66,8 +66,34 @@ class AuthenticationServiceImpl(
         }
     }
 
-    override suspend fun validateToken(): Boolean {
-        return true // TODO
+    override suspend fun validateToken(account: AccountData?, context: CoroutineContext): AccountData? =
+        withContext(context) {
+            logger.info { "Validating token" }
+            if (account == null) {
+                logger.info { "No account selected - requiring full login" }
+                return@withContext null
+            }
+            if (account.tokenData.exp > Instant.now().plusSeconds(60)) {
+                return@withContext account
+            }
+            try {
+                logger.info { "Verifying access token" }
+                getMinecraftProfile(account.tokenData.token)
+                return@withContext account
+            } catch (e: Throwable) {
+                logger.info { "Access token expired - refreshing token" }
+                try {
+                    val (msAccessToken, refreshToken) = refreshMicrosoftAccessToken(account.tokenData.refreshToken)
+                    val (xblToken, userHash) = getXblToken(msAccessToken)
+                    val xstsToken = getXstsToken(xblToken, userHash)
+                    val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
+                    val (uuid, username) = getMinecraftProfile(token)
+                    return@withContext AccountData(username, uuid, refreshToken, token, exp)
+                } catch (e: Throwable) {
+                    logger.info { "Unable to refresh token - requiring full login" }
+                    return@withContext null
+                }
+            }
     }
 
     private suspend fun getAuthorizationCode(
@@ -199,7 +225,7 @@ class AuthenticationServiceImpl(
     }
 
     private fun invalidResponse(result: JsonObject): Nothing {
-        logger.error { "Invalid response: $result" }
+        logger.warn { "Invalid response: $result" }
         throw AuthenticationException("Invalid response, see logs for more info")
     }
 

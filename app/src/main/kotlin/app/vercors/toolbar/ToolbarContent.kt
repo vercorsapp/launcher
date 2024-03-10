@@ -1,30 +1,39 @@
 package app.vercors.toolbar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Badge
+import androidx.compose.material.BadgedBox
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.unit.dp
 import app.vercors.LocalConfiguration
 import app.vercors.LocalPalette
 import app.vercors.UI
-import app.vercors.applyIf
 import app.vercors.navigation.title
+import app.vercors.notification.NotificationLevel
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
+import vercors.app.generated.resources.Res
+import vercors.app.generated.resources.next
+import vercors.app.generated.resources.previous
+import vercors.app.generated.resources.refresh
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ToolbarContent(component: ToolbarComponent) {
     val uiState by component.uiState.collectAsState()
@@ -38,21 +47,21 @@ fun ToolbarContent(component: ToolbarComponent) {
         ) {
             ToolbarButtonContent(
                 icon = FeatherIcons.ChevronLeft,
-                name = "Previous",
+                name = stringResource(Res.string.previous),
                 interactionSource = interactionSource,
                 enabled = uiState.hasPreviousScreen,
                 onClick = { component.onToolbarClick(ToolbarButton.Previous) }
             )
             ToolbarButtonContent(
                 icon = FeatherIcons.ChevronRight,
-                name = "Next",
+                name = stringResource(Res.string.next),
                 interactionSource = interactionSource,
                 enabled = uiState.hasNextScreen,
                 onClick = { component.onToolbarClick(ToolbarButton.Next) }
             )
             ToolbarButtonContent(
                 icon = FeatherIcons.RefreshCw,
-                name = "Refresh",
+                name = stringResource(Res.string.refresh),
                 interactionSource = interactionSource,
                 enabled = uiState.canRefreshScreen,
                 onClick = { component.onToolbarClick(ToolbarButton.Refresh) }
@@ -75,10 +84,17 @@ fun ToolbarContent(component: ToolbarComponent) {
         }
         Spacer(Modifier.weight(1f))
 
-        Row(Modifier.padding(horizontal = UI.mediumPadding)) {
-            if (uiState.hasUnreadNotifications) {
+        Row(Modifier.padding(horizontal = UI.largePadding)) {
+            if (uiState.unreadNotifications > 0) {
                 BadgedBox(
-                    badge = { Badge(Modifier.size(UI.smallBadgeSize)) }
+                    badge = {
+                        Badge(
+                            backgroundColor = getNotificationBadgeColor(uiState.maxUnreadNotificationLevel),
+                            contentColor = MaterialTheme.colors.onPrimary
+                        ) {
+                            Text(uiState.unreadNotifications.toString())
+                        }
+                    }
                 ) {
                     NotificationButtonContent(interactionSource, component.onNotificationButtonClick)
                 }
@@ -88,15 +104,19 @@ fun ToolbarContent(component: ToolbarComponent) {
         }
         if (!LocalConfiguration.current.useSystemWindowFrame) {
             Row {
-                WindowButton(
+                WindowButtonContent(
                     FeatherIcons.Minus,
                     "Minimize Window"
                 ) { component.onToolbarClick(ToolbarButton.Minimize) }
-                WindowButton(
+                WindowButtonContent(
                     FeatherIcons.Square,
                     "Maximize Window"
                 ) { component.onToolbarClick(ToolbarButton.Maximize) }
-                WindowButton(FeatherIcons.X, "Close Window", true) { component.onToolbarClick(ToolbarButton.Close) }
+                WindowButtonContent(
+                    FeatherIcons.X,
+                    "Close Window",
+                    true
+                ) { component.onToolbarClick(ToolbarButton.Close) }
             }
         }
 
@@ -104,53 +124,8 @@ fun ToolbarContent(component: ToolbarComponent) {
 }
 
 @Composable
-private fun ToolbarButtonContent(
-    icon: ImageVector,
-    name: String,
-    interactionSource: MutableInteractionSource,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Icon(
-        imageVector = icon,
-        contentDescription = name,
-        modifier = modifier.size(UI.mediumIconSize).applyIf(enabled) {
-            pointerHoverIcon(PointerIcon.Hand).clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-        },
-        tint = if (enabled) LocalContentColor.current else LocalPalette.current.surface2
-    )
-}
-
-@Composable
-private fun WindowButton(
-    icon: ImageVector,
-    name: String,
-    isRed: Boolean = false,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    Box(
-        Modifier.fillMaxHeight().width(40.dp).pointerHoverIcon(PointerIcon.Hand)
-            .clickable(onClick = onClick).hoverable(interactionSource)
-            .background(if (isRed && isHovered) MaterialTheme.colors.error else MaterialTheme.colors.surface)
-    ) {
-        Icon(icon, name, Modifier.align(Alignment.Center).size(UI.mediumIconSize))
-    }
-}
-
-@Composable
-private fun NotificationButtonContent(interactionSource: MutableInteractionSource, onClick: () -> Unit) {
-    ToolbarButtonContent(
-        icon = FeatherIcons.Bell,
-        name = "Notifications",
-        interactionSource = interactionSource,
-        onClick = onClick,
-    )
+private fun getNotificationBadgeColor(level: NotificationLevel): Color = when (level) {
+    NotificationLevel.INFO -> LocalPalette.current.blue
+    NotificationLevel.WARN -> LocalPalette.current.yellow
+    NotificationLevel.ERROR -> LocalPalette.current.red
 }

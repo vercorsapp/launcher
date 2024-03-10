@@ -82,7 +82,17 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     single<ConfigurationRepository> { ConfigurationRepositoryImpl(inject(), inject()) }
     single<InstanceService> { InstanceServiceImpl(inject(), inject(), inject()) }
     single<InstanceRepository> { InstanceRepositoryImpl(inject(), inject()) }
-    single<LauncherService> { LauncherServiceImpl(inject(), inject(), inject(), inject(), inject(), inject()) }
+    single<LauncherService> {
+        LauncherServiceImpl(
+            inject(),
+            inject(),
+            inject(),
+            inject(),
+            inject(),
+            inject(),
+            inject()
+        )
+    }
     single<AccountService> { AccountServiceImpl(inject(), inject()) }
     single<AccountRepository> { AccountRepositoryImpl(inject(), inject()) }
     single<AuthenticationService> {

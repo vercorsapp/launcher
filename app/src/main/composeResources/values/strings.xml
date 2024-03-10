@@ -23,12 +23,22 @@
     <string name="descending">Descending order</string>
     <string name="none">None</string>
 
+    <!-- Toolbar -->
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="refresh">Refresh</string>
+    <string name="notifications">Notifications</string>
+
     <!-- Notifications -->
-    <string name="notificationCount">%1$d notification</string>
-    <string name="notificationsCount">%1$d notifications</string>
+    <string name="noNotificationCount">No unread notification</string>
+    <string name="notificationCount">%1$d unread notification</string>
+    <string name="notificationsCount">%1$d unread notifications</string>
     <string name="markAllAsRead">Mark all as read</string>
     <string name="deleteAll">Delete all</string>
-    <string name="noNotifications">No notifications</string>
+    <string name="markAsRead">Mark as read</string>
+    <string name="markAsUnread">Mark as unread</string>
+    <string name="delete">Delete</string>
+    <string name="noNotifications">No notification. Let's play!</string>
     <string name="instanceNotFound">Could not find instance at location %1$s.</string>
     <string name="notificationError">%1$s\nCheck the logs for more details.</string>
 
