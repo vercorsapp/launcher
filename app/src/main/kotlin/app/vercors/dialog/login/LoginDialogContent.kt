@@ -21,11 +21,9 @@ import app.vercors.common.IconTextButton
 import app.vercors.common.appAnimateContentSize
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LoginDialogContent(component: LoginDialogComponent) {
     val clipboardManager = LocalClipboardManager.current

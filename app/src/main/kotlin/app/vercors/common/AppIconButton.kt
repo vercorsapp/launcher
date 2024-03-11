@@ -1,7 +1,6 @@
 package app.vercors.common
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import app.vercors.UI
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppIconButton(
     onClick: () -> Unit,

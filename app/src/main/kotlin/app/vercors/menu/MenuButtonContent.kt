@@ -1,6 +1,5 @@
 package app.vercors.menu
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,13 +24,11 @@ import app.vercors.common.*
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Plus
 import compose.icons.feathericons.User
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.accounts
 import vercors.app.generated.resources.createInstance
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MenuButtonContent(
     button: MenuButton,
@@ -76,7 +73,6 @@ private fun NormalMenuButton(isSelected: Boolean, title: String, icon: ImageVect
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MenuButtonFrame(
     title: String,

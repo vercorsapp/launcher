@@ -18,7 +18,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.nio.file.Path
@@ -105,7 +104,6 @@ class LauncherServiceImpl(
         System.gc()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun validateVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo {
         logger.debug { "Validating version information" }
         val path = storageService.getVersionJsonPath(version.id)
@@ -130,7 +128,6 @@ class LauncherServiceImpl(
         return path.absolutePathString()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun validateLibraries(version: MojangVersionInfo, nativesPath: Path): List<String> =
         coroutineScope {
             logger.debug { "Validating libraries" }
@@ -169,7 +166,6 @@ class LauncherServiceImpl(
             }.awaitAll().filterNotNull()
         }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun validateAssetIndex(version: MojangVersionInfo): MojangAssetIndex {
         logger.debug { "Validating asset index" }
         val path = storageService.getAssetIndexPath(version.assets)
@@ -182,7 +178,6 @@ class LauncherServiceImpl(
         return path.inputStream().use { json.decodeFromStream(it) }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun validateAssets(assetIndex: MojangAssetIndex) = coroutineScope {
         logger.debug { "Validating assets" }
         val context = Dispatchers.IO.limitedParallelism(configurationService.config.maximumParallelThreads)
@@ -233,7 +228,7 @@ class LauncherServiceImpl(
             "auth_access_token" to account.tokenData.token,
             "clientid" to "", // TODO
             "auth_xuid" to "", // TODO
-            "user_type" to "msa", // TODO
+            "user_type" to "msa",
             "version_type" to versionInfo.type,
             "natives_directory" to nativesPath,
             "launcher_name" to APP_NAME,
@@ -251,10 +246,15 @@ class LauncherServiceImpl(
             if (versionInfo.arguments != null) getProcessArgs(versionInfo.arguments.game, variables) else null
         val logConfigArg =
             if (logConfigPath != null) versionInfo.logging!!.client.argument.replaceVariables(mapOf("path" to logConfigPath.absolutePathString())) else null
+        val javaPath =
+            if (versionInfo.javaVersion.majorVersion <= 8) configurationService.config.java8Path else configurationService.config.java17Path
+        if (javaPath == null) throw JavaVersionException("Java path needs to be set for version ${versionInfo.javaVersion.majorVersion}")
         val args = buildList {
-            add("C:\\Program Files\\Java\\jre-1.8\\bin\\java.exe")
+            add(Path.of(javaPath, "bin", "java").absolutePathString())
             add("-Djava.library.path=$nativesPath")
             logConfigArg?.let { add(it) }
+            configurationService.config.defaultAllocatedRam?.let { add("-Xmx${it}M") }
+            configurationService.config.jvmArguments.let { if (it.isNotBlank()) add(it) }
             jvmArgs?.let { addAll(it) }
             versionInfo.minecraftArguments?.let {
                 add("-cp")

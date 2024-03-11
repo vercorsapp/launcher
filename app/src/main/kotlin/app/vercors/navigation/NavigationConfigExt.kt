@@ -1,11 +1,9 @@
 package app.vercors.navigation
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 val NavigationConfig.title: String
     @Composable get() = when (this) {
         NavigationConfig.Home -> stringResource(Res.string.home)

@@ -25,11 +25,9 @@ import app.vercors.common.appAnimateContentSize
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.BellOff
 import compose.icons.feathericons.Trash2
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun NotificationListContent(component: NotificationListComponent) {
     val uiState by component.uiState.collectAsState()
@@ -50,7 +48,8 @@ fun NotificationListContent(component: NotificationListComponent) {
             Card(
                 modifier = Modifier.width(600.dp).heightIn(100.dp, 600.dp)
                     .padding(top = UI.mediumPadding, end = UI.largePadding).shadow(8.dp)
-                    .appAnimateContentSize()
+                    .appAnimateContentSize(),
+                backgroundColor = LocalPalette.current.surface0
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
@@ -90,7 +89,6 @@ fun NotificationListContent(component: NotificationListComponent) {
                     Box {
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(UI.mediumPadding),
-                            modifier = Modifier.padding(end = UI.mediumPadding + 6.dp)
                         ) {
                             items(
                                 items = uiState.notifications,

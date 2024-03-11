@@ -6,7 +6,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
@@ -25,7 +24,6 @@ class InstanceRepositoryImpl(
 ) : InstanceRepository {
     val path get() = storageService.instancesPath
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun loadInstances(maximumParallelThreads: Int, context: CoroutineContext): Flow<InstanceLoadingResult> =
         channelFlow {
             val dispatcher = Dispatchers.IO.limitedParallelism(maximumParallelThreads) + SupervisorJob()
@@ -55,7 +53,6 @@ class InstanceRepositoryImpl(
             }.getOrElse { InstanceLoadingResult.Error(it) }
         }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun loadInstanceFromFile(instanceDir: Path, jsonFile: Path): InstanceLoadingResult.Success {
         try {
             logger.debug { "Loading instance at location $jsonFile" }
@@ -72,7 +69,6 @@ class InstanceRepositoryImpl(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun saveInstance(instance: InstanceData, context: CoroutineContext) = withContext(context) {
         var instanceWithPath = instance
         if (instance.path.isEmpty()) instanceWithPath = instance.copy(path = generatePath(instance))
@@ -94,7 +90,6 @@ class InstanceRepositoryImpl(
         return path.name
     }
 
-    @OptIn(ExperimentalPathApi::class)
     override suspend fun deleteInstance(instance: InstanceData, context: CoroutineContext) = withContext(context) {
         logger.debug { "Deleting instance ${instance.name}" }
         storageService.getInstancePath(instance).deleteRecursively()

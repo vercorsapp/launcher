@@ -12,14 +12,12 @@ import app.vercors.di.inject
 import app.vercors.root.RootComponent
 import app.vercors.root.RootContent
 import com.arkivanov.decompose.DefaultComponentContext
-import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-@OptIn(ExperimentalDecomposeApi::class)
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
     val properties = loadProperties("/app.properties")
@@ -35,7 +33,6 @@ fun main() {
             val rootComponent = inject<RootComponent>(componentContext, ::onClose)
             RootContent(rootComponent, windowState, ::onClose)
         }
-
     }
     logger.info { "Goodbye!\n" }
 }

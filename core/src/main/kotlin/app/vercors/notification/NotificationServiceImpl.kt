@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.update
 class NotificationServiceImpl : NotificationService {
     private val _notificationsState: MutableStateFlow<List<NotificationData>> = MutableStateFlow(
         buildList {
-            repeat(5) {
+            repeat(1) {
                 addAll(
                     listOf(
                         NotificationData(NotificationLevel.INFO, "Test notification info"),

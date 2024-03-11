@@ -15,7 +15,6 @@ import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.io.path.*
 
 private class Utils
@@ -73,10 +72,8 @@ fun ByteArray.sha1(): ByteArray = hash("SHA-1")
 
 private fun ByteArray.hash(method: String): ByteArray = MessageDigest.getInstance(method).digest(this)
 
-@OptIn(ExperimentalEncodingApi::class)
 fun ByteArray.encodeBase64(): String = Base64.UrlSafe.encode(this)
 
-@OptIn(ExperimentalStdlibApi::class)
 fun ByteArray.encodeHex(): String = toHexString()
 
 suspend fun validate(path: Path, url: String, sha1: String? = null, size: Int? = null, attempts: Int = 3) =
@@ -191,7 +188,6 @@ fun Job.onCancel(block: Job.(CancellationException) -> Unit) = apply {
     invokeOnCompletion { if (it is CancellationException) block(it) }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 fun <T> Deferred<T>.onSuccessUse(block: Deferred<T>.(T) -> Unit) = apply {
     invokeOnCompletion { if (it == null) block(getCompleted()) }
 }

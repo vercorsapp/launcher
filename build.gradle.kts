@@ -46,7 +46,8 @@ subprojects {
                     rootProject.layout.projectDirectory.file(
                         "compose_compiler_config.conf"
                     ).asFile
-                }"
+                }",
+                "-opt-in=com.arkivanov.decompose.ExperimentalDecomposeApi",
             )
         }
     }

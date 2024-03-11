@@ -26,14 +26,12 @@ import app.vercors.navigation.title
 import app.vercors.notification.NotificationLevel
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.next
 import vercors.app.generated.resources.previous
 import vercors.app.generated.resources.refresh
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ToolbarContent(component: ToolbarComponent) {
     val uiState by component.uiState.collectAsState()

@@ -20,11 +20,9 @@ import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Folder
 import compose.icons.feathericons.Play
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun SetupContent(component: SetupComponent) {
     val uiState by component.uiState.collectAsState()

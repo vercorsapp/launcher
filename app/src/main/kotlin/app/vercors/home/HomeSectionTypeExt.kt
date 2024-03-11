@@ -1,11 +1,9 @@
 package app.vercors.home
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 val HomeSectionType.title: String
     @Composable get() = stringResource(
         when (this) {
@@ -17,7 +15,6 @@ val HomeSectionType.title: String
         }
     )
 
-@OptIn(ExperimentalResourceApi::class)
 val HomeSectionType.shortTitle: String
     @Composable get() = stringResource(
         when (this) {

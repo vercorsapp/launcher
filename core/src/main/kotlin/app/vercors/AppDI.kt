@@ -69,6 +69,7 @@ import ca.gosyer.appdirs.AppDirs
 import io.ktor.client.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
+import oshi.SystemInfo
 import java.util.*
 
 fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
@@ -76,6 +77,7 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     single<Json> { AppJson }
     single<HttpClient> { AppHttpClient(inject()) }
     single<AppDirs> { AppDirs(APP_NAME) }
+    single<SystemInfo> { SystemInfo() }
     single<StorageService> { StorageServiceImpl() }
     single<SystemThemeService> { SystemThemeServiceImpl(inject()) }
     single<ConfigurationService> { ConfigurationServiceImpl(inject(), inject()) }

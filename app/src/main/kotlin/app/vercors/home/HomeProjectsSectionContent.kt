@@ -33,7 +33,6 @@ import app.vercors.project.ProjectData
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
@@ -81,7 +80,6 @@ private fun RowScope.ProjectCardBox(
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun RowScope.ProjectCardContent(
     project: ProjectData,

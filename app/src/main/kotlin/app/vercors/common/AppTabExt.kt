@@ -8,11 +8,9 @@ import compose.icons.feathericons.Box
 import compose.icons.feathericons.Home
 import compose.icons.feathericons.Search
 import compose.icons.feathericons.Settings
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 val AppTab.title: String
     @Composable get() = stringResource(
         when (this) {

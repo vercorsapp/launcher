@@ -119,6 +119,18 @@
     <string name="sectionsDescription">Choose which section(s) to show on the home tab.</string>
     <string name="providers">Providers</string>
     <string name="providersDescription">Choose which service(s) provide popular projects on the home tab.</string>
+    <string name="java">Java</string>
+    <string name="java8Path">Java 8 path</string>
+    <string name="java8PathDescription">Location of a Java 8 installation.\nRequired to run Minecraft up to version 1.17.</string>
+    <string name="java17Path">Java 17 path</string>
+    <string name="java17PathDescription">Location of a Java 17 installation.\nRequired to run Minecraft starting from version 1.18.</string>
+    <string name="checkingJava">Checking Java %1$d path...</string>
+    <string name="validJava">Valid Java %1$d path</string>
+    <string name="invalidJava">Invalid Java %1$d path</string>
+    <string name="defaultAllocatedRam">Default allocated memory</string>
+    <string name="defaultAllocatedRamDescription">Default allocated memory for Minecraft.</string>
+    <string name="jvmArguments">JVM arguments</string>
+    <string name="jvmArgumentsDescription">Custom JVM arguments for launching Minecraft.</string>
 
     <!-- Account -->
     <string name="logIn">Log in</string>

@@ -3,7 +3,6 @@ package app.vercors.account
 import app.vercors.system.storage.StorageService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -18,7 +17,6 @@ class AccountRepositoryImpl(
     private val json: Json,
     private val accountsFileName: String = "accounts.json"
 ) : AccountRepository {
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun loadAccounts(context: CoroutineContext): AccountListData = withContext(context) {
         val accountsFile = storageService.basePath.resolve(accountsFileName)
         try {
@@ -42,7 +40,6 @@ class AccountRepositoryImpl(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun saveAccounts(accounts: AccountListData, context: CoroutineContext) {
         withContext(context) {
             val accountsFile = storageService.basePath.resolve(accountsFileName)

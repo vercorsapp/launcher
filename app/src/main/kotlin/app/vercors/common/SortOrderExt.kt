@@ -6,13 +6,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.ArrowDown
 import compose.icons.feathericons.ArrowUp
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.ascending
 import vercors.app.generated.resources.descending
 
-@OptIn(ExperimentalResourceApi::class)
 val SortOrder.title: String
     @Composable get() = stringResource(
         when (this) {

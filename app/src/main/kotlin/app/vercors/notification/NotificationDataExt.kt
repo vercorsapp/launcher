@@ -9,7 +9,6 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.AlertOctagon
 import compose.icons.feathericons.AlertTriangle
 import compose.icons.feathericons.Info
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.instanceNotFound
@@ -29,7 +28,6 @@ val NotificationData.color: Color
         NotificationLevel.ERROR -> LocalPalette.current.red
     }
 
-@OptIn(ExperimentalResourceApi::class)
 val NotificationData.actualText: String
     @Composable get() = when (text) {
         is NotificationText.Literal -> (text as NotificationText.Literal).text

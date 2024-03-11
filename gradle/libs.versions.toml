@@ -17,6 +17,7 @@ coil = "3.0.0-alpha06"
 rebugger = "1.0.0-rc02"
 mpfilepicker = "3.1.0"
 jna = "5.14.0"
+oshi = "6.4.13"
 junit = "5.10.2"
 mockk = "1.13.10"
 mockposable = "0.7"
@@ -48,6 +49,7 @@ coil-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor", ve
 rebugger = { group = "io.github.theapache64", name = "rebugger", version.ref = "rebugger" }
 mpfilepicker = { group = "com.darkrockstudios", name = "mpfilepicker", version.ref = "mpfilepicker" }
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
+oshi = { group = "com.github.oshi", name = "oshi-core", version.ref = "oshi" }
 junit = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 

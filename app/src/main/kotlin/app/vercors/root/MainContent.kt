@@ -1,6 +1,5 @@
 package app.vercors.root
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,7 +34,6 @@ import okio.Path.Companion.toOkioPath
 import java.awt.Dimension
 import java.awt.Toolkit
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainContent(component: MainComponent, windowState: WindowState, onClose: () -> Unit) {
     val uiState = component.uiState.collectAsState().value

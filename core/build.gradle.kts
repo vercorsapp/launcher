@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.serialization)
@@ -23,6 +25,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.ktor)
     implementation(libs.jna)
+    implementation(libs.oshi)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
@@ -35,6 +38,16 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
     jvmArgs = listOf("--add-opens=java.base/java.nio.file=ALL-UNNAMED")
+}
+
+tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
+    compilerOptions.freeCompilerArgs.addAll(
+        "-opt-in=kotlin.ExperimentalStdlibApi",
+        "-opt-in=kotlin.io.path.ExperimentalPathApi",
+        "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+    )
 }
 
 tasks {

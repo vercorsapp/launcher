@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
@@ -60,7 +59,6 @@ class ConfigurationRepositoryImplTest {
         unmockkStatic(*staticClasses)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileExistsAndIsValid() = runTest {
         val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
@@ -78,7 +76,6 @@ class ConfigurationRepositoryImplTest {
         confirmVerified(json, inputStream)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileExistsAndIsInvalid() = runTest {
         val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
@@ -95,7 +92,6 @@ class ConfigurationRepositoryImplTest {
         confirmVerified(json, inputStream)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testLoadConfigurationWhenFileDoesNotExist() = runTest {
         val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
@@ -128,7 +124,6 @@ class ConfigurationRepositoryImplTest {
         verify { path.exists(*anyVararg()) }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testSaveConfigurationSuccess() = runTest {
         val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))
@@ -145,7 +140,6 @@ class ConfigurationRepositoryImplTest {
         confirmVerified(json, outputStream)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun testSaveConfigurationError() = runTest {
         val store = ConfigurationRepositoryImpl(json, storageService, StandardTestDispatcher(testScheduler))

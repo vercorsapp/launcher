@@ -22,7 +22,11 @@ data class ConfigurationData(
     val homeSections: List<HomeSectionType> = HomeSectionType.entries,
     val homeProviders: List<ProjectProviderType> = ProjectProviderType.entries,
     val savedInstanceSorter: InstanceSorter = InstanceSorter(),
-    val maximumParallelThreads: Int = Runtime.getRuntime().availableProcessors().coerceAtMost(8)
+    val maximumParallelThreads: Int = Runtime.getRuntime().availableProcessors().coerceAtMost(8),
+    val java8Path: String? = null,
+    val java17Path: String? = null,
+    val defaultAllocatedRam: Int? = null,
+    val jvmArguments: String = ""
 ) {
     companion object {
         val DEFAULT = ConfigurationData()

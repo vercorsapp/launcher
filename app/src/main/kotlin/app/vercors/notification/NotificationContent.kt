@@ -18,14 +18,12 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.Bell
 import compose.icons.feathericons.BellOff
 import compose.icons.feathericons.Trash2
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.delete
 import vercors.app.generated.resources.markAsRead
 import vercors.app.generated.resources.markAsUnread
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun NotificationContent(
     notification: NotificationData,

@@ -13,7 +13,6 @@ import compose.icons.FeatherIcons
 import compose.icons.feathericons.ChevronDown
 import compose.icons.feathericons.ChevronUp
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T> AppDropdownMenuBox(
     options: Iterable<T>,

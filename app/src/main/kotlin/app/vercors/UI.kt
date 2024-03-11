@@ -26,7 +26,6 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.Font
 import org.ocpsoft.prettytime.PrettyTime
 import vercors.app.generated.resources.*
@@ -113,7 +112,6 @@ val AppColors: Colors
         )
     }
 
-@OptIn(ExperimentalResourceApi::class)
 private val AppFontFamily: FontFamily
     @Composable get() = FontFamily(
         Font(Res.font.Inter_Black, FontWeight.Black),

@@ -2,11 +2,10 @@ package app.vercors.configuration
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,17 +18,18 @@ import app.vercors.home.HomeSectionType
 import app.vercors.home.shortTitle
 import app.vercors.project.ProjectProviderType
 import app.vercors.project.icon
+import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Check
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import compose.icons.feathericons.Folder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ConfigurationContent(component: ConfigurationComponent) {
     val configuration = LocalConfiguration.current
+    val uiState by component.uiState.collectAsState()
 
     Box(Modifier.padding(start = UI.mediumPadding)) {
         val scrollState = rememberScrollState()
@@ -161,6 +161,67 @@ fun ConfigurationContent(component: ConfigurationComponent) {
                     }
                 }
             }
+
+            SettingsSection(Res.string.java) {
+                JavaPathSetting(
+                    title = Res.string.java8Path,
+                    description = Res.string.java8PathDescription,
+                    value = configuration.java8Path,
+                    onValueChange = { component.onConfigChange(configuration.copy(java8Path = it)) },
+                    onOpenDirectoryPicker = { component.openDirectoryPicker(configuration.java8Path) { copy(java8Path = it) } },
+                    status = uiState.java8Status,
+                    javaVersion = 8
+                )
+
+                JavaPathSetting(
+                    title = Res.string.java17Path,
+                    description = Res.string.java17PathDescription,
+                    value = configuration.java17Path,
+                    onValueChange = { component.onConfigChange(configuration.copy(java17Path = it)) },
+                    onOpenDirectoryPicker = { component.openDirectoryPicker(configuration.java17Path) { copy(java17Path = it) } },
+                    status = uiState.java17Status,
+                    javaVersion = 17
+                )
+
+                Setting(Res.string.defaultAllocatedRam, Res.string.defaultAllocatedRamDescription) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppCheckbox(
+                            checked = uiState.hasCustomMemory,
+                            onCheckedChange = { component.toggleCustomMemory() }
+                        )
+                        Slider(
+                            enabled = uiState.hasCustomMemory,
+                            value = uiState.currentMemory.toFloat(),
+                            onValueChange = { component.onCustomMemoryChange(it.toInt()) },
+                            valueRange = 0f..uiState.totalMemory.toFloat(),
+                            modifier = Modifier.width(428.dp)
+                        )
+                        OutlinedTextField(
+                            enabled = uiState.hasCustomMemory,
+                            value = uiState.currentMemory.toString(),
+                            onValueChange = { it.toIntOrNull()?.let { v -> component.onCustomMemoryChange(v, false) } },
+                            modifier = Modifier.width(150.dp),
+                            trailingIcon = { Text("MB") }
+                        )
+                    }
+                }
+
+                Setting(Res.string.jvmArguments, Res.string.jvmArgumentsDescription) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = configuration.jvmArguments,
+                            onValueChange = { component.onConfigChange(configuration.copy(jvmArguments = it)) },
+                            modifier = Modifier.width(632.dp)
+                        )
+                    }
+                }
+            }
         }
 
         VerticalScrollbar(
@@ -168,9 +229,16 @@ fun ConfigurationContent(component: ConfigurationComponent) {
             adapter = rememberScrollbarAdapter(scrollState)
         )
     }
+
+    DirectoryPicker(
+        show = uiState.showDirectoryPicker,
+        initialDirectory = uiState.initialPath
+    ) { path ->
+        path?.let { uiState.apply { component.onConfigChange(configuration.onSelectPath(it)) } }
+        component.closeDirectoryPicker()
+    }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun SettingsSection(name: StringResource, content: @Composable ColumnScope.() -> Unit) {
     SectionContent(stringResource(name)) {
@@ -185,7 +253,6 @@ private fun SettingsSection(name: StringResource, content: @Composable ColumnSco
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun Setting(
     title: StringResource,
@@ -201,5 +268,53 @@ private fun Setting(
             Text(stringResource(description))
         }
         content()
+    }
+}
+
+@Composable
+private fun JavaPathSetting(
+    title: StringResource,
+    description: StringResource,
+    value: String?,
+    onValueChange: (String) -> Unit,
+    onOpenDirectoryPicker: () -> Unit,
+    status: ConfigurationJavaStatus,
+    javaVersion: Int
+) {
+    Setting(title, description) {
+        Column(verticalArrangement = Arrangement.spacedBy(UI.smallPadding)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(UI.mediumPadding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = value ?: "",
+                    onValueChange = onValueChange,
+                    modifier = Modifier.width(500.dp)
+                )
+                IconTextButton(
+                    onClick = onOpenDirectoryPicker,
+                    imageVector = FeatherIcons.Folder,
+                    text = stringResource(Res.string.browse),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(UI.smallPadding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = status.icon,
+                    contentDescription = status.name,
+                    modifier = Modifier.size(UI.mediumIconSize),
+                    tint = status.color
+                )
+                Text(
+                    text = status.text(javaVersion),
+                    color = status.color,
+                    lineHeight = UI.normalLineHeight
+                )
+            }
+        }
     }
 }

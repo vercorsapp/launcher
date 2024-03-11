@@ -5,7 +5,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
@@ -18,7 +17,6 @@ class ConfigurationRepositoryImpl(
     private val storageService: StorageService,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ConfigurationRepository {
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun load(): ConfigurationData = withContext(dispatcher) {
         val path = storageService.configPath
         try {
@@ -38,7 +36,6 @@ class ConfigurationRepositoryImpl(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun save(config: ConfigurationData) {
         withContext(dispatcher) {
             val path = storageService.configPath

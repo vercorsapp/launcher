@@ -21,11 +21,9 @@ import compose.icons.feathericons.Box
 import compose.icons.feathericons.Feather
 import compose.icons.feathericons.Plus
 import compose.icons.feathericons.X
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun CreateInstanceDialogContent(component: CreateInstanceDialogComponent) {
     val uiState by component.uiState.collectAsState()

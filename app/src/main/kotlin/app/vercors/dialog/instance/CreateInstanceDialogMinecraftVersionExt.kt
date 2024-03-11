@@ -5,13 +5,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Clock
 import compose.icons.feathericons.Star
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.latestRelease
 import vercors.app.generated.resources.latestSnapshot
 
-@OptIn(ExperimentalResourceApi::class)
 val CreateInstanceDialogMinecraftVersion.text: String
     @Composable get() =
         if (isLatestRelease) stringResource(Res.string.latestRelease, data.id)

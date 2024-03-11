@@ -1,6 +1,5 @@
 package app.vercors.toolbar
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +16,6 @@ import app.vercors.UI
 import app.vercors.applyIf
 import app.vercors.common.AppTooltip
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ToolbarButtonContent(
     icon: ImageVector,

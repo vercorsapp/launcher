@@ -4,10 +4,8 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBoxScope
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -25,7 +23,6 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import app.vercors.LocalConfiguration
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExposedDropdownMenuBoxScope.ScrollableExposedDropdownMenu(
     expanded: Boolean,
@@ -273,7 +270,6 @@ private fun calculateTransformOrigin(
     return TransformOrigin(pivotX, pivotY)
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 private fun handlePopupOnKeyEvent(
     keyEvent: KeyEvent,
     focusManager: FocusManager?,

@@ -11,13 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.vercors.UI
 import app.vercors.root.error.ErrorComponent
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.fatalError
 import vercors.app.generated.resources.fatalErrorDetails
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ErrorContent(component: ErrorComponent) {
     AppWindowContent {

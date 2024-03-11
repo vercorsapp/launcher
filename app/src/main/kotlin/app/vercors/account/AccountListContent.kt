@@ -1,6 +1,9 @@
 package app.vercors.account
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -29,14 +32,12 @@ import app.vercors.common.appAnimateContentSize
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.LogOut
 import compose.icons.feathericons.UserPlus
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.Res
 import vercors.app.generated.resources.logIn
 import vercors.app.generated.resources.logOut
 import vercors.app.generated.resources.selected
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalResourceApi::class)
 @Composable
 fun AccountListContent(component: AccountListComponent) {
     val uiState by component.uiState.collectAsState()
@@ -55,7 +56,8 @@ fun AccountListContent(component: AccountListComponent) {
             Card(
                 modifier = Modifier.defaultMinSize(minWidth = 350.dp).width(IntrinsicSize.Max)
                     .padding(start = UI.mediumPadding, bottom = UI.largePadding).shadow(8.dp)
-                    .appAnimateContentSize()
+                    .appAnimateContentSize(),
+                backgroundColor = LocalPalette.current.surface0
             ) {
                 Column {
                     uiState.data.accounts.forEach {

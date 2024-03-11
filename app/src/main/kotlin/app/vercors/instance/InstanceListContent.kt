@@ -25,12 +25,10 @@ import app.vercors.common.*
 import app.vercors.header
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import vercors.app.generated.resources.*
 
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, ExperimentalResourceApi::class)
 @Composable
 fun InstanceListContent(component: InstanceListComponent) {
     val uiState by component.uiState.collectAsState()
