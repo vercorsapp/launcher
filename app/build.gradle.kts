@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.mockposable)
+    jacoco
 }
 
 dependencies {
@@ -32,6 +33,10 @@ dependencies {
 
 tasks.test {
     useJUnit()
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
 }
 
 mockposable {

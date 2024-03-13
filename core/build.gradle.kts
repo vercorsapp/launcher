@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.serialization)
     alias(libs.plugins.jetbrains.compose)
+    jacoco
 }
 
 dependencies {
@@ -38,6 +39,10 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
     jvmArgs = listOf("--add-opens=java.base/java.nio.file=ALL-UNNAMED")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
 }
 
 tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {

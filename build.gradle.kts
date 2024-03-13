@@ -52,6 +52,12 @@ subprojects {
             )
         }
     }
+
+    tasks.withType<JacocoReport> {
+        reports {
+            xml.required = true
+        }
+    }
 }
 
 sonar {
