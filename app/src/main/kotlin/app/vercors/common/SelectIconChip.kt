@@ -50,8 +50,8 @@ fun SelectIconChip(
     text: String,
     icon: (@Composable () -> Unit)? = null
 ) {
-    val backgroundColor by appAnimateColorAsState(if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.surface)
-    val contentColor by appAnimateColorAsState(if (selected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
+    val backgroundColor by appAnimateColorAsState(selected, MaterialTheme.colors.primary, MaterialTheme.colors.surface)
+    val contentColor by appAnimateColorAsState(selected, MaterialTheme.colors.onPrimary, MaterialTheme.colors.onSurface)
 
     FilterChip(
         selected = selected,

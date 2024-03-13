@@ -62,8 +62,16 @@ fun AccountListContent(component: AccountListComponent) {
                 Column {
                     uiState.data.accounts.forEach {
                         val isSelected = it.uuid == uiState.data.selected
-                        val backgroundColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.primary else Color.Transparent)
-                        val contentColor by appAnimateColorAsState(if (isSelected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
+                        val backgroundColor by appAnimateColorAsState(
+                            isSelected,
+                            MaterialTheme.colors.primary,
+                            Color.Transparent
+                        )
+                        val contentColor by appAnimateColorAsState(
+                            isSelected,
+                            MaterialTheme.colors.onPrimary,
+                            MaterialTheme.colors.onSurface
+                        )
 
                         AccountsPopupEntry(
                             clickable = !isSelected,

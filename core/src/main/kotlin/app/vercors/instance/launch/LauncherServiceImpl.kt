@@ -40,57 +40,13 @@ class LauncherServiceImpl(
 ) : LauncherService, CoroutineScope by coroutineScope {
     override fun launchInstance(instance: InstanceData, context: CoroutineContext) {
         launch {
-            var progress = 0
             val selectedAccount = accountService.selectedAccountState.value
-            instance.updateProgress(++progress)
-            val preparation = runCatching {
-                logger.info { "Launching instance ${instance.name}" }
-                val account = authenticationService.validateToken(selectedAccount)
-                if (account == null) {
-                    val job = Job()
-                    //send(LaunchStatus.RequiresLogin(job)) TODO
-                    job.join()
-                    if (job.isCancelled) {
-                        instance.update(InstanceStatus.Errored(CancellationException("Login cancelled. You must log into an account in order to launch the game.")))
-                        return@launch
-                    }
-                } else {
-                    accountService.addAccount(account)
-                }
-                logger.info { "Access token validated - preparing to launch instance" }
-                instance.updateProgress(++progress)
-                val versionInfo = validateVersionInfo(instance.gameVersion)
-                instance.updateProgress(++progress)
-                val clientJarPath = validateClientJar(versionInfo)
-                instance.updateProgress(++progress)
-                val nativesPath = storageService.getInstanceNativesPath(instance)
-                instance.updateProgress(++progress)
-                val libraryPaths = validateLibraries(versionInfo, nativesPath)
-                instance.updateProgress(++progress)
-                val assetIndex = validateAssetIndex(versionInfo)
-                instance.updateProgress(++progress)
-                validateAssets(assetIndex)
-                instance.updateProgress(++progress)
-                val logConfigPath =
-                    if (versionInfo.logging != null) validateLogConfig(versionInfo.logging.client) else null
-                instance.updateProgress(++progress)
-                val classpath = buildList {
-                    add(clientJarPath)
-                    addAll(libraryPaths)
-                    add(".")
-                }.joinToString(";", "\"", "\"")
-                buildProcess(
-                    instance,
-                    versionInfo,
-                    classpath,
-                    logConfigPath,
-                    accountService.selectedAccountState.value!!
-                )
-            }
-            instance.updateProgress(++progress)
+            instance.updateProgress(1)
+            val preparation = runCatching { prepareInstance(instance, selectedAccount) }
+            instance.updateProgress(10)
             if (preparation.isFailure) {
                 val e = preparation.exceptionOrNull()!!
-                logger.error(e) { "An error occured while running instance ${instance.name}" }
+                logger.error(e) { "An error occured while preparing to run instance ${instance.name}" }
                 instance.update(InstanceStatus.Errored(e))
                 return@launch
             }
@@ -104,7 +60,7 @@ class LauncherServiceImpl(
                         val now = Instant.now()
                         instanceService.updateInstance(
                             instance.copy(
-                                lastPlayed = lastInstant,
+                                lastPlayed = now,
                                 timePlayed = instance.timePlayed + Duration.between(lastInstant, now)
                             )
                         )
@@ -127,6 +83,48 @@ class LauncherServiceImpl(
 
     private fun InstanceData.update(status: InstanceStatus) {
         instanceService.updateInstanceStatus(this, status)
+    }
+
+    private suspend fun prepareInstance(instance: InstanceData, selectedAccount: AccountData?): ProcessBuilder {
+        logger.info { "Launching instance ${instance.name}" }
+        val account = authenticationService.validateToken(selectedAccount)
+        if (account == null) {
+            val job = Job()
+            //send(LaunchStatus.RequiresLogin(job)) TODO
+            job.join()
+            if (job.isCancelled) throw CancellationException("Login cancelled. You must log into an account in order to launch the game.")
+        } else {
+            accountService.addAccount(account)
+        }
+        logger.info { "Access token validated - preparing to launch instance" }
+        instance.updateProgress(2)
+        val versionInfo = validateVersionInfo(instance.gameVersion)
+        instance.updateProgress(3)
+        val clientJarPath = validateClientJar(versionInfo)
+        instance.updateProgress(4)
+        val nativesPath = storageService.getInstanceNativesPath(instance)
+        instance.updateProgress(5)
+        val libraryPaths = validateLibraries(versionInfo, nativesPath)
+        instance.updateProgress(6)
+        val assetIndex = validateAssetIndex(versionInfo)
+        instance.updateProgress(7)
+        validateAssets(assetIndex)
+        instance.updateProgress(8)
+        val logConfigPath =
+            if (versionInfo.logging != null) validateLogConfig(versionInfo.logging.client) else null
+        instance.updateProgress(9)
+        val classpath = buildList {
+            add(clientJarPath)
+            addAll(libraryPaths)
+            add(".")
+        }.joinToString(";", "\"", "\"")
+        return buildProcess(
+            instance,
+            versionInfo,
+            classpath,
+            logConfigPath,
+            accountService.selectedAccountState.value!!
+        )
     }
 
     private suspend fun validateVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo {

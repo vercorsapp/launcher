@@ -74,21 +74,7 @@ fun LoginDialogContent(component: LoginDialogComponent) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (uiState.error != null) {
-                    Icon(FeatherIcons.XCircle, null, Modifier.size(UI.mediumIconSize), MaterialTheme.colors.error)
-                } else if (uiState.isSuccess) {
-                    Icon(FeatherIcons.Check, null, Modifier.size(UI.mediumIconSize), LocalPalette.current.green)
-                }
-                Text(
-                    text = if (uiState.isSuccess) stringResource(Res.string.accountSuccess)
-                    else if (uiState.isWaitingLogin) stringResource(Res.string.awaitingAuth)
-                    else "${stringResource(Res.string.authenticating)}...",
-                    color = if (uiState.error != null) MaterialTheme.colors.error
-                    else if (uiState.isSuccess) LocalPalette.current.green
-                    else MaterialTheme.colors.onSurface,
-                    lineHeight = UI.normalLineHeight,
-                    fontWeight = if (uiState.isSuccess || uiState.error != null) FontWeight.SemiBold else null
-                )
+                LoginStatusContent(uiState)
             }
             if (uiState.progress < 0 && uiState.error == null) LinearProgressIndicator()
             else if (!uiState.isSuccess) LinearProgressIndicator(animatedProgress)
@@ -132,4 +118,23 @@ fun LoginDialogContent(component: LoginDialogComponent) {
             }
         }
     }
+}
+
+@Composable
+private fun LoginStatusContent(uiState: LoginDialogUiState) {
+    if (uiState.error != null) {
+        Icon(FeatherIcons.XCircle, null, Modifier.size(UI.mediumIconSize), MaterialTheme.colors.error)
+    } else if (uiState.isSuccess) {
+        Icon(FeatherIcons.Check, null, Modifier.size(UI.mediumIconSize), LocalPalette.current.green)
+    }
+    Text(
+        text = if (uiState.isSuccess) stringResource(Res.string.accountSuccess)
+        else if (uiState.isWaitingLogin) stringResource(Res.string.awaitingAuth)
+        else "${stringResource(Res.string.authenticating)}...",
+        color = if (uiState.error != null) MaterialTheme.colors.error
+        else if (uiState.isSuccess) LocalPalette.current.green
+        else MaterialTheme.colors.onSurface,
+        lineHeight = UI.normalLineHeight,
+        fontWeight = if (uiState.isSuccess || uiState.error != null) FontWeight.SemiBold else null
+    )
 }

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
@@ -43,6 +44,22 @@ fun appAnimateColorAsState(
         derivedStateOf { targetValue }
     }
 }
+
+@Composable
+@NonRestartableComposable
+fun appAnimateColorAsState(
+    condition: Boolean,
+    valueIfTrue: Color,
+    valueIfFalse: Color,
+    animationSpec: AnimationSpec<Color> = spring(),
+    label: String = "AppColorAnimation",
+    finishedListener: ((Color) -> Unit)? = null
+): State<Color> = appAnimateColorAsState(
+    targetValue = if (condition) valueIfTrue else valueIfFalse,
+    animationSpec = animationSpec,
+    label = label,
+    finishedListener = finishedListener
+)
 
 @Composable
 fun Modifier.appAnimateContentSize(

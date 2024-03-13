@@ -89,8 +89,12 @@ private fun MenuButtonFrame(
         ),
         delayMillis = 250,
     ) {
-        val backgroundColor by appAnimateColorAsState(if (active) MaterialTheme.colors.primary else Color.Transparent)
-        val contentColor by appAnimateColorAsState(if (active) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface)
+        val backgroundColor by appAnimateColorAsState(active, MaterialTheme.colors.primary, Color.Transparent)
+        val contentColor by appAnimateColorAsState(
+            active,
+            MaterialTheme.colors.onPrimary,
+            MaterialTheme.colors.onSurface
+        )
 
         AppButton(
             modifier = Modifier.size(50.dp),

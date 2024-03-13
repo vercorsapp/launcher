@@ -105,52 +105,8 @@ fun ScrollableDropdownMenuContent(
     if (LocalConfiguration.current.animations) {
         // Menu open/close animation.
         val transition = updateTransition(expandedStates, "DropDownMenu")
-
-        scale = transition.animateFloat(
-            transitionSpec = {
-                if (false isTransitioningTo true) {
-                    // Dismissed to expanded
-                    tween(
-                        durationMillis = 120,
-                        easing = LinearOutSlowInEasing
-                    )
-                } else {
-                    // Expanded to dismissed.
-                    tween(
-                        durationMillis = 1,
-                        delayMillis = 75 - 1
-                    )
-                }
-            }
-        ) {
-            if (it) {
-                // Menu is expanded.
-                1f
-            } else {
-                // Menu is dismissed.
-                0.8f
-            }
-        }.value
-
-        alpha = transition.animateFloat(
-            transitionSpec = {
-                if (false isTransitioningTo true) {
-                    // Dismissed to expanded
-                    tween(durationMillis = 30)
-                } else {
-                    // Expanded to dismissed.
-                    tween(durationMillis = 75)
-                }
-            }
-        ) {
-            if (it) {
-                // Menu is expanded.
-                1f
-            } else {
-                // Menu is dismissed.
-                0f
-            }
-        }.value
+        scale = transition.animateScale()
+        alpha = transition.animateAlpha()
     }
     Card(
         modifier = Modifier.graphicsLayer {
@@ -175,6 +131,54 @@ fun ScrollableDropdownMenuContent(
         }
     }
 }
+
+@Composable
+private fun Transition<Boolean>.animateScale() = animateFloat(
+    transitionSpec = {
+        if (false isTransitioningTo true) {
+            // Dismissed to expanded
+            tween(
+                durationMillis = 120,
+                easing = LinearOutSlowInEasing
+            )
+        } else {
+            // Expanded to dismissed.
+            tween(
+                durationMillis = 1,
+                delayMillis = 75 - 1
+            )
+        }
+    }
+) {
+    if (it) {
+        // Menu is expanded.
+        1f
+    } else {
+        // Menu is dismissed.
+        0.8f
+    }
+}.value
+
+@Composable
+private fun Transition<Boolean>.animateAlpha() = animateFloat(
+    transitionSpec = {
+        if (false isTransitioningTo true) {
+            // Dismissed to expanded
+            tween(durationMillis = 30)
+        } else {
+            // Expanded to dismissed.
+            tween(durationMillis = 75)
+        }
+    }
+) {
+    if (it) {
+        // Menu is expanded.
+        1f
+    } else {
+        // Menu is dismissed.
+        0f
+    }
+}.value
 
 @Immutable
 private data class DropdownMenuPositionProvider(
