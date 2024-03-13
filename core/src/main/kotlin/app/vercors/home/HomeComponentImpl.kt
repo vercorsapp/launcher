@@ -93,7 +93,7 @@ class HomeComponentImpl(
     }
 
     override fun onLaunchInstance(instance: InstanceData) {
-        launch { launcherService.launch(instance).collect() }
+        launcherService.launchInstance(instance)
     }
 
     override fun onShowProjectDetails(project: ProjectData) {

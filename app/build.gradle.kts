@@ -63,7 +63,7 @@ compose {
                     TargetFormat.Msi
                 )
                 packageName = "Vercors"
-                packageVersion = rootProject.version as String
+                packageVersion = (rootProject.version as String).split("-")[0]
                 description = "A modern Minecraft launcher with mod support"
                 copyright = "Copyright (c) ${Calendar.getInstance().get(Calendar.YEAR)} skyecodes"
                 vendor = "skyecodes"
@@ -82,6 +82,7 @@ compose {
 
                 macOS {
                     packageVersion = (rootProject.version as String)
+                        .split("-")[0]
                         .split('.')
                         .mapIndexed { index, s -> if (index == 0) (s.toInt() + 1).toString() else s }
                         .joinToString(".")

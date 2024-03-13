@@ -43,7 +43,6 @@ fun SelectIconChip(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SelectIconChip(
     selected: Boolean,

@@ -17,10 +17,11 @@ coil = "3.0.0-alpha06"
 rebugger = "1.0.0-rc02"
 mpfilepicker = "3.1.0"
 jna = "5.14.0"
-oshi = "6.4.13"
+oshi = "6.5.0"
 junit = "5.10.2"
 mockk = "1.13.10"
 mockposable = "0.7"
+sonarqube = "4.4.1.3373"
 
 [libraries]
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
@@ -58,3 +59,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 mockposable = { id = "com.jeppeman.mockposable", version.ref = "mockposable" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }

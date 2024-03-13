@@ -15,9 +15,7 @@ import app.vercors.notification.NotificationService
 import app.vercors.project.ModLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.util.*
 
 class InstanceListComponentImpl(
@@ -93,8 +91,8 @@ class InstanceListComponentImpl(
         navigationService.handle(NavigationEvent.InstanceDetails(instance))
     }
 
-    override fun launchInstance(instance: InstanceData) {
-        launch { launcherService.launch(instance).collect() }
+    override fun onLaunchInstance(instance: InstanceData) {
+        launcherService.launchInstance(instance)
     }
 
     override fun openCreateInstanceDialog() {

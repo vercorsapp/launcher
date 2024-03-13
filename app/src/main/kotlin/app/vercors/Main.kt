@@ -27,7 +27,7 @@ fun main() {
         val lifecycle = LifecycleRegistry()
         val windowState = rememberWindowState(size = DpSize(1280.dp, 720.dp))
         LifecycleController(lifecycle, windowState)
-        val di = appDI(properties, coroutineScope)
+        val di = AppDI(properties, coroutineScope)
         CompositionLocalProvider(LocalDI provides di) {
             val componentContext = inject<AppComponentContext>(DefaultComponentContext(lifecycle), di)
             val rootComponent = inject<RootComponent>(componentContext, ::onClose)

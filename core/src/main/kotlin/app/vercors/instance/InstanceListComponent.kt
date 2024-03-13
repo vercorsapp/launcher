@@ -8,7 +8,7 @@ interface InstanceListComponent : NavigationChildComponent, Refreshable {
     val uiState: StateFlow<InstanceListUiState>
 
     fun showInstanceDetails(instance: InstanceData)
-    fun launchInstance(instance: InstanceData)
+    fun onLaunchInstance(instance: InstanceData)
     fun openCreateInstanceDialog()
     fun updateNameFilter(nameFilter: String)
     fun updateSortBy(sortBy: InstanceSortBy)

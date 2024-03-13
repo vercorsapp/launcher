@@ -12,4 +12,5 @@ interface InstanceService {
     fun createInstance(instance: InstanceData): Deferred<InstanceData>
     fun updateInstance(instance: InstanceData): Job
     fun deleteInstance(instance: InstanceData): Job
+    fun updateInstanceStatus(instance: InstanceData, status: InstanceStatus)
 }

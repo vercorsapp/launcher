@@ -2,9 +2,6 @@ name: Build & Release app
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   build:
@@ -29,6 +26,10 @@ jobs:
       - name: Build packages
         id: build
         run: ./gradlew packageReleaseDistributionForCurrentOS --no-daemon
+        env:
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
+          MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
         continue-on-error: true
 
       - name: Check errors

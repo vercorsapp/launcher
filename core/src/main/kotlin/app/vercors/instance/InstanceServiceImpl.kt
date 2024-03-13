@@ -83,6 +83,12 @@ class InstanceServiceImpl(
         }
     }
 
+    override fun updateInstanceStatus(instance: InstanceData, status: InstanceStatus) {
+        _loadingState.updateAs<InstanceLoadingState.Loaded> {
+            it.copy(instances = it.instances.map { old -> if (old.path == instance.path) instance.copy(status = status) else old })
+        }
+    }
+
     private fun saveInstance(instance: InstanceData) = async { repository.saveInstance(instance) }
 
     @Suppress("unchecked_cast")

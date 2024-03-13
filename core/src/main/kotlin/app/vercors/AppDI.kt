@@ -72,7 +72,7 @@ import kotlinx.serialization.json.Json
 import oshi.SystemInfo
 import java.util.*
 
-fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
+fun AppDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
     single<CoroutineScope> { coroutineScope }
     single<Json> { AppJson }
     single<HttpClient> { AppHttpClient(inject()) }
@@ -86,6 +86,7 @@ fun appDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     single<InstanceRepository> { InstanceRepositoryImpl(inject(), inject()) }
     single<LauncherService> {
         LauncherServiceImpl(
+            inject(),
             inject(),
             inject(),
             inject(),

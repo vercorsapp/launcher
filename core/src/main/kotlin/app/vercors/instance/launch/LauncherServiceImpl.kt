@@ -8,6 +8,7 @@ import app.vercors.account.auth.AuthenticationService
 import app.vercors.configuration.ConfigurationService
 import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceService
+import app.vercors.instance.InstanceStatus
 import app.vercors.instance.mojang.MojangService
 import app.vercors.instance.mojang.data.*
 import app.vercors.system.storage.StorageService
@@ -16,8 +17,6 @@ import app.vercors.validate
 import com.sun.jna.Platform
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.nio.file.Path
@@ -30,6 +29,7 @@ import kotlin.io.path.inputStream
 private val logger = KotlinLogging.logger { }
 
 class LauncherServiceImpl(
+    coroutineScope: CoroutineScope,
     private val json: Json,
     private val storageService: StorageService,
     private val mojangService: MojangService,
@@ -37,71 +37,96 @@ class LauncherServiceImpl(
     private val authenticationService: AuthenticationService,
     private val instanceService: InstanceService,
     private val configurationService: ConfigurationService
-) : LauncherService {
-    override fun launch(instance: InstanceData, context: CoroutineContext): Flow<LaunchStatus> = channelFlow {
-        val selectedAccount = accountService.selectedAccountState.value
-        val preparation = runCatching {
-            logger.info { "Launching instance ${instance.name}" }
-            val account = authenticationService.validateToken(selectedAccount)
-            if (account == null) {
-                val job = Job()
-                send(LaunchStatus.RequiresLogin(job))
-                job.join()
-                if (job.isCancelled) {
-                    send(LaunchStatus.Errored(CancellationException("Login cancelled. You must log into an account in order to launch the game.")))
-                    return@channelFlow
+) : LauncherService, CoroutineScope by coroutineScope {
+    override fun launchInstance(instance: InstanceData, context: CoroutineContext) {
+        launch {
+            var progress = 0
+            val selectedAccount = accountService.selectedAccountState.value
+            instance.updateProgress(++progress)
+            val preparation = runCatching {
+                logger.info { "Launching instance ${instance.name}" }
+                val account = authenticationService.validateToken(selectedAccount)
+                if (account == null) {
+                    val job = Job()
+                    //send(LaunchStatus.RequiresLogin(job)) TODO
+                    job.join()
+                    if (job.isCancelled) {
+                        instance.update(InstanceStatus.Errored(CancellationException("Login cancelled. You must log into an account in order to launch the game.")))
+                        return@launch
+                    }
+                } else {
+                    accountService.addAccount(account)
                 }
-            } else {
-                accountService.addAccount(account)
+                logger.info { "Access token validated - preparing to launch instance" }
+                instance.updateProgress(++progress)
+                val versionInfo = validateVersionInfo(instance.gameVersion)
+                instance.updateProgress(++progress)
+                val clientJarPath = validateClientJar(versionInfo)
+                instance.updateProgress(++progress)
+                val nativesPath = storageService.getInstanceNativesPath(instance)
+                instance.updateProgress(++progress)
+                val libraryPaths = validateLibraries(versionInfo, nativesPath)
+                instance.updateProgress(++progress)
+                val assetIndex = validateAssetIndex(versionInfo)
+                instance.updateProgress(++progress)
+                validateAssets(assetIndex)
+                instance.updateProgress(++progress)
+                val logConfigPath =
+                    if (versionInfo.logging != null) validateLogConfig(versionInfo.logging.client) else null
+                instance.updateProgress(++progress)
+                val classpath = buildList {
+                    add(clientJarPath)
+                    addAll(libraryPaths)
+                    add(".")
+                }.joinToString(";", "\"", "\"")
+                buildProcess(
+                    instance,
+                    versionInfo,
+                    classpath,
+                    logConfigPath,
+                    accountService.selectedAccountState.value!!
+                )
             }
-            logger.info { "Access token validated - preparing to launch instance" }
-            send(LaunchStatus.Preparing(0f))
-            val versionInfo = validateVersionInfo(instance.gameVersion)
-            val clientJarPath = validateClientJar(versionInfo)
-            val nativesPath = storageService.getInstanceNativesPath(instance)
-            val libraryPaths = validateLibraries(versionInfo, nativesPath)
-            val assetIndex = validateAssetIndex(versionInfo)
-            validateAssets(assetIndex)
-            val logConfigPath = if (versionInfo.logging != null) validateLogConfig(versionInfo.logging.client) else null
-            val classpath = buildList {
-                add(clientJarPath)
-                addAll(libraryPaths)
-                add(".")
-            }.joinToString(";", "\"", "\"")
-            buildProcess(instance, versionInfo, classpath, logConfigPath, accountService.selectedAccountState.value!!)
-        }
-        if (preparation.isFailure) {
-            val e = preparation.exceptionOrNull()!!
-            logger.error(e) { "An error occured while running instance ${instance.name}" }
-            send(LaunchStatus.Errored(e))
-            return@channelFlow
-        }
-        val run = runCatching {
-            System.gc()
-            val process = launchProcess(preparation.getOrThrow())
-            send(LaunchStatus.Running)
-            withContext(context) {
-                var lastInstant = Instant.now()
-                while (process.isAlive) {
-                    val now = Instant.now()
-                    instanceService.updateInstance(
-                        instance.copy(
-                            lastPlayed = lastInstant,
-                            timePlayed = instance.timePlayed + Duration.between(lastInstant, now)
+            instance.updateProgress(++progress)
+            if (preparation.isFailure) {
+                val e = preparation.exceptionOrNull()!!
+                logger.error(e) { "An error occured while running instance ${instance.name}" }
+                instance.update(InstanceStatus.Errored(e))
+                return@launch
+            }
+            val run = runCatching {
+                System.gc()
+                val process = launchProcess(preparation.getOrThrow())
+                instance.update(InstanceStatus.Running)
+                withContext(context) {
+                    var lastInstant = Instant.now()
+                    while (process.isAlive) {
+                        val now = Instant.now()
+                        instanceService.updateInstance(
+                            instance.copy(
+                                lastPlayed = lastInstant,
+                                timePlayed = instance.timePlayed + Duration.between(lastInstant, now)
+                            )
                         )
-                    )
-                    lastInstant = now
-                    delay(1000)
+                        lastInstant = now
+                        delay(1000)
+                    }
                 }
+                logger.info { "Instance ${instance.name} stopped" }
+                instance.update(InstanceStatus.Stopped)
             }
-            logger.info { "Instance ${instance.name} stopped" }
-            send(LaunchStatus.Stopped)
+            run.onFailure {
+                logger.error(it) { "An error occured while running instance ${instance.name}" }
+                instance.update(InstanceStatus.Errored(it))
+            }
+            System.gc()
         }
-        run.onFailure {
-            logger.error(it) { "An error occured while running instance ${instance.name}" }
-            send(LaunchStatus.Errored(it))
-        }
-        System.gc()
+    }
+
+    private fun InstanceData.updateProgress(progress: Int) = update(InstanceStatus.Launching(progress / 10f))
+
+    private fun InstanceData.update(status: InstanceStatus) {
+        instanceService.updateInstanceStatus(this, status)
     }
 
     private suspend fun validateVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo {

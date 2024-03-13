@@ -52,14 +52,14 @@ tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
 
 tasks {
     val appProperties by registering(WriteProperties::class) {
+        fun appProperty(name: String, env: String) =
+            property(name, findProperty(name) as String? ?: System.getenv(env) ?: "")
+
         destinationFile = layout.buildDirectory.file("app.properties")
         encoding = "UTF-8"
-        property("curseforgeApiKey", findProperty("curseforgeApiKey") as String? ?: System.getenv("CURSEFORGE_API_KEY"))
-        property("modrinthApiKey", findProperty("modrinthApiKey") as String? ?: System.getenv("MODRINTH_API_KEY"))
-        property(
-            "microsoftClientId",
-            findProperty("microsoftClientId") as String? ?: System.getenv("MICROSOFT_CLIENT_ID")
-        )
+        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
+        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
+        appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
     }
 
     processResources {

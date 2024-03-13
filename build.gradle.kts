@@ -5,10 +5,11 @@ plugins {
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.jetbrains.compose) apply false
     alias(libs.plugins.mockposable) apply false
+    alias(libs.plugins.sonarqube)
 }
 
 group = "app.vercors"
-version = "0.1.0"
+version = "0.1.0-SNAPSHOT"
 
 subprojects {
     repositories {
@@ -51,5 +52,11 @@ subprojects {
             )
         }
     }
+}
 
+sonar {
+    properties {
+        property("sonar.projectKey", "vercorsapp_launcher_8b12075b-c1a4-4c9c-ab16-1c10c239b9e2")
+        property("sonar.projectName", "launcher")
+    }
 }

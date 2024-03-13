@@ -6,11 +6,13 @@ import app.vercors.instance.mojang.data.MojangVersionManifest
 import app.vercors.project.ModLoader
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.time.Duration
 import java.time.Instant
 
 @Serializable
 data class InstanceData(
+    val version: Int = 0,
     val name: String,
     val path: String = "",
     val icon: Icon? = null,
@@ -20,7 +22,9 @@ data class InstanceData(
     val dateCreated: AppInstant = Instant.now(),
     val dateModified: AppInstant = Instant.now(),
     val lastPlayed: AppInstant? = null,
-    val timePlayed: AppDuration = Duration.ZERO
+    val timePlayed: AppDuration = Duration.ZERO,
+    @Transient
+    val status: InstanceStatus = InstanceStatus.Stopped
 ) {
     @Serializable
     data class Icon(
