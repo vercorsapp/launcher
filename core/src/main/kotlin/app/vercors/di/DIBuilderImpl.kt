@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
-class DefaultDIBuilder(
+internal class DIBuilderImpl(
     private val coroutineScope: CoroutineScope,
     private val coroutineContext: CoroutineContext
 ) : DIBuilder {
@@ -22,5 +22,5 @@ class DefaultDIBuilder(
         providerMap[kClass] = DIProvider.Factory(provider)
     }
 
-    override fun build(): DI = DefaultDI(coroutineScope, coroutineContext, providerMap)
+    override fun build(): DI = DIImpl(coroutineScope, coroutineContext, providerMap)
 }

@@ -9,20 +9,21 @@ import kotlin.system.measureTimeMillis
 
 private val logger = KotlinLogging.logger { }
 
-class DefaultDI(
+internal class DIImpl(
     coroutineScope: CoroutineScope,
     coroutineContext: CoroutineContext,
     private val providerMap: Map<KClass<*>, DIProvider<*>>
 ) : DI {
     private val singletonMap = ConcurrentHashMap<KClass<*>, DISingleton<*>>(mapOf(DI::class to DISingleton.Lazy(this)))
+    private val initJob: Job
 
     init {
-        coroutineScope.launch(coroutineContext) {
+        initJob = coroutineScope.launch(coroutineContext) {
             logger.debug { "Initializing singletons" }
             measureTimeMillis {
                 providerMap.filterValues { it is DIProvider.Single }.forEach { (kClass, provider) ->
                     singletonMap[kClass] = DISingleton.Async(coroutineScope.async(coroutineContext) {
-                        provide(kClass) { (provider as DIProvider.Single).provider(this@DefaultDI) }
+                        provide(kClass) { (provider as DIProvider.Single).provider(this@DIImpl) }
                     })
                 }
                 singletonMap.values.filterIsInstance<DISingleton.Async<*>>().map { it.deferred }.awaitAll()
@@ -33,13 +34,13 @@ class DefaultDI(
     @Suppress("unchecked_cast")
     override fun <T : Any> inject(kClass: KClass<T>, vararg args: Any): T = when (val provider = providerMap[kClass]) {
         is DIProvider.Factory -> {
-            val context = DefaultDIInjectionContext(this, args)
+            val context = DIInjectionContextImpl(this, args)
             provide(kClass) { provider.provider(context) }
         }
 
         is DIProvider.LazySingle -> {
             (singletonMap.getOrPut(kClass) {
-                val context = DefaultDIInjectionContext(this, args)
+                val context = DIInjectionContextImpl(this, args)
                 DISingleton.Lazy(provide(kClass) { provider.provider(context) })
             } as DISingleton.Lazy).value as T
         }
@@ -47,6 +48,8 @@ class DefaultDI(
         is DIProvider.Single -> runBlocking { (singletonMap[kClass] as DISingleton.Async).deferred.await() } as T
         null -> throw IllegalArgumentException("Class $kClass is not registered in DI")
     }
+
+    override suspend fun awaitInit() = initJob.join()
 
     @Suppress("unchecked_cast")
     private fun <T : Any> provide(kClass: KClass<T>, provider: suspend () -> Any): T {
@@ -65,4 +68,4 @@ fun DI(
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
     coroutineContext: CoroutineContext = Dispatchers.Default,
     block: DIBuilder.() -> Unit
-): DI = DefaultDIBuilder(coroutineScope, coroutineContext).apply(block).build()
+): DI = DIBuilderImpl(coroutineScope, coroutineContext).apply(block).build()

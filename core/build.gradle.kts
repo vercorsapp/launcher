@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.serialization)
@@ -34,6 +32,13 @@ dependencies {
 
 kotlin {
     jvmToolchain(17)
+    compilerOptions.freeCompilerArgs.addAll(
+        "-opt-in=kotlin.ExperimentalStdlibApi",
+        "-opt-in=kotlin.io.path.ExperimentalPathApi",
+        "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+    )
 }
 
 tasks.test {
@@ -43,16 +48,6 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
-}
-
-tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
-    compilerOptions.freeCompilerArgs.addAll(
-        "-opt-in=kotlin.ExperimentalStdlibApi",
-        "-opt-in=kotlin.io.path.ExperimentalPathApi",
-        "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
-        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-    )
 }
 
 tasks {

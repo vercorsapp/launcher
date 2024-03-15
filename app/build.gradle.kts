@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import java.util.*
 
 plugins {
@@ -31,6 +30,17 @@ dependencies {
     testImplementation(libs.mockk)
 }
 
+kotlin {
+    jvmToolchain(17)
+    compilerOptions.freeCompilerArgs.addAll(
+        "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+        "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+        "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+        "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+        "-opt-in=org.jetbrains.compose.resources.ExperimentalResourceApi",
+    )
+}
+
 tasks.test {
     useJUnit()
 }
@@ -41,16 +51,6 @@ tasks.jacocoTestReport {
 
 mockposable {
     plugins = listOf("mockk")
-}
-
-tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
-    compilerOptions.freeCompilerArgs.addAll(
-        "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-        "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-        "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-        "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
-        "-opt-in=org.jetbrains.compose.resources.ExperimentalResourceApi",
-    )
 }
 
 compose {
