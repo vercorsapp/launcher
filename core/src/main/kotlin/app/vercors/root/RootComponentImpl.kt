@@ -15,15 +15,12 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.value.Value
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
-
-private val logger = KotlinLogging.logger { }
 
 class RootComponentImpl(
     componentContext: AppComponentContext,
     private val onClose: () -> Unit,
-    private val configurationService: ConfigurationService = componentContext.inject()
+    configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), RootComponent {
     private val navigation = SlotNavigation<RootContentConfig>()
     override val child: Value<ChildSlot<*, RootChildComponent>> = childSlot(

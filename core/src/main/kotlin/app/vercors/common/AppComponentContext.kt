@@ -6,14 +6,15 @@ import app.vercors.onError
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.value.ObserveLifecycleMode
+import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.subscribe
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 interface AppComponentContext : ComponentContext, CoroutineScope {
@@ -105,6 +106,12 @@ interface AppComponentContext : ComponentContext, CoroutineScope {
                     onPause = { job?.cancel() },
                 )
         }
+    }
+
+    fun <T : Any> Value<T>.toStateFlow(mode: ObserveLifecycleMode = ObserveLifecycleMode.START_STOP): StateFlow<T> {
+        val mutableFlow = MutableStateFlow(value)
+        subscribe(lifecycle, mode) { value -> mutableFlow.update { value } }
+        return mutableFlow
     }
 }
 

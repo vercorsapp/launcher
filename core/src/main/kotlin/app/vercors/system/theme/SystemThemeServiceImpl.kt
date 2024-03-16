@@ -14,12 +14,11 @@ class SystemThemeServiceImpl(
     private lateinit var osThemeDetector: OsThemeDetector
     private val _isDark = MutableStateFlow(true)
     override val isDark: StateFlow<Boolean> = _isDark
-
-    init {
-        launch {
-            osThemeDetector = osThemeDetectorProvider()
-            _isDark.update { osThemeDetector.isDark }
-            osThemeDetector.registerListener { _isDark.update { _ -> it } }
-        }
+    private val initJob = launch {
+        osThemeDetector = osThemeDetectorProvider()
+        _isDark.update { osThemeDetector.isDark }
+        osThemeDetector.registerListener { _isDark.update { _ -> it } }
     }
+
+    override suspend fun awaitInit() = initJob.join()
 }

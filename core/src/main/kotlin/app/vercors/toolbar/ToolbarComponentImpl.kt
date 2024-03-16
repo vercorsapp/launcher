@@ -17,7 +17,7 @@ class ToolbarComponentImpl(
     override val onToolbarClick: (ToolbarButton) -> Unit,
     override val onNotificationButtonClick: () -> Unit,
     private val navigationService: NavigationService = componentContext.inject(),
-    private val notificationService: NotificationService = componentContext.inject()
+    notificationService: NotificationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), ToolbarComponent {
     private val _uiState = MutableStateFlow(ToolbarUiState())
     override val uiState: StateFlow<ToolbarUiState> = _uiState
@@ -45,7 +45,5 @@ class ToolbarComponentImpl(
             }
     }
 
-    override fun onTitleClick(config: NavigationConfig) {
-        navigationService.navigateTo(config)
-    }
+    override fun onTitleClick(config: NavigationConfig) = navigationService.navigateTo(config)
 }
