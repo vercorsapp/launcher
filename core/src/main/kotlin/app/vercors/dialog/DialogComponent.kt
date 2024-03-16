@@ -1,8 +1,8 @@
 package app.vercors.dialog
 
 import com.arkivanov.decompose.router.slot.ChildSlot
-import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.StateFlow
 
 interface DialogComponent : DialogEventHandler {
-    val dialog: Value<ChildSlot<*, DialogChildComponent>>
+    val childState: StateFlow<ChildSlot<*, DialogChildComponent>>
 }

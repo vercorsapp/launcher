@@ -23,6 +23,10 @@ interface AppComponentContext : ComponentContext, CoroutineScope {
     fun appChildContext(key: String, lifecycle: Lifecycle? = null): AppComponentContext =
         appChildContext(childContext(key, lifecycle))
     fun appChildContext(context: ComponentContext): AppComponentContext = inject<AppComponentContext>(context, di)
+    fun <C, T> childFactory(factory: (C, AppComponentContext) -> T): (C, ComponentContext) -> T =
+        { configuration, componentContext ->
+            factory(configuration, appChildContext(componentContext))
+        }
 
     fun launchInLifecycle(
         mode: ObserveLifecycleMode = ObserveLifecycleMode.START_STOP,

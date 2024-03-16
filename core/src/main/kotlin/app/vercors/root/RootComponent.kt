@@ -1,8 +1,8 @@
 package app.vercors.root
 
 import com.arkivanov.decompose.router.slot.ChildSlot
-import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.StateFlow
 
 interface RootComponent {
-    val child: Value<ChildSlot<*, RootChildComponent>>
+    val childState: StateFlow<ChildSlot<*, RootChildComponent>>
 }

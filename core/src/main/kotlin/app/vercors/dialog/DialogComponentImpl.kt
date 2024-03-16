@@ -8,28 +8,28 @@ import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.StateFlow
 
 class DialogComponentImpl(
     componentContext: AppComponentContext,
     private val dialogService: DialogService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), DialogEventHandler by dialogService, DialogComponent {
-    private val dialogNavigation = SlotNavigation<DialogConfig>()
-    private val _dialog: Value<ChildSlot<DialogConfig, DialogChildComponent>> = childSlot(
-        source = dialogNavigation,
+    private val navigation = SlotNavigation<DialogConfig>()
+    private val _childState: Value<ChildSlot<DialogConfig, DialogChildComponent>> = childSlot(
+        source = navigation,
         serializer = DialogConfig.serializer(),
-        handleBackButton = true
-    ) { configuration, componentContext ->
-        createDialog(configuration, appChildContext(componentContext))
-    }
-    override val dialog: Value<ChildSlot<*, DialogChildComponent>> = _dialog
+        handleBackButton = true,
+        childFactory = childFactory(::createChild)
+    )
+    override val childState: StateFlow<ChildSlot<*, DialogChildComponent>> = _childState.toStateFlow()
 
     init {
         dialogService.dialogState.collectInLifecycle { config ->
-            config?.let { dialogNavigation.activate(it) } ?: dialogNavigation.dismiss()
+            config?.let { navigation.activate(it) } ?: navigation.dismiss()
         }
     }
 
-    private fun createDialog(config: DialogConfig, componentContext: AppComponentContext): DialogChildComponent =
+    private fun createChild(config: DialogConfig, componentContext: AppComponentContext): DialogChildComponent =
         when (config) {
             is DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(componentContext, ::closeDialog)
             is DialogConfig.Login -> inject<LoginDialogComponent>(componentContext, ::closeDialog)

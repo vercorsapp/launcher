@@ -1,17 +1,17 @@
 package app.vercors.toolbar
 
 import app.vercors.componentContext
-import app.vercors.initMainDispatcher
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationService
 import app.vercors.navigation.NavigationState
 import app.vercors.notification.NotificationData
 import app.vercors.notification.NotificationLevel
 import app.vercors.notification.NotificationService
+import app.vercors.runTest
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
-import com.arkivanov.essenty.lifecycle.start
-import com.arkivanov.essenty.lifecycle.stop
+import com.arkivanov.essenty.lifecycle.destroy
+import com.arkivanov.essenty.lifecycle.resume
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -19,7 +19,6 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -57,13 +56,15 @@ class ToolbarComponentImplTest {
     fun `given component is started, when navigation state changes, ui state is updated accordingly`(
         navigation: NavigationState
     ) = runTest {
-        initMainDispatcher()
+        // given
         val lifecycle = LifecycleRegistry()
         val component = createComponent(lifecycle)
-        lifecycle.start()
+        lifecycle.resume()
 
+        // when
         navigationState.update { navigation }
 
+        // then
         component.uiState.first().let {
             assertEquals(navigation.hasPreviousScreen, it.hasPreviousScreen)
             assertEquals(navigation.hasNextScreen, it.hasNextScreen)
@@ -72,34 +73,34 @@ class ToolbarComponentImplTest {
 
     @Test
     fun `given component is stopped, when navigation state changes, ui state is not updated`() = runTest {
-        initMainDispatcher()
-
+        // given
         val lifecycle = LifecycleRegistry()
         val component = createComponent(lifecycle)
-        lifecycle.start()
-        lifecycle.stop()
+        lifecycle.resume()
+        lifecycle.destroy()
 
+        // when
         val initialComponentState = component.uiState.value
         navigationState.update { NavigationState(listOf(NavigationConfig.Home, NavigationConfig.InstanceList), 1) }
 
+        // then
         assertSame(initialComponentState, component.uiState.first())
     }
 
     @ParameterizedTest
     @MethodSource("provide notifications states")
     fun `given component is started, when notifications state changes, ui state is updated accordingly`(
-        notifications: List<NotificationData>,
-        unreadNotifications: Int,
-        maxUnreadNotificationLevel: NotificationLevel
+        notifications: List<NotificationData>, unreadNotifications: Int, maxUnreadNotificationLevel: NotificationLevel
     ) = runTest {
-        initMainDispatcher()
-
+        // given
         val lifecycle = LifecycleRegistry()
         val component = createComponent(lifecycle)
-        lifecycle.start()
+        lifecycle.resume()
 
+        // when
         notificationsState.update { notifications }
 
+        // then
         component.uiState.first().let {
             assertEquals(unreadNotifications, it.unreadNotifications)
             assertEquals(maxUnreadNotificationLevel, it.maxUnreadNotificationLevel)
@@ -108,33 +109,32 @@ class ToolbarComponentImplTest {
 
     @Test
     fun `given component is stopped, when notifications state changes, ui state is not updated`() = runTest {
-        initMainDispatcher()
-
+        // given
         val lifecycle = LifecycleRegistry()
         val component = createComponent(lifecycle)
-        lifecycle.start()
-        lifecycle.stop()
+        lifecycle.resume()
+        lifecycle.destroy()
 
+        // when
         val initialComponentState = component.uiState.value
         notificationsState.update { listOf(NotificationData(NotificationLevel.INFO, "test")) }
 
+        // then
         assertSame(initialComponentState, component.uiState.first())
     }
 
     @Test
     fun `given component is started, when title clicked, navigation service is called`() = runTest {
-        initMainDispatcher()
-
+        // given
         every { navigationService.navigateTo(any()) } returns Unit
-
         val lifecycle = LifecycleRegistry()
         val component = createComponent(lifecycle)
-        lifecycle.start()
+        lifecycle.resume()
 
-        component.onTitleClick(NavigationConfig.Home)
-        verify(exactly = 1) { navigationService.navigateTo(NavigationConfig.Home) }
-
+        // when
         component.onTitleClick(NavigationConfig.Search)
+
+        // then
         verify(exactly = 1) { navigationService.navigateTo(NavigationConfig.Search) }
     }
 
@@ -151,36 +151,27 @@ class ToolbarComponentImplTest {
         fun `provide navigation states`(): Stream<Arguments> = Stream.of(
             Arguments.of(
                 NavigationState(
-                    items = listOf(NavigationConfig.Home, NavigationConfig.InstanceList),
-                    index = 1
+                    items = listOf(NavigationConfig.Home, NavigationConfig.InstanceList), index = 1
                 )
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 NavigationState(
                     items = listOf(NavigationConfig.Home, NavigationConfig.InstanceList, NavigationConfig.Search),
                     index = 2
                 )
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 NavigationState(
                     items = listOf(NavigationConfig.Home, NavigationConfig.InstanceList, NavigationConfig.Search),
                     index = 1
                 )
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 NavigationState(
                     items = listOf(
-                        NavigationConfig.Home,
-                        NavigationConfig.InstanceList,
-                        NavigationConfig.Configuration
-                    ),
-                    index = 2
+                        NavigationConfig.Home, NavigationConfig.InstanceList, NavigationConfig.Configuration
+                    ), index = 2
                 )
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 NavigationState(
-                    items = listOf(NavigationConfig.Home),
-                    index = 0
+                    items = listOf(NavigationConfig.Home), index = 0
                 )
             )
         )
@@ -190,71 +181,47 @@ class ToolbarComponentImplTest {
             Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test"
+                        level = NotificationLevel.INFO, text = "test"
                     ),
                 ), 1, NotificationLevel.INFO
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test1"
-                    ),
-                    NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test2"
+                        level = NotificationLevel.INFO, text = "test1"
+                    ), NotificationData(
+                        level = NotificationLevel.INFO, text = "test2"
                     )
                 ), 2, NotificationLevel.INFO
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test1"
-                    ),
-                    NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test2",
-                        isRead = true
+                        level = NotificationLevel.INFO, text = "test1"
+                    ), NotificationData(
+                        level = NotificationLevel.INFO, text = "test2", isRead = true
                     )
                 ), 1, NotificationLevel.INFO
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test1"
-                    ),
-                    NotificationData(
-                        level = NotificationLevel.ERROR,
-                        text = "test2"
+                        level = NotificationLevel.INFO, text = "test1"
+                    ), NotificationData(
+                        level = NotificationLevel.ERROR, text = "test2"
                     )
                 ), 2, NotificationLevel.ERROR
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test1",
-                        isRead = true
-                    ),
-                    NotificationData(
-                        level = NotificationLevel.ERROR,
-                        text = "test2"
+                        level = NotificationLevel.INFO, text = "test1", isRead = true
+                    ), NotificationData(
+                        level = NotificationLevel.ERROR, text = "test2"
                     )
                 ), 1, NotificationLevel.ERROR
-            ),
-            Arguments.of(
+            ), Arguments.of(
                 listOf(
                     NotificationData(
-                        level = NotificationLevel.INFO,
-                        text = "test1"
-                    ),
-                    NotificationData(
-                        level = NotificationLevel.ERROR,
-                        text = "test2",
-                        isRead = true
+                        level = NotificationLevel.INFO, text = "test1"
+                    ), NotificationData(
+                        level = NotificationLevel.ERROR, text = "test2", isRead = true
                     )
                 ), 1, NotificationLevel.INFO
             )

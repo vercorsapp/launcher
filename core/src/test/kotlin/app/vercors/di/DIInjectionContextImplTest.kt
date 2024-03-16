@@ -14,18 +14,32 @@ class DIInjectionContextImplTest {
 
     @Test
     fun `given two params, when call param twice, then return params in order`() {
+        // given
         val param1 = "test1"
         val param2 = "test2"
         val injectionContext = DIInjectionContextImpl(di, arrayOf(param1, param2))
-        assertSame(param1, injectionContext.param<String>())
-        assertSame(param2, injectionContext.param<String>())
+
+        // when
+        val res1 = injectionContext.param<String>()
+        val res2 = injectionContext.param<String>()
+
+        // then
+        assertSame(param1, res1)
+        assertSame(param2, res2)
     }
 
     @Test
     fun `given one param, when call param twice, then return param then error`() {
-        val param = "test"
-        val injectionContext = DIInjectionContextImpl(di, arrayOf(param))
-        assertSame(param, injectionContext.param<String>())
-        assertThrows<IndexOutOfBoundsException> { injectionContext.param<String>() }
+        // given
+        val param1 = "test1"
+        val injectionContext = DIInjectionContextImpl(di, arrayOf(param1))
+
+        // when
+        val res1 = injectionContext.param<String>()
+        val res2 = { injectionContext.param<String>() }
+
+        // then
+        assertSame(param1, res1)
+        assertThrows<IndexOutOfBoundsException> { res2() }
     }
 }

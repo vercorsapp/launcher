@@ -9,12 +9,12 @@ import app.vercors.configuration.ConfigurationService
 import app.vercors.root.error.ErrorComponent
 import app.vercors.root.main.MainComponent
 import app.vercors.root.setup.SetupComponent
-import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.slot.ChildSlot
 import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
 class RootComponentImpl(
@@ -23,11 +23,12 @@ class RootComponentImpl(
     configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), RootComponent {
     private val navigation = SlotNavigation<RootContentConfig>()
-    override val child: Value<ChildSlot<*, RootChildComponent>> = childSlot(
+    private val _childState: Value<ChildSlot<RootContentConfig, RootChildComponent>> = childSlot(
         source = navigation,
         serializer = RootContentConfig.serializer(),
-        childFactory = ::createChild
+        childFactory = childFactory(::createChild)
     )
+    override val childState: StateFlow<ChildSlot<*, RootChildComponent>> = _childState.toStateFlow()
 
     init {
         if (appBasePath != null) configurationService.load()
@@ -42,12 +43,11 @@ class RootComponentImpl(
 
     private fun onError(error: Throwable) = navigation.activate(RootContentConfig.Errored(error))
 
-    private fun createChild(config: RootContentConfig, context: ComponentContext): RootChildComponent {
-        val ctx = inject<AppComponentContext>(context, di)
+    private fun createChild(config: RootContentConfig, context: AppComponentContext): RootChildComponent {
         return when (config) {
-            is RootContentConfig.Errored -> inject<ErrorComponent>(ctx, onClose, config.error)
-            is RootContentConfig.Setup -> inject<SetupComponent>(ctx, onClose)
-            is RootContentConfig.Main -> inject<MainComponent>(ctx, onClose)
+            is RootContentConfig.Errored -> inject<ErrorComponent>(context, onClose, config.error)
+            is RootContentConfig.Setup -> inject<SetupComponent>(context, onClose)
+            is RootContentConfig.Main -> inject<MainComponent>(context, onClose)
         }
     }
 

@@ -10,8 +10,12 @@ import app.vercors.instance.InstanceListComponent
 import app.vercors.instance.details.InstanceDetailsComponent
 import app.vercors.project.ProjectDetailsComponent
 import app.vercors.project.SearchComponent
-import com.arkivanov.decompose.router.stack.*
+import com.arkivanov.decompose.router.stack.ChildStack
+import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.bringToFront
+import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
 class NavigationComponentImpl(
@@ -19,22 +23,20 @@ class NavigationComponentImpl(
     private val navigationService: NavigationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), NavigationEventHandler by navigationService, NavigationComponent {
     private val navigation = StackNavigation<NavigationConfig>()
-    private val _children: Value<ChildStack<NavigationConfig, NavigationChildComponent>> = childStack(
+    private val _childState: Value<ChildStack<NavigationConfig, NavigationChildComponent>> = childStack(
         source = navigation,
         serializer = NavigationConfig.serializer(),
         initialConfiguration = navigationService.navigationState.value.active,
-        childFactory = { configuration, componentContext ->
-            createChild(configuration, appChildContext(componentContext))
-        }
+        childFactory = childFactory(::createChild)
     )
-    override val children: Value<ChildStack<*, NavigationChildComponent>> = _children
+    override val childState: StateFlow<ChildStack<*, NavigationChildComponent>> = _childState.toStateFlow()
 
     init {
         navigationService.navigationState.filterNotNull().collectInLifecycle {
             navigation.bringToFront(it.active)
         }
         navigationService.refreshChannel.consumeInLifecycle {
-            val active = children.active.instance
+            val active = childState.value.active.instance
             if (active is Refreshable) active.refresh()
         }
     }

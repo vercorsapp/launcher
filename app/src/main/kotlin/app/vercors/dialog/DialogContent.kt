@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,14 +22,13 @@ import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.instance.CreateInstanceDialogContent
 import app.vercors.dialog.login.LoginDialogComponent
 import app.vercors.dialog.login.LoginDialogContent
-import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 @Composable
 fun DialogContent(component: DialogComponent) {
-    val child by component.dialog.subscribeAsState()
+    val childState by component.childState.collectAsState()
 
     Crossfade(
-        targetState = child,
+        targetState = childState,
         animationSpec = if (LocalConfiguration.current.animations) tween() else tween(0)
     ) {
         it.child?.instance?.let { childComponent ->
