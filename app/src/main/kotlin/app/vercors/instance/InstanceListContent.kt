@@ -195,7 +195,7 @@ private fun InstanceListAreaContent(
                         )
                     }
                 } else if (uiState.sorter.groupBy === InstanceGroupBy.None) {
-                    items(uiState.instanceGroups[""]!!, key = { it.path }) {
+                    items(uiState.instanceGroups[""]!!, key = { it.id }) {
                         Card(modifier = Modifier.padding(UI.mediumPadding)) {
                             InstanceCardContent(it, component::showInstanceDetails, component::onLaunchInstance)
                         }
@@ -224,7 +224,7 @@ private fun InstanceListAreaContent(
                             }
 
                         }
-                        items(instances, key = { it.path }) {
+                        items(instances, key = { it.id }) {
                             Card(modifier = Modifier.padding(UI.mediumPadding)) {
                                 InstanceCardContent(it, component::showInstanceDetails, component::onLaunchInstance)
                             }

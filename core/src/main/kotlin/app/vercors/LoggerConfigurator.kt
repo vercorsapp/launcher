@@ -12,13 +12,12 @@ import ch.qos.logback.core.rolling.RollingFileAppender
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
 import ch.qos.logback.core.spi.ContextAwareBase
 import org.slf4j.LoggerFactory
-import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 
 class LoggerConfigurator : ContextAwareBase(), Configurator {
     override fun configure(lc: LoggerContext): Configurator.ExecutionStatus {
         addInfo("Setting up custom logger")
-        val logsPath = appBasePath?.resolve("logs") ?: Path.of("logs")
+        val logsPath = logsFolder
 
         // Encoder for all appenders
         val appEncoder = PatternLayoutEncoder().apply {

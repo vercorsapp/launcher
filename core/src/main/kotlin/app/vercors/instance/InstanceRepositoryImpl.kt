@@ -57,37 +57,25 @@ class InstanceRepositoryImpl(
         try {
             logger.debug { "Loading instance at location $jsonFile" }
             var instance = jsonFile.inputStream().use { json.decodeFromStream<InstanceData>(it) }
-            if (instance.path != instanceDir.name) {
-                logger.warn { "Directory of instance ${instance.name} changed to ${instanceDir.name}, fixing that" }
-                instance = instance.copy(path = instanceDir.name)
+            if (instance.id != instanceDir.name) {
+                logger.warn { "Directory of instance ${instance.name} changed to ${instanceDir.name}, patching file data" }
+                instance = instance.copy(id = instanceDir.name)
                 saveInstance(instance)
             }
             logger.debug { "Loaded instance ${instance.name}" }
-            return InstanceLoadingResult.Success(instance.copy(path = instanceDir.name))
+            return InstanceLoadingResult.Success(instance.copy(id = instanceDir.name))
         } catch (e: Exception) {
             throw InstanceLoadingException("There was an error while loading instance at location $jsonFile", e)
         }
     }
 
-    override suspend fun saveInstance(instance: InstanceData, context: CoroutineContext) = withContext(context) {
-        var instanceWithPath = instance
-        if (instance.path.isEmpty()) instanceWithPath = instance.copy(path = generatePath(instance))
-        val path = storageService.getInstancePath(instanceWithPath)
-        logger.debug { "Saving instance ${instance.name} at location $path" }
+    override suspend fun saveInstance(instance: InstanceData, log: Boolean, context: CoroutineContext) =
+        withContext(context) {
+            val path = storageService.getInstancePath(instance)
+            if (log) logger.debug { "Saving instance ${instance.name} at location $path" }
         path.resolve(instanceFileName).createParentDirectories()
-            .outputStream().use { json.encodeToStream(instanceWithPath, it) }
-        logger.debug { "Saved instance ${instance.name}" }
-        instanceWithPath
-    }
-
-    private fun generatePath(instance: InstanceData): String {
-        val sanitizedName = instance.name.replace("[^a-zA-Z0-9._]+".toRegex(), "_")
-        var path = storageService.instancesPath.resolve(sanitizedName)
-        var suffix = 1
-        while (path.exists()) {
-            path = storageService.instancesPath.resolve("${sanitizedName}_${suffix++}")
-        }
-        return path.name
+            .outputStream().use { json.encodeToStream(instance, it) }
+            if (log) logger.debug { "Saved instance ${instance.name}" }
     }
 
     override suspend fun deleteInstance(instance: InstanceData, context: CoroutineContext) = withContext(context) {

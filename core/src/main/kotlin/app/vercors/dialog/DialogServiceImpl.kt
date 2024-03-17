@@ -8,18 +8,9 @@ class DialogServiceImpl : DialogService {
     private val _dialogState: MutableStateFlow<DialogConfig?> = MutableStateFlow(null)
     override val dialogState: StateFlow<DialogConfig?> = _dialogState
 
-    override fun openDialog(event: DialogEvent) {
-        when (event) {
-            DialogEvent.CreateInstance -> update(DialogConfig.CreateInstance)
-            DialogEvent.Login -> update(DialogConfig.Login())
-        }
-    }
+    override fun openDialog(config: DialogConfig) = update(config)
 
-    override fun closeDialog() {
-        update(null)
-    }
+    override fun closeDialog() = update(null)
 
-    private fun update(config: DialogConfig?) {
-        _dialogState.update { config }
-    }
+    private fun update(config: DialogConfig?) = _dialogState.update { config }
 }

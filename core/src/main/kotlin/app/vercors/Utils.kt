@@ -44,6 +44,7 @@ var appBasePath: Path?
             _appBasePath = value
         }
     }
+val logsFolder: Path get() = appBasePath?.resolve("logs") ?: Path.of("logs")
 
 fun loadProperties(file: String) = Properties().apply { load(resourceAsStream(file)) }
 

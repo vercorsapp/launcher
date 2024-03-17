@@ -3,7 +3,8 @@ package app.vercors.dialog
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
-import app.vercors.dialog.error.ErrorDialogComponent
+import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
+import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
 import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
@@ -31,8 +32,14 @@ class DialogComponentImpl(
 
     private fun createChild(config: DialogConfig, componentContext: AppComponentContext): DialogChildComponent =
         when (config) {
-            is DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(componentContext, ::closeDialog)
+            DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(componentContext, ::closeDialog)
             is DialogConfig.Login -> inject<LoginDialogComponent>(componentContext, ::closeDialog)
-            is DialogConfig.Error -> inject<ErrorDialogComponent>(componentContext, ::closeDialog)
+            DialogConfig.Error.Launch -> inject<LaunchErrorDialogComponent>(componentContext, ::closeDialog)
+            is DialogConfig.Error.JavaVersion -> inject<JavaVersionErrorDialogComponent>(
+                componentContext,
+                ::closeDialog,
+                config.instance,
+                config.javaVersion
+            )
         }
 }

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CreateInstanceDialogComponent : DialogChildComponent {
     val uiState: StateFlow<CreateInstanceDialogUiState>
-    val onClose: () -> Unit
 
     fun updateInstanceName(instanceName: String)
     fun updateMinecraftVersion(minecraftVersion: CreateInstanceDialogMinecraftVersion)

@@ -16,8 +16,10 @@ import app.vercors.dialog.DialogComponent
 import app.vercors.dialog.DialogComponentImpl
 import app.vercors.dialog.DialogService
 import app.vercors.dialog.DialogServiceImpl
-import app.vercors.dialog.error.ErrorDialogComponent
-import app.vercors.dialog.error.ErrorDialogComponentImpl
+import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
+import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponentImpl
+import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
+import app.vercors.dialog.error.launch.LaunchErrorDialogComponentImpl
 import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.instance.CreateInstanceDialogComponentImpl
 import app.vercors.dialog.login.LoginDialogComponent
@@ -82,10 +84,11 @@ fun AppDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     single<SystemThemeService> { SystemThemeServiceImpl(inject()) }
     single<ConfigurationService> { ConfigurationServiceImpl(inject(), inject()) }
     single<ConfigurationRepository> { ConfigurationRepositoryImpl(inject(), inject()) }
-    single<InstanceService> { InstanceServiceImpl(inject(), inject(), inject()) }
+    single<InstanceService> { InstanceServiceImpl(inject(), inject(), inject(), inject()) }
     single<InstanceRepository> { InstanceRepositoryImpl(inject(), inject()) }
     single<LauncherService> {
         LauncherServiceImpl(
+            inject(),
             inject(),
             inject(),
             inject(),
@@ -123,7 +126,8 @@ fun AppDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutine
     factory<DialogComponent> { DialogComponentImpl(param()) }
     factory<CreateInstanceDialogComponent> { CreateInstanceDialogComponentImpl(param(), param()) }
     factory<LoginDialogComponent> { LoginDialogComponentImpl(param(), param()) }
-    factory<ErrorDialogComponent> { ErrorDialogComponentImpl(param()) }
+    factory<LaunchErrorDialogComponent> { LaunchErrorDialogComponentImpl(param(), param()) }
+    factory<JavaVersionErrorDialogComponent> { JavaVersionErrorDialogComponentImpl(param(), param(), param(), param()) }
     factory<AccountListComponent> { AccountListComponentImpl(param()) }
     factory<NotificationListComponent> { NotificationListComponentImpl(param()) }
     factory<HomeComponent> { HomeComponentImpl(param()) }

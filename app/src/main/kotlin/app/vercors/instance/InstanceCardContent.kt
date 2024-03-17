@@ -26,7 +26,12 @@ import app.vercors.UI
 import app.vercors.common.AppAnimatedVisibility
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box
+import compose.icons.feathericons.Eye
 import compose.icons.feathericons.Play
+import org.jetbrains.compose.resources.stringResource
+import vercors.app.generated.resources.Res
+import vercors.app.generated.resources.play
+import vercors.app.generated.resources.view
 
 @Composable
 fun InstanceCardContent(
@@ -58,10 +63,6 @@ fun InstanceCardContent(
                 }
 
                 when (instance.status) {
-                    is InstanceStatus.Errored -> {
-
-                    }
-
                     is InstanceStatus.Launching -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -74,13 +75,31 @@ fun InstanceCardContent(
 
                             CircularProgressIndicator(
                                 progress = animatedProgress,
+                                strokeWidth = 6.dp,
                                 modifier = Modifier.size(64.dp)
                             )
                         }
                     }
 
                     InstanceStatus.Running -> {
-
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IconButton(
+                                onClick = { onInstanceClick(instance) },
+                                modifier = Modifier.size(64.dp)
+                                    .background(MaterialTheme.colors.primary, CircleShape),
+                                content = {
+                                    Icon(
+                                        imageVector = FeatherIcons.Eye,
+                                        contentDescription = stringResource(Res.string.view),
+                                        modifier = Modifier.size(32.dp),
+                                        tint = MaterialTheme.colors.onPrimary
+                                    )
+                                }
+                            )
+                        }
                     }
 
                     InstanceStatus.Stopped -> {
@@ -99,10 +118,10 @@ fun InstanceCardContent(
                                         .background(MaterialTheme.colors.primary, CircleShape),
                                     content = {
                                         Icon(
-                                            FeatherIcons.Play,
-                                            "Play",
-                                            Modifier.size(32.dp),
-                                            MaterialTheme.colors.onPrimary
+                                            imageVector = FeatherIcons.Play,
+                                            contentDescription = stringResource(Res.string.play),
+                                            modifier = Modifier.size(32.dp),
+                                            tint = MaterialTheme.colors.onPrimary
                                         )
                                     }
                                 )

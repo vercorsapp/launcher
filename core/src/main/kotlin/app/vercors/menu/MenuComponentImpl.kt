@@ -4,7 +4,7 @@ import app.vercors.account.AccountService
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
-import app.vercors.dialog.DialogEvent
+import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogService
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationService
@@ -47,7 +47,7 @@ class MenuComponentImpl(
     override fun onMenuButtonClick(button: MenuButton) {
         when (button) {
             MenuButton.Accounts -> onAccountsMenuButtonClick()
-            MenuButton.CreateInstance -> dialogService.openDialog(DialogEvent.CreateInstance)
+            MenuButton.CreateInstance -> dialogService.openDialog(DialogConfig.CreateInstance)
             MenuButton.Home -> navigationService.handle(NavigationEvent.Home)
             MenuButton.Instances -> navigationService.handle(NavigationEvent.InstanceList)
             MenuButton.Search -> navigationService.handle(NavigationEvent.Search)

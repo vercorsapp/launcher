@@ -6,7 +6,7 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.SortOrder
 import app.vercors.common.inject
 import app.vercors.configuration.ConfigurationService
-import app.vercors.dialog.DialogEvent
+import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogService
 import app.vercors.instance.launch.LauncherService
 import app.vercors.navigation.NavigationEvent
@@ -96,7 +96,7 @@ class InstanceListComponentImpl(
     }
 
     override fun openCreateInstanceDialog() {
-        dialogService.openDialog(DialogEvent.CreateInstance)
+        dialogService.openDialog(DialogConfig.CreateInstance)
     }
 
     override fun updateNameFilter(nameFilter: String) {

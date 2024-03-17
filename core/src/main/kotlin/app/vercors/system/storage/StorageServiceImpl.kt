@@ -17,7 +17,7 @@ class StorageServiceImpl : StorageService {
     private val librariesDir: Path get() = basePath.resolve("libraries")
     private val loggingDir: Path get() = basePath.resolve("logging")
 
-    override fun getInstancePath(instance: InstanceData): Path = instancesPath.resolve(instance.path)
+    override fun getInstancePath(instance: InstanceData): Path = instancesPath.resolve(instance.id)
 
     override fun getInstanceNativesPath(instance: InstanceData): Path = getInstancePath(instance).resolve("natives")
 

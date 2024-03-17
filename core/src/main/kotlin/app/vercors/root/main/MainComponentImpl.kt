@@ -5,7 +5,7 @@ import app.vercors.account.AccountService
 import app.vercors.common.*
 import app.vercors.configuration.ConfigurationService
 import app.vercors.dialog.DialogComponent
-import app.vercors.dialog.DialogEvent
+import app.vercors.dialog.DialogConfig
 import app.vercors.instance.InstanceLoadingState
 import app.vercors.instance.InstanceService
 import app.vercors.menu.MenuComponent
@@ -92,7 +92,7 @@ class MainComponentImpl(
 
     private fun onAccountsMenuButtonClick() {
         if (accountService.selectedAccountState.value == null) {
-            dialogComponent.openDialog(DialogEvent.Login)
+            dialogComponent.openDialog(DialogConfig.Login())
         } else {
             accountListComponent.onTogglePopup()
         }

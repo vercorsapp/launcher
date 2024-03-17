@@ -1,6 +1,6 @@
 package app.vercors.dialog
 
 interface DialogEventHandler {
-    fun openDialog(event: DialogEvent)
+    fun openDialog(config: DialogConfig)
     fun closeDialog()
 }

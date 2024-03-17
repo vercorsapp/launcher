@@ -1,5 +1,6 @@
 package app.vercors.dialog
 
+import app.vercors.instance.InstanceData
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,5 +12,11 @@ sealed interface DialogConfig {
     data class Login(val authenticationStateCollector: () -> Unit = {}) : DialogConfig
 
     @Serializable
-    data class Error(val title: String, val message: List<String>) : DialogConfig
+    sealed interface Error : DialogConfig {
+        @Serializable
+        data object Launch : Error
+
+        @Serializable
+        data class JavaVersion(val instance: InstanceData, val javaVersion: Int) : Error
+    }
 }

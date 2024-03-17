@@ -1,3 +1,6 @@
 package app.vercors.dialog
 
-interface DialogChildComponent
+interface DialogChildComponent {
+    val onClose: () -> Unit
+    fun close() = onClose()
+}

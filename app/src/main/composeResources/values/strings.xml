@@ -144,4 +144,12 @@
     <string name="accountSuccess">Authentication successful</string>
     <string name="logOut">Log out</string>
     <string name="refreshingToken">Refreshing access token</string>
+
+    <!-- Error dialogs -->
+    <string name="launchErrorTitle">An error occured while launching the instance</string>
+    <string name="launchErrorMessage">Please check the launcher logs for more details.</string>
+    <string name="openLogs">Open logs</string>
+    <string name="javaVersionErrorTitle">Java location needs to be set</string>
+    <string name="javaVersionErrorMessage">Java %1$d path needs to be set in the launcher settings in order to launch this instance.</string>
+    <string name="openSettings">Open settings</string>
 </resources>

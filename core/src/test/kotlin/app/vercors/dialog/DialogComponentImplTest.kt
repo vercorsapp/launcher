@@ -4,9 +4,11 @@ import app.vercors.common.AppComponentContext
 import app.vercors.componentContext
 import app.vercors.di.DI
 import app.vercors.di.single
-import app.vercors.dialog.error.ErrorDialogComponent
+import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
+import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
 import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
+import app.vercors.instance.InstanceData
 import app.vercors.runTest
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
@@ -38,7 +40,13 @@ class DialogComponentImplTest {
     lateinit var loginDialogComponent: LoginDialogComponent
 
     @MockK
-    lateinit var errorDialogComponent: ErrorDialogComponent
+    lateinit var launchErrorDialogComponent: LaunchErrorDialogComponent
+
+    @MockK
+    lateinit var javaVersionErrorDialogComponent: JavaVersionErrorDialogComponent
+
+    @MockK
+    lateinit var instanceData: InstanceData
 
     private val dialogState = MutableStateFlow<DialogConfig?>(null)
     private lateinit var di: DI
@@ -50,7 +58,8 @@ class DialogComponentImplTest {
             single { appComponentContext }
             single { createInstanceDialogComponent }
             single { loginDialogComponent }
-            single { errorDialogComponent }
+            single { launchErrorDialogComponent }
+            single { javaVersionErrorDialogComponent }
         }
     }
 
@@ -99,7 +108,7 @@ class DialogComponentImplTest {
         }
 
     @Test
-    fun `given component is started, when dialog state changes to error, then set child component to error component`() =
+    fun `given component is started, when dialog state changes to launch error, then set child component to launch error component`() =
         runTest {
             // given
             val lifecycle = LifecycleRegistry()
@@ -107,10 +116,25 @@ class DialogComponentImplTest {
             lifecycle.resume()
 
             // when
-            dialogState.update { DialogConfig.Error("error", emptyList()) }
+            dialogState.update { DialogConfig.Error.Launch }
 
             // then
-            assertSame(errorDialogComponent, component.childState.first().child?.instance)
+            assertSame(launchErrorDialogComponent, component.childState.first().child?.instance)
+        }
+
+    @Test
+    fun `given component is started, when dialog state changes to java version error, then set child component to java version error component`() =
+        runTest {
+            // given
+            val lifecycle = LifecycleRegistry()
+            val component = createComponent(lifecycle)
+            lifecycle.resume()
+
+            // when
+            dialogState.update { DialogConfig.Error.JavaVersion(instanceData, 0) }
+
+            // then
+            assertSame(javaVersionErrorDialogComponent, component.childState.first().child?.instance)
         }
 
     @Test

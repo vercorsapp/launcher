@@ -3,7 +3,7 @@ package app.vercors.account
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
-import app.vercors.dialog.DialogEvent
+import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +38,6 @@ class AccountListComponentImpl(
 
     override fun onAddAccount() {
         onTogglePopup()
-        dialogService.openDialog(DialogEvent.Login)
+        dialogService.openDialog(DialogConfig.Login())
     }
 }

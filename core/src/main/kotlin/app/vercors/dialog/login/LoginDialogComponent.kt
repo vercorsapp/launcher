@@ -8,5 +8,4 @@ interface LoginDialogComponent : DialogChildComponent {
     val canOpenInBrowser: Boolean
 
     fun openInBrowser(url: String)
-    fun close()
 }

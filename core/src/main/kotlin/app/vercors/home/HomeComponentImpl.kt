@@ -56,7 +56,6 @@ class HomeComponentImpl(
         sectionTypes: List<HomeSectionType>,
         providerTypes: List<ProjectProviderType>
     ) = coroutineScope {
-        logger.info { "Loading home sections" }
         _uiState.update { HomeUiState(emptySections(sectionTypes)) }
         sectionTypes.forEach { sectionType ->
             launch {
@@ -79,9 +78,7 @@ class HomeComponentImpl(
     override fun refresh() {
         cachedProjectData.clear()
         val (sectionType, providerType) = configState.value!!
-        launch {
-            loadSections(sectionType, providerType)
-        }
+        launch { loadSections(sectionType, providerType) }
     }
 
     private fun List<HomeSection.Projects>.merge(): HomeSection.Projects {

@@ -4,6 +4,7 @@ import app.vercors.common.AppDuration
 import app.vercors.common.AppInstant
 import app.vercors.instance.mojang.data.MojangVersionManifest
 import app.vercors.project.ModLoader
+import kotlinx.coroutines.Job
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -14,7 +15,7 @@ import java.time.Instant
 data class InstanceData(
     val version: Int = 0,
     val name: String,
-    val path: String = "",
+    val id: String = "",
     val icon: Icon? = null,
     val gameVersion: MojangVersionManifest.Version,
     val loader: ModLoader? = null,
@@ -24,8 +25,15 @@ data class InstanceData(
     val lastPlayed: AppInstant? = null,
     val timePlayed: AppDuration = Duration.ZERO,
     @Transient
-    val status: InstanceStatus = InstanceStatus.Stopped
+    var dirty: Boolean = false,
+    @Transient
+    val status: InstanceStatus = InstanceStatus.Stopped,
+    @Transient
+    val preparationJob: Job? = null,
+    @Transient
+    val runJob: Job? = null
 ) {
+
     @Serializable
     data class Icon(
         val type: Type,

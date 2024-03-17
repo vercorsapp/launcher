@@ -1,3 +1,3 @@
 package app.vercors.instance.launch
 
-class JavaVersionException(message: String) : Exception(message)
+class JavaVersionException(val javaVersion: Int) : Exception("Java path needs to be set for version $javaVersion")

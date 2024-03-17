@@ -5,19 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 class NotificationServiceImpl : NotificationService {
-    private val _notificationsState: MutableStateFlow<List<NotificationData>> = MutableStateFlow(
-        buildList {
-            repeat(1) {
-                addAll(
-                    listOf(
-                        NotificationData(NotificationLevel.INFO, "Test notification info"),
-                        NotificationData(NotificationLevel.WARN, "Test notification warn"),
-                        NotificationData(NotificationLevel.ERROR, "Test notification error"),
-                    )
-                )
-            }
-        }
-    )
+    private val _notificationsState: MutableStateFlow<List<NotificationData>> = MutableStateFlow(emptyList())
     override val notificationsState: StateFlow<List<NotificationData>> = _notificationsState
 
     override fun sendNotification(notification: NotificationData) {

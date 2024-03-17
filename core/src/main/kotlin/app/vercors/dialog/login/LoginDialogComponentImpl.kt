@@ -14,7 +14,7 @@ import java.net.URI
 
 class LoginDialogComponentImpl(
     componentContext: AppComponentContext,
-    private val onClose: () -> Unit,
+    override val onClose: () -> Unit,
     private val accountService: AccountService = componentContext.inject(),
     private val authenticationService: AuthenticationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), LoginDialogComponent {
@@ -45,8 +45,8 @@ class LoginDialogComponentImpl(
         openURL(URI(url))
     }
 
-    override fun close() {
+    /*override fun close() {
         onClose()
         //authenticationStateCollector(AuthenticationState.Closed)
-    }
+    }*/
 }
