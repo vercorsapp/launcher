@@ -30,7 +30,9 @@ import java.awt.Desktop
 
 class LaunchErrorDialogComponentImpl(
     componentContext: AppComponentContext,
-    override val onClose: () -> Unit
+    private val _onClose: () -> Unit
 ) : AbstractAppComponent(componentContext), LaunchErrorDialogComponent {
     override fun openLogFolder() = Desktop.getDesktop().open(logsFolder.toFile())
+
+    override fun onClose() = _onClose()
 }

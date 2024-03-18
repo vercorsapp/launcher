@@ -23,9 +23,6 @@
 
 package app.vercors.menu
 
-import kotlinx.coroutines.flow.StateFlow
+import app.vercors.common.DefaultComponent
 
-interface MenuComponent {
-    val uiState: StateFlow<MenuUiState>
-    fun onMenuButtonClick(button: MenuButton)
-}
+interface MenuComponent : DefaultComponent<MenuState, MenuIntent>

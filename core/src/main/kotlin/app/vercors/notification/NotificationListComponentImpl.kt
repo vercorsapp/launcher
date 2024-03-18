@@ -32,10 +32,10 @@ import kotlinx.coroutines.flow.update
 
 class NotificationListComponentImpl(
     componentContext: AppComponentContext,
-    notificationService: NotificationService = componentContext.inject()
-) : AbstractAppComponent(componentContext), NotificationEventHandler by notificationService, NotificationListComponent {
-    private val _uiState: MutableStateFlow<NotificationsUiState> = MutableStateFlow(NotificationsUiState())
-    override val uiState: StateFlow<NotificationsUiState> = _uiState
+    private val notificationService: NotificationService = componentContext.inject()
+) : AbstractAppComponent(componentContext), NotificationListComponent {
+    private val _uiState: MutableStateFlow<NotificationListState> = MutableStateFlow(NotificationListState())
+    override val state: StateFlow<NotificationListState> = _uiState
 
     init {
         notificationService.notificationsState.collectInLifecycle { notifs ->
@@ -43,7 +43,19 @@ class NotificationListComponentImpl(
         }
     }
 
-    override fun onTogglePopup() {
+    override fun onIntent(intent: NotificationListIntent) = when (intent) {
+        NotificationListIntent.TogglePopup -> onTogglePopup()
+        is NotificationListIntent.SendNotification -> notificationService.sendNotification(intent.notification)
+        is NotificationListIntent.ToggleNotificationReadStatus -> notificationService.toggleNotificationReadStatus(
+            intent.notification
+        )
+
+        is NotificationListIntent.ClearNotification -> notificationService.clearNotification(intent.notification)
+        NotificationListIntent.ClearAllNotifications -> notificationService.clearAllNotifications()
+        NotificationListIntent.MarkAllNotificationsAsRead -> notificationService.markAllNotificationsAsRead()
+    }
+
+    private fun onTogglePopup() {
         _uiState.update { it.copy(isPopupOpen = !it.isPopupOpen) }
     }
 }

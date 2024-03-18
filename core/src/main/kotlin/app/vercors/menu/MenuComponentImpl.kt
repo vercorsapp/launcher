@@ -40,11 +40,11 @@ class MenuComponentImpl(
     componentContext: AppComponentContext,
     private val onAccountsMenuButtonClick: () -> Unit,
     private val navigationService: NavigationService = componentContext.inject(),
-    private val accountService: AccountService = componentContext.inject(),
+    accountService: AccountService = componentContext.inject(),
     private val dialogService: DialogService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), MenuComponent {
-    private val _uiState = MutableStateFlow(
-        MenuUiState(
+    private val _state = MutableStateFlow(
+        MenuState(
             topButtons = listOf(
                 MenuButton.Home,
                 MenuButton.Instances,
@@ -56,21 +56,25 @@ class MenuComponentImpl(
             bottomButtons = listOf(MenuButton.Settings, MenuButton.Accounts)
         )
     )
-    override val uiState: StateFlow<MenuUiState> = _uiState
+    override val state: StateFlow<MenuState> = _state
 
     init {
         navigationService.navigationState.map { it.active.tab }.collectInLifecycle { tab ->
-            _uiState.update { it.copy(selectedTab = tab) }
+            _state.update { it.copy(selectedTab = tab) }
         }
         accountService.selectedAccountState.collectInLifecycle { account ->
-            _uiState.update { it.copy(selectedAccount = account) }
+            _state.update { it.copy(selectedAccount = account) }
         }
     }
 
-    override fun onMenuButtonClick(button: MenuButton) {
+    override fun onIntent(intent: MenuIntent) = when (intent) {
+        is MenuIntent.MenuButtonClick -> onMenuButtonClick(intent.button)
+    }
+
+    private fun onMenuButtonClick(button: MenuButton) {
         when (button) {
             MenuButton.Accounts -> onAccountsMenuButtonClick()
-            MenuButton.CreateInstance -> dialogService.openDialog(DialogConfig.CreateInstance)
+            MenuButton.CreateInstance -> dialogService.onOpenDialog(DialogConfig.CreateInstance)
             MenuButton.Home -> navigationService.handle(NavigationEvent.Home)
             MenuButton.Instances -> navigationService.handle(NavigationEvent.InstanceList)
             MenuButton.Search -> navigationService.handle(NavigationEvent.Search)

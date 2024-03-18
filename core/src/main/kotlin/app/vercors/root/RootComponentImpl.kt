@@ -37,6 +37,7 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
@@ -46,12 +47,14 @@ class RootComponentImpl(
     configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), RootComponent {
     private val navigation = SlotNavigation<RootContentConfig>()
-    private val _childState: Value<ChildSlot<RootContentConfig, RootChildComponent>> = childSlot(
+    private val _state: Value<ChildSlot<RootContentConfig, RootChildComponent>> = childSlot(
         source = navigation,
         serializer = RootContentConfig.serializer(),
         childFactory = childFactory(::createChild)
     )
-    override val childState: StateFlow<ChildSlot<*, RootChildComponent>> = _childState.toStateFlow()
+    override val state: StateFlow<RootState> = _state
+        .map { RootState(it.child?.instance) }
+        .toStateFlow()
 
     init {
         if (appBasePath != null) configurationService.load()
@@ -62,6 +65,10 @@ class RootComponentImpl(
                 ConfigurationLoadingState.NotLoaded -> navigation.activate(RootContentConfig.Setup)
             }
         }
+    }
+
+    override fun onIntent(intent: RootIntent) = when (intent) {
+        RootIntent.Close -> onClose()
     }
 
     private fun onError(error: Throwable) = navigation.activate(RootContentConfig.Errored(error))

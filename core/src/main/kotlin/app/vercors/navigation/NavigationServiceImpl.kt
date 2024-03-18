@@ -37,15 +37,15 @@ class NavigationServiceImpl(
     coroutineScope: CoroutineScope,
     private val configurationService: ConfigurationService
 ) : NavigationService, CoroutineScope by coroutineScope {
-    private val _navigationState: MutableStateFlow<NavigationState> by lazy {
+    private val _navigationState: MutableStateFlow<NavigationInternalState> by lazy {
         MutableStateFlow(
-            NavigationState(
+            NavigationInternalState(
                 items = listOf(getConfigForTab(configurationService.config.defaultTab)),
                 index = 0
             )
         )
     }
-    override val navigationState: StateFlow<NavigationState> by lazy { _navigationState }
+    override val navigationState: StateFlow<NavigationInternalState> by lazy { _navigationState }
     private val _refreshChannel: Channel<Unit> = Channel()
     override val refreshChannel: ReceiveChannel<Unit> = _refreshChannel
 

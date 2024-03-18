@@ -42,37 +42,42 @@ class SetupComponentImpl(
     appDirs: AppDirs = componentContext.inject(),
     private val configurationService: ConfigurationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), SetupComponent {
-    private val _uiState = MutableStateFlow(
-        SetupUiState(
+    private val _state = MutableStateFlow(
+        SetupState(
             config = ConfigurationData(),
             path = appDirs.getUserConfigDir()
         )
     )
-    override val uiState: StateFlow<SetupUiState> = _uiState
+    override val state: StateFlow<SetupState> = _state
 
-    override fun updatePath(path: String) {
-        _uiState.update { it.copy(path = path) }
+    override fun onIntent(intent: SetupIntent) = when (intent) {
+        is SetupIntent.UpdatePath -> onUpdatePath(intent.path)
+        SetupIntent.OpenDirectoryPicker -> onOpenDirectoryPicker()
+        SetupIntent.CloseDirectoryPicker -> onCloseDirectoryPicker()
+        is SetupIntent.UpdateShowTutorial -> onUpdateShowTutorial(intent.showTutorial)
+        SetupIntent.Launch -> onLaunch()
     }
 
-    override fun openDirectoryPicker() {
-        _uiState.update { it.copy(showDirectoryPicker = true) }
+    private fun onUpdatePath(path: String) {
+        _state.update { it.copy(path = path) }
     }
 
-    override fun closeDirectoryPicker() {
-        _uiState.update { it.copy(showDirectoryPicker = false) }
+    private fun onOpenDirectoryPicker() {
+        _state.update { it.copy(showDirectoryPicker = true) }
     }
 
-    override fun updateShowTutorial(showTutorial: Boolean) {
-        _uiState.update { it.copy(showTutorial = showTutorial) }
+    private fun onCloseDirectoryPicker() {
+        _state.update { it.copy(showDirectoryPicker = false) }
     }
 
-    override fun launch() {
-        val currentState = uiState.value
+    private fun onUpdateShowTutorial(showTutorial: Boolean) {
+        _state.update { it.copy(showTutorial = showTutorial) }
+    }
+
+    private fun onLaunch() {
+        val currentState = state.value
         appBasePath = Path.of(currentState.path)
         LoggerConfigurator.reload()
-        configurationService.update(
-            currentState.config.copy(showTutorial = currentState.showTutorial),
-            forceSave = true
-        )
+        configurationService.update(true) { it.copy(showTutorial = currentState.showTutorial) }
     }
 }

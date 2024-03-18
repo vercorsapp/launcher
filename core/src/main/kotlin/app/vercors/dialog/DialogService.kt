@@ -25,6 +25,9 @@ package app.vercors.dialog
 
 import kotlinx.coroutines.flow.StateFlow
 
-interface DialogService : DialogEventHandler {
+interface DialogService {
     val dialogState: StateFlow<DialogConfig?>
+
+    fun onOpenDialog(config: DialogConfig)
+    fun onCloseDialog()
 }

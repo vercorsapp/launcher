@@ -128,14 +128,14 @@ class LauncherServiceImpl(
             run.onFailure {
                 logger.error(it) { "An error occured while running instance ${instance.name}" }
                 when (it) {
-                    is JavaVersionException -> dialogService.openDialog(
+                    is JavaVersionException -> dialogService.onOpenDialog(
                         DialogConfig.Error.JavaVersion(
                             instance,
                             it.javaVersion
                         )
                     )
 
-                    else -> dialogService.openDialog(DialogConfig.Error.Launch)
+                    else -> dialogService.onOpenDialog(DialogConfig.Error.Launch)
                 }
             }
             System.gc()

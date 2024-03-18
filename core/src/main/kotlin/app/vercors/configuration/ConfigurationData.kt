@@ -39,7 +39,7 @@ data class ConfigurationData(
     val theme: AppTheme = AppTheme.System,
     val darkTheme: AppDarkTheme = AppDarkTheme.Normal,
     val accentColor: AppColor = AppColor.Mauve,
-    val useSystemWindowFrame: Boolean = false,
+    val systemWindowFrame: Boolean = false,
     val animations: Boolean = true,
     val defaultTab: AppTab = AppTab.Home,
     val homeSections: List<HomeSectionType> = HomeSectionType.entries,

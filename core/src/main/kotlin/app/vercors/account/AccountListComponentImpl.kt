@@ -38,29 +38,36 @@ class AccountListComponentImpl(
     private val accountService: AccountService = componentContext.inject(),
     private val dialogService: DialogService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), AccountListComponent {
-    private val _uiState: MutableStateFlow<AccountsUiState> = MutableStateFlow(AccountsUiState())
-    override val uiState: StateFlow<AccountsUiState> = _uiState
+    private val _state: MutableStateFlow<AccountListState> = MutableStateFlow(AccountListState())
+    override val state: StateFlow<AccountListState> = _state
 
     init {
         accountService.accountListState.filterNotNull().collectInLifecycle { accounts ->
-            _uiState.update { it.copy(data = accounts) }
+            _state.update { it.copy(data = accounts) }
         }
     }
 
-    override fun onTogglePopup() {
-        _uiState.update { it.copy(isPopupOpen = !it.isPopupOpen) }
+    override fun onIntent(intent: AccountListIntent) = when (intent) {
+        AccountListIntent.TogglePopup -> onTogglePopup()
+        is AccountListIntent.SelectAccount -> onSelectAccount(intent.account)
+        is AccountListIntent.RemoveAccount -> onRemoveAccount(intent.account)
+        AccountListIntent.AddAccount -> onAddAccount()
     }
 
-    override fun onSelectAccount(account: AccountData) {
+    private fun onTogglePopup() {
+        _state.update { it.copy(isPopupOpen = !it.isPopupOpen) }
+    }
+
+    private fun onSelectAccount(account: AccountData) {
         accountService.selectAccount(account)
     }
 
-    override fun onRemoveAccount(account: AccountData) {
+    private fun onRemoveAccount(account: AccountData) {
         accountService.removeAccount(account)
     }
 
-    override fun onAddAccount() {
+    private fun onAddAccount() {
         onTogglePopup()
-        dialogService.openDialog(DialogConfig.Login())
+        dialogService.onOpenDialog(DialogConfig.Login())
     }
 }

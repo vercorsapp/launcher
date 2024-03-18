@@ -37,13 +37,13 @@ import kotlinx.coroutines.flow.update
 
 class ToolbarComponentImpl(
     componentContext: AppComponentContext,
-    override val onToolbarClick: (ToolbarButton) -> Unit,
-    override val onNotificationButtonClick: () -> Unit,
+    private val onToolbarClick: (ToolbarButton) -> Unit,
+    private val onNotificationButtonClick: () -> Unit,
     private val navigationService: NavigationService = componentContext.inject(),
     notificationService: NotificationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), ToolbarComponent {
-    private val _uiState = MutableStateFlow(ToolbarUiState())
-    override val uiState: StateFlow<ToolbarUiState> = _uiState
+    private val _uiState = MutableStateFlow(ToolbarState())
+    override val state: StateFlow<ToolbarState> = _uiState
 
     init {
         navigationService.navigationState.collectInLifecycle { state ->
@@ -68,5 +68,11 @@ class ToolbarComponentImpl(
             }
     }
 
-    override fun onTitleClick(config: NavigationConfig) = navigationService.navigateTo(config)
+    override fun onIntent(intent: ToolbarIntent) = when (intent) {
+        is ToolbarIntent.ToolbarClick -> onToolbarClick(intent.button)
+        ToolbarIntent.NotificationButtonClick -> onNotificationButtonClick()
+        is ToolbarIntent.TitleClick -> onTitleClick(intent.config)
+    }
+
+    private fun onTitleClick(config: NavigationConfig) = navigationService.navigateTo(config)
 }

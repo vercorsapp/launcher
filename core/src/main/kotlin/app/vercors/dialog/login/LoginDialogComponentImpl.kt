@@ -37,39 +37,39 @@ import java.net.URI
 
 class LoginDialogComponentImpl(
     componentContext: AppComponentContext,
-    override val onClose: () -> Unit,
+    private val _onClose: () -> Unit,
     private val accountService: AccountService = componentContext.inject(),
     private val authenticationService: AuthenticationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), LoginDialogComponent {
-    private val _uiState = MutableStateFlow(LoginDialogUiState())
-    override val uiState: StateFlow<LoginDialogUiState> = _uiState
-    override val canOpenInBrowser = Desktop.isDesktopSupported()
+    private val _state = MutableStateFlow(LoginDialogState(Desktop.isDesktopSupported()))
+    override val state: StateFlow<LoginDialogState> = _state
 
     init {
         authenticationService.startAuthentication()
-            .catch { error -> _uiState.update { it.copy(error = error) } }
+            .catch { error -> _state.update { it.copy(error = error) } }
             .onCompletion { _ -> authenticationService.cancelAuthentication() }
             .collectInLifecycle(ObserveLifecycleMode.CREATE_DESTROY) { state ->
                 when (state) {
-                    is AuthenticationState.Progress -> _uiState.update { it.copy(progress = state.progress) }
+                    is AuthenticationState.Progress -> _state.update { it.copy(progress = state.progress) }
                     is AuthenticationState.Success -> {
                         accountService.addAccount(state.account)
-                        _uiState.update { it.copy(account = state.account) }
+                        _state.update { it.copy(account = state.account) }
                     }
 
-                    is AuthenticationState.Waiting -> _uiState.update { it.copy(url = state.url) }
+                    is AuthenticationState.Waiting -> _state.update { it.copy(url = state.url) }
                     AuthenticationState.Closed -> { /* Nothing */
                     }
                 }
             }
     }
 
-    override fun openInBrowser(url: String) {
-        openURL(URI(url))
+    override fun onIntent(intent: LoginDialogIntent) = when (intent) {
+        LoginDialogIntent.CloseDialog -> onClose()
+        is LoginDialogIntent.OpenBrowser -> openURL(URI(intent.url))
     }
 
-    /*override fun close() {
-        onClose()
+    override fun onClose() {
+        _onClose()
         //authenticationStateCollector(AuthenticationState.Closed)
-    }*/
+    }
 }

@@ -50,20 +50,24 @@ class HomeComponentImpl(
     private val launcherService: LauncherService = componentContext.inject(),
     private val navigationService: NavigationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), HomeComponent {
-
-    private val configState = configurationService.configState
-        .filterNotNull()
-        .map { it.homeSections to it.homeProviders }
-        .stateIn(this, SharingStarted.Eagerly, null)
-    private val _uiState = MutableStateFlow(HomeUiState())
-    override val uiState: StateFlow<HomeUiState> = _uiState
+    private val configState =
+        configurationService.configState.filterNotNull().map { it.homeSections to it.homeProviders }
+            .stateIn(this, SharingStarted.Eagerly, null)
+    private val _state = MutableStateFlow(HomeState())
+    override val state: StateFlow<HomeState> = _state
 
     init {
-        configState.filterNotNull()
-            .combine(instanceService.instancesState) { c, _ -> c }
+        configState.filterNotNull().combine(instanceService.instancesState) { c, _ -> c }
             .collectInLifecycle { (sectionTypes, providerTypes) ->
                 loadSections(sectionTypes, providerTypes)
             }
+    }
+
+    override fun onIntent(intent: HomeIntent) = when (intent) {
+        is HomeIntent.ShowInstanceDetails -> onShowInstanceDetails(intent.instance)
+        is HomeIntent.LaunchInstance -> onLaunchInstance(intent.instance)
+        is HomeIntent.ShowProjectDetails -> onShowProjectDetails(intent.project)
+        is HomeIntent.InstallProject -> onInstallProject(intent.project)
     }
 
     private fun emptySections(sectionTypes: List<HomeSectionType>): List<HomeSection> {
@@ -76,20 +80,17 @@ class HomeComponentImpl(
     }
 
     private suspend fun loadSections(
-        sectionTypes: List<HomeSectionType>,
-        providerTypes: List<ProjectProviderType>
+        sectionTypes: List<HomeSectionType>, providerTypes: List<ProjectProviderType>
     ) = coroutineScope {
-        _uiState.update { HomeUiState(emptySections(sectionTypes)) }
+        _state.update { HomeState(emptySections(sectionTypes)) }
         sectionTypes.forEach { sectionType ->
             launch {
                 val section = when (sectionType) {
                     HomeSectionType.JumpBackIn -> homeService.loadInstances()
                     else -> providerTypes.map { providerType -> getProjectData(sectionType, providerType) }.merge()
                 }
-                _uiState.update { state ->
-                    state.copy(sections = state.sections.map {
-                        if (it.type === sectionType) section else it
-                    })
+                _state.update { state ->
+                    HomeState(state.sections.map { if (it.type === sectionType) section else it })
                 }
             }
         }
@@ -108,19 +109,19 @@ class HomeComponentImpl(
         return first()
     }
 
-    override fun onShowInstanceDetails(instance: InstanceData) {
+    private fun onShowInstanceDetails(instance: InstanceData) {
         navigationService.handle(NavigationEvent.InstanceDetails(instance))
     }
 
-    override fun onLaunchInstance(instance: InstanceData) {
+    private fun onLaunchInstance(instance: InstanceData) {
         launcherService.launchInstance(instance)
     }
 
-    override fun onShowProjectDetails(project: ProjectData) {
+    private fun onShowProjectDetails(project: ProjectData) {
         navigationService.handle(NavigationEvent.ProjectDetails(project))
     }
 
-    override fun onInstallProject(project: ProjectData) {
+    private fun onInstallProject(project: ProjectData) {
         // TODO
     }
 

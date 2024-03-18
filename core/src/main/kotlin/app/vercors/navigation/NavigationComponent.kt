@@ -23,9 +23,6 @@
 
 package app.vercors.navigation
 
-import com.arkivanov.decompose.router.stack.ChildStack
-import kotlinx.coroutines.flow.StateFlow
+import app.vercors.common.StatefulComponent
 
-interface NavigationComponent : NavigationEventHandler {
-    val childState: StateFlow<ChildStack<*, NavigationChildComponent>>
-}
+interface NavigationComponent : StatefulComponent<NavigationState>

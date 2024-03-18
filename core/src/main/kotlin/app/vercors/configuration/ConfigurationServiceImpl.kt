@@ -63,8 +63,11 @@ class ConfigurationServiceImpl(
         _loadingState.update { newState }
     }
 
-    override fun update(config: ConfigurationData, forceSave: Boolean) {
-        _loadingState.update { ConfigurationLoadingState.Loaded(config) }
+    override fun update(forceSave: Boolean, update: (ConfigurationData) -> ConfigurationData) {
+        _loadingState.update {
+            val config = (it as ConfigurationLoadingState.Loaded).config
+            ConfigurationLoadingState.Loaded(update(config))
+        }
         if (forceSave) save()
     }
 

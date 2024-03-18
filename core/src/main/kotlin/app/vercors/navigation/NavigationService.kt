@@ -26,7 +26,10 @@ package app.vercors.navigation
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 
-interface NavigationService : NavigationEventHandler {
-    val navigationState: StateFlow<NavigationState>
+interface NavigationService {
+    val navigationState: StateFlow<NavigationInternalState>
     val refreshChannel: ReceiveChannel<Unit>
+
+    fun handle(event: NavigationEvent)
+    fun navigateTo(config: NavigationConfig)
 }

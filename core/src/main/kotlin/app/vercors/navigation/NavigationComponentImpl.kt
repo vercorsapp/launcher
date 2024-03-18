@@ -38,13 +38,14 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
 class NavigationComponentImpl(
     componentContext: AppComponentContext,
     private val navigationService: NavigationService = componentContext.inject()
-) : AbstractAppComponent(componentContext), NavigationEventHandler by navigationService, NavigationComponent {
+) : AbstractAppComponent(componentContext), NavigationComponent {
     private val navigation = StackNavigation<NavigationConfig>()
     private val _childState: Value<ChildStack<NavigationConfig, NavigationChildComponent>> = childStack(
         source = navigation,
@@ -52,14 +53,17 @@ class NavigationComponentImpl(
         initialConfiguration = navigationService.navigationState.value.active,
         childFactory = childFactory(::createChild)
     )
-    override val childState: StateFlow<ChildStack<*, NavigationChildComponent>> = _childState.toStateFlow()
+
+    override val state: StateFlow<NavigationState> = _childState
+        .map { NavigationState(it.active.instance) }
+        .toStateFlow()
 
     init {
         navigationService.navigationState.filterNotNull().collectInLifecycle {
             navigation.bringToFront(it.active)
         }
         navigationService.refreshChannel.consumeInLifecycle {
-            val active = childState.value.active.instance
+            val active = state.value.child
             if (active is Refreshable) active.refresh()
         }
     }

@@ -32,12 +32,13 @@ import app.vercors.dialog.instance.CreateInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import kotlinx.coroutines.flow.StateFlow
 
 class DialogComponentImpl(
     componentContext: AppComponentContext,
     private val dialogService: DialogService = componentContext.inject()
-) : AbstractAppComponent(componentContext), DialogEventHandler by dialogService, DialogComponent {
+) : AbstractAppComponent(componentContext), DialogComponent {
     private val navigation = SlotNavigation<DialogConfig>()
     private val _childState: Value<ChildSlot<DialogConfig, DialogChildComponent>> = childSlot(
         source = navigation,
@@ -45,7 +46,7 @@ class DialogComponentImpl(
         handleBackButton = true,
         childFactory = childFactory(::createChild)
     )
-    override val childState: StateFlow<ChildSlot<*, DialogChildComponent>> = _childState.toStateFlow()
+    override val state: StateFlow<DialogState> = _childState.map { DialogState(it.child?.instance) }.toStateFlow()
 
     init {
         dialogService.dialogState.collectInLifecycle { config ->
@@ -53,14 +54,26 @@ class DialogComponentImpl(
         }
     }
 
+    override fun onIntent(intent: DialogIntent) = when (intent) {
+        DialogIntent.CloseDialog -> dialogService.onCloseDialog()
+        is DialogIntent.OpenDialog -> dialogService.onOpenDialog(intent.config)
+    }
+
     private fun createChild(config: DialogConfig, componentContext: AppComponentContext): DialogChildComponent =
         when (config) {
-            DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(componentContext, ::closeDialog)
-            is DialogConfig.Login -> inject<LoginDialogComponent>(componentContext, ::closeDialog)
-            DialogConfig.Error.Launch -> inject<LaunchErrorDialogComponent>(componentContext, ::closeDialog)
+            DialogConfig.CreateInstance -> inject<CreateInstanceDialogComponent>(
+                componentContext,
+                dialogService::onCloseDialog
+            )
+
+            is DialogConfig.Login -> inject<LoginDialogComponent>(componentContext, dialogService::onCloseDialog)
+            DialogConfig.Error.Launch -> inject<LaunchErrorDialogComponent>(
+                componentContext,
+                dialogService::onCloseDialog
+            )
             is DialogConfig.Error.JavaVersion -> inject<JavaVersionErrorDialogComponent>(
                 componentContext,
-                ::closeDialog,
+                dialogService::onCloseDialog,
                 config.instance,
                 config.javaVersion
             )

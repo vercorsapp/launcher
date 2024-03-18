@@ -32,13 +32,17 @@ import app.vercors.navigation.NavigationService
 
 class JavaVersionErrorDialogComponentImpl(
     componentContext: AppComponentContext,
-    override val onClose: () -> Unit,
+    private val _onClose: () -> Unit,
     override val instance: InstanceData,
     override val javaVersion: Int,
     private val navigationService: NavigationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), JavaVersionErrorDialogComponent {
     override fun openSettings() {
         navigationService.navigateTo(NavigationConfig.Configuration)
-        close()
+        onClose()
+    }
+
+    override fun onClose() {
+        _onClose()
     }
 }

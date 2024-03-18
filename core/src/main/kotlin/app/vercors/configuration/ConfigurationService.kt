@@ -31,5 +31,8 @@ interface ConfigurationService {
     val configState: StateFlow<ConfigurationData?>
     val config: ConfigurationData
     fun load(): Job
-    fun update(config: ConfigurationData, forceSave: Boolean = false)
+
+    @Deprecated("Use the other update method", ReplaceWith("update({ config }, forceSave)"))
+    fun update_(config: ConfigurationData, forceSave: Boolean = false) = update(forceSave) { config }
+    fun update(forceSave: Boolean = false, update: (ConfigurationData) -> ConfigurationData)
 }

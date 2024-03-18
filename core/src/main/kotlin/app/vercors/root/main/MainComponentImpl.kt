@@ -24,25 +24,26 @@
 package app.vercors.root.main
 
 import app.vercors.account.AccountListComponent
+import app.vercors.account.AccountListIntent
 import app.vercors.account.AccountService
 import app.vercors.common.*
 import app.vercors.configuration.ConfigurationService
 import app.vercors.dialog.DialogComponent
 import app.vercors.dialog.DialogConfig
+import app.vercors.dialog.DialogIntent
 import app.vercors.instance.InstanceLoadingState
 import app.vercors.instance.InstanceService
 import app.vercors.menu.MenuComponent
 import app.vercors.navigation.NavigationComponent
 import app.vercors.navigation.NavigationEvent
-import app.vercors.notification.NotificationData
-import app.vercors.notification.NotificationLevel
-import app.vercors.notification.NotificationListComponent
-import app.vercors.notification.NotificationText
+import app.vercors.navigation.NavigationService
+import app.vercors.notification.*
 import app.vercors.system.storage.StorageService
 import app.vercors.system.theme.SystemThemeService
 import app.vercors.toolbar.ToolbarButton
 import app.vercors.toolbar.ToolbarComponent
 import com.arkivanov.decompose.value.ObserveLifecycleMode
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -53,17 +54,29 @@ class MainComponentImpl(
     private val instanceService: InstanceService = componentContext.inject(),
     private val accountService: AccountService = componentContext.inject(),
     private val systemThemeService: SystemThemeService = componentContext.inject(),
-    private val storageService: StorageService = componentContext.inject()
+    private val storageService: StorageService = componentContext.inject(),
+    private val notificationService: NotificationService = componentContext.inject(),
+    private val navigationService: NavigationService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), MainComponent {
-    override val dialogComponent = inject<DialogComponent>(appChildContext("dialog"))
-    override val accountListComponent = inject<AccountListComponent>(appChildContext("account"))
-    override val menuComponent = inject<MenuComponent>(appChildContext("menu"), ::onAccountsMenuButtonClick)
-    override val toolbarComponent =
+    private val dialogComponent = inject<DialogComponent>(appChildContext("dialog"))
+    private val accountListComponent = inject<AccountListComponent>(appChildContext("account"))
+    private val menuComponent = inject<MenuComponent>(appChildContext("menu"), ::onAccountsMenuButtonClick)
+    private val toolbarComponent =
         inject<ToolbarComponent>(appChildContext("toolbar"), ::onToolbarClick, ::onNotificationButtonClick)
-    override val navigationComponent = inject<NavigationComponent>(appChildContext("navigation"))
-    override val notificationListComponent = inject<NotificationListComponent>(appChildContext("notification"))
-    private val _uiState: MutableStateFlow<MainUiState> = MutableStateFlow(MainUiState.NotLoaded)
-    override val uiState: StateFlow<MainUiState> = _uiState
+    private val navigationComponent = inject<NavigationComponent>(appChildContext("navigation"))
+    private val notificationListComponent = inject<NotificationListComponent>(appChildContext("notification"))
+    override val children = MainChildComponents(
+        dialogComponent = dialogComponent,
+        accountListComponent = accountListComponent,
+        menuComponent = menuComponent,
+        toolbarComponent = toolbarComponent,
+        navigationComponent = navigationComponent,
+        notificationListComponent = notificationListComponent
+    )
+    private val _state: MutableStateFlow<MainState> = MutableStateFlow(MainState.NotLoaded)
+    override val state: StateFlow<MainState> = _state
+    private val _event = Channel<MainEvent>()
+    override val events: Flow<MainEvent> = _event.receiveAsFlow()
 
     init {
         // Load instances and accounts after configuration is loaded
@@ -84,15 +97,19 @@ class MainComponentImpl(
                     AppDarkTheme.Darker -> AppPalette.Mocha
                 }
             }.collect { (config, palette) ->
-                _uiState.update {
-                    MainUiState.Loaded(config, palette, storageService.coilCachePath, null)
+                _state.update {
+                    MainState.Loaded(
+                        config = config,
+                        palette = palette,
+                        cachePath = storageService.coilCachePath,
+                    )
                 }
             }
         }
         instanceService.loadingState.collectInLifecycle(ObserveLifecycleMode.CREATE_DESTROY) { state ->
             if (state is InstanceLoadingState.Loaded) {
                 state.warns.forEach {
-                    notificationListComponent.sendNotification(
+                    notificationService.sendNotification(
                         NotificationData(
                             NotificationLevel.WARN,
                             NotificationText.Template.InstanceNotFound,
@@ -101,7 +118,7 @@ class MainComponentImpl(
                     )
                 }
                 state.errors.forEach {
-                    notificationListComponent.sendNotification(
+                    notificationService.sendNotification(
                         NotificationData(
                             NotificationLevel.ERROR,
                             NotificationText.Template.Error,
@@ -113,38 +130,39 @@ class MainComponentImpl(
         }
     }
 
+    override fun onIntent(intent: MainIntent) = when (intent) {
+        MainIntent.Maximize -> onMaximize()
+        MainIntent.Close -> onClose()
+    }
+
     private fun onAccountsMenuButtonClick() {
         if (accountService.selectedAccountState.value == null) {
-            dialogComponent.openDialog(DialogConfig.Login())
+            dialogComponent.onIntent(DialogIntent.OpenDialog(DialogConfig.Login()))
         } else {
-            accountListComponent.onTogglePopup()
+            accountListComponent.onIntent(AccountListIntent.TogglePopup)
         }
     }
 
     private fun onToolbarClick(toolbarButton: ToolbarButton) {
         when (toolbarButton) {
-            ToolbarButton.Previous -> navigationComponent.handle(NavigationEvent.Previous)
-            ToolbarButton.Next -> navigationComponent.handle(NavigationEvent.Next)
-            ToolbarButton.Refresh -> navigationComponent.handle(NavigationEvent.Refresh)
-            ToolbarButton.Minimize -> updateWindowEvent(MainWindowEvent.Minimize)
+            ToolbarButton.Previous -> navigationService.handle(NavigationEvent.Previous)
+            ToolbarButton.Next -> navigationService.handle(NavigationEvent.Next)
+            ToolbarButton.Refresh -> navigationService.handle(NavigationEvent.Refresh)
+            ToolbarButton.Minimize -> onSendEvent(MainEvent.Minimize)
             ToolbarButton.Maximize -> onMaximize()
-            ToolbarButton.Close -> updateWindowEvent(MainWindowEvent.Close)
+            ToolbarButton.Close -> onSendEvent(MainEvent.Close)
         }
     }
 
     private fun onNotificationButtonClick() {
-        notificationListComponent.onTogglePopup()
+        notificationListComponent.onIntent(NotificationListIntent.TogglePopup)
     }
 
-    override fun onMaximize() {
-        updateWindowEvent(MainWindowEvent.Maximize)
+    private fun onMaximize() {
+        onSendEvent(MainEvent.Maximize)
     }
 
-    override fun windowEventProcessed() {
-        updateWindowEvent(null)
-    }
-
-    private fun updateWindowEvent(windowEvent: MainWindowEvent?) {
-        _uiState.update { (it as MainUiState.Loaded).copy(windowEvent = windowEvent) }
+    private fun onSendEvent(event: MainEvent) {
+        launch { _event.send(event) }
     }
 }

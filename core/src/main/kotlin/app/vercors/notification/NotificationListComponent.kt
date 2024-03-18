@@ -23,10 +23,6 @@
 
 package app.vercors.notification
 
-import kotlinx.coroutines.flow.StateFlow
+import app.vercors.common.DefaultComponent
 
-interface NotificationListComponent : NotificationEventHandler {
-    val uiState: StateFlow<NotificationsUiState>
-
-    fun onTogglePopup()
-}
+interface NotificationListComponent : DefaultComponent<NotificationListState, NotificationListIntent>

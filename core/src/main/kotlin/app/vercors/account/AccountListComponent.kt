@@ -23,12 +23,6 @@
 
 package app.vercors.account
 
-import kotlinx.coroutines.flow.StateFlow
+import app.vercors.common.DefaultComponent
 
-interface AccountListComponent {
-    val uiState: StateFlow<AccountsUiState>
-    fun onTogglePopup()
-    fun onSelectAccount(account: AccountData)
-    fun onRemoveAccount(account: AccountData)
-    fun onAddAccount()
-}
+interface AccountListComponent : DefaultComponent<AccountListState, AccountListIntent>

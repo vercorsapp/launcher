@@ -36,12 +36,12 @@ import kotlinx.coroutines.flow.update
 
 class CreateInstanceDialogComponentImpl(
     componentContext: AppComponentContext,
-    override val onClose: () -> Unit,
+    private val _onClose: () -> Unit,
     private val mojangService: MojangService = componentContext.inject(),
     private val instanceService: InstanceService = componentContext.inject()
 ) : AbstractAppComponent(componentContext), CreateInstanceDialogComponent {
-    private val _uiState = MutableStateFlow(CreateInstanceDialogUiState())
-    override val uiState: StateFlow<CreateInstanceDialogUiState> = _uiState
+    private val _state = MutableStateFlow(CreateInstanceDialogState())
+    override val state: StateFlow<CreateInstanceDialogState> = _state
 
     init {
         launchInLifecycle { loadMinecraftVersions() }
@@ -56,23 +56,33 @@ class CreateInstanceDialogComponentImpl(
                 isLatestSnapshot = manifest.isLatestSnapshot(it)
             )
         }
-        _uiState.update {
+        _state.update {
             it.copy(allMinecraftVersions = data).let { state ->
                 state.copy(minecraftVersion = state.filteredMinecraftVersions.firstOrNull())
             }
         }
     }
 
-    override fun updateInstanceName(instanceName: String) {
-        _uiState.update { it.copy(instanceName = instanceName) }
+    override fun onIntent(intent: CreateInstanceDialogIntent) = when (intent) {
+        is CreateInstanceDialogIntent.UpdateInstanceName -> onUpdateInstanceName(intent.instanceName)
+        is CreateInstanceDialogIntent.UpdateMinecraftVersion -> onUpdateMinecraftVersion(intent.minecraftVersion)
+        is CreateInstanceDialogIntent.UpdateIncludeSnapshots -> onUpdateIncludeSnapshots(intent.includeSnapshots)
+        CreateInstanceDialogIntent.ToggleIncludeSnapshots -> onToggleIncludeSnapshots()
+        is CreateInstanceDialogIntent.UpdateLoader -> onUpdateLoader(intent.loader)
+        CreateInstanceDialogIntent.CreateInstance -> onCreateInstance()
+        CreateInstanceDialogIntent.CloseDialog -> onClose()
     }
 
-    override fun updateMinecraftVersion(minecraftVersion: CreateInstanceDialogMinecraftVersion) {
-        _uiState.update { it.copy(minecraftVersion = minecraftVersion) }
+    private fun onUpdateInstanceName(instanceName: String) {
+        _state.update { it.copy(instanceName = instanceName) }
     }
 
-    override fun updateIncludeSnapshots(includeSnapshots: Boolean) {
-        _uiState.update {
+    private fun onUpdateMinecraftVersion(minecraftVersion: CreateInstanceDialogMinecraftVersion) {
+        _state.update { it.copy(minecraftVersion = minecraftVersion) }
+    }
+
+    private fun onUpdateIncludeSnapshots(includeSnapshots: Boolean) {
+        _state.update {
             it.copy(includeSnapshots = includeSnapshots).let { state ->
                 state.copy(
                     minecraftVersion = if (state.minecraftVersion in state.filteredMinecraftVersions) state.minecraftVersion
@@ -82,16 +92,16 @@ class CreateInstanceDialogComponentImpl(
         }
     }
 
-    override fun toggleIncludeSnapshots() {
-        updateIncludeSnapshots(!uiState.value.includeSnapshots)
+    private fun onToggleIncludeSnapshots() {
+        onUpdateIncludeSnapshots(!state.value.includeSnapshots)
     }
 
-    override fun updateLoader(loader: ModLoader?) {
-        _uiState.update { it.copy(loader = loader) }
+    private fun onUpdateLoader(loader: ModLoader?) {
+        _state.update { it.copy(loader = loader) }
     }
 
-    override fun createInstance() {
-        val state = uiState.value
+    private fun onCreateInstance() {
+        val state = state.value
         if (state.isValid) {
             instanceService.createInstance(
                 InstanceData(
@@ -104,4 +114,6 @@ class CreateInstanceDialogComponentImpl(
             onClose()
         }
     }
+
+    override fun onClose() = _onClose()
 }

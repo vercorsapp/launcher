@@ -25,6 +25,12 @@ package app.vercors.notification
 
 import kotlinx.coroutines.flow.StateFlow
 
-interface NotificationService : NotificationEventHandler {
+interface NotificationService {
     val notificationsState: StateFlow<List<NotificationData>>
+
+    fun sendNotification(notification: NotificationData)
+    fun toggleNotificationReadStatus(notification: NotificationData)
+    fun clearNotification(notification: NotificationData)
+    fun clearAllNotifications()
+    fun markAllNotificationsAsRead()
 }

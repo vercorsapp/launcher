@@ -46,36 +46,36 @@ class ConfigurationComponentImpl(
     private val configurationService: ConfigurationService = componentContext.inject(),
     private val systemInfo: SystemInfo = componentContext.inject()
 ) : AbstractAppComponent(componentContext), ConfigurationComponent {
-    private val _uiState = MutableStateFlow(
-        ConfigurationUiState(
+    private val _state = MutableStateFlow(
+        ConfigurationState(
             hasCustomMemory = configurationService.config.defaultAllocatedRam != null,
             currentMemory = configurationService.config.defaultAllocatedRam ?: 1024
         )
     )
-    override val uiState: StateFlow<ConfigurationUiState> = _uiState
+    override val state: StateFlow<ConfigurationState> = _state
 
     init {
         configurationService.configState.filterNotNull()
             .map { it.java8Path }.distinctUntilChanged()
             .collectInLifecycle {
-                _uiState.update { it.copy(java8Status = ConfigurationJavaStatus.Checking) }
+                _state.update { it.copy(java8Status = ConfigurationJavaStatus.Checking) }
                 launch {
                     val status = checkJavaPath(it, 8)
-                    _uiState.update { it.copy(java8Status = status) }
+                    _state.update { it.copy(java8Status = status) }
                 }
             }
         configurationService.configState.filterNotNull()
             .map { it.java17Path }.distinctUntilChanged()
             .collectInLifecycle {
-                _uiState.update { it.copy(java17Status = ConfigurationJavaStatus.Checking) }
+                _state.update { it.copy(java17Status = ConfigurationJavaStatus.Checking) }
                 launch {
                     val status = checkJavaPath(it, 17)
-                    _uiState.update { it.copy(java17Status = status) }
+                    _state.update { it.copy(java17Status = status) }
                 }
             }
         launchInLifecycle {
             val totalMemory = systemInfo.totalMemory()
-            _uiState.update { it.copy(totalMemory = totalMemory) }
+            _state.update { it.copy(totalMemory = totalMemory) }
             while (true) {
                 delay(1000)
                 batchSaveConfig()
@@ -85,30 +85,41 @@ class ConfigurationComponentImpl(
         doOnStop { batchSaveConfig() }
     }
 
-    override fun onConfigChange(config: ConfigurationData) {
-        configurationService.update(config)
-    }
-
-    override fun onHomeSectionChanged(section: HomeSectionType, configuration: ConfigurationData) {
-        val sections =
-            if (section in configuration.homeSections) configuration.homeSections - section
-            else configuration.homeSections + section
-        if (sections.isNotEmpty()) onConfigChange(configuration.copy(homeSections = sections.sorted()))
-    }
-
-    override fun onHomeProviderChanged(provider: ProjectProviderType, configuration: ConfigurationData) {
-        val providers =
-            if (provider in configuration.homeProviders) configuration.homeProviders - provider
-            else configuration.homeProviders + provider
-        if (providers.isNotEmpty()) onConfigChange(configuration.copy(homeProviders = providers.sorted()))
+    override fun onIntent(intent: ConfigurationIntent) = when (intent) {
+        is ConfigurationIntent.UpdateConfig -> onUpdateConfig(intent.update)
+        is ConfigurationIntent.UpdateHomeSection -> onUpdateHomeSection(intent.section)
+        is ConfigurationIntent.UpdateHomeProvider -> onUpdateHomeProvider(intent.provider)
+        is ConfigurationIntent.OpenDirectoryPicker -> onOpenDirectoryPicker(intent.initialPath, intent.onSelectPath)
+        ConfigurationIntent.CloseDirectoryPicker -> onCloseDirectoryPicker()
+        ConfigurationIntent.ToggleCustomMemory -> onToggleCustomMemory()
+        is ConfigurationIntent.UpdateCustomMemory -> onUpdateCustomMemory(intent.value, intent.fromSlider)
     }
 
     override fun refresh() {
         configurationService.load()
     }
 
-    override fun closeDirectoryPicker() {
-        _uiState.update {
+    private fun onUpdateConfig(update: (ConfigurationData) -> ConfigurationData) {
+        configurationService.update(false, update)
+    }
+
+    private fun onUpdateHomeSection(section: HomeSectionType) {
+        onUpdateConfig {
+            val sections = if (section in it.homeSections) it.homeSections - section else it.homeSections + section
+            if (sections.isNotEmpty()) it.copy(homeSections = sections.sorted()) else it
+        }
+    }
+
+    private fun onUpdateHomeProvider(provider: ProjectProviderType) {
+        onUpdateConfig {
+            val providers =
+                if (provider in it.homeProviders) it.homeProviders - provider else it.homeProviders + provider
+            if (providers.isNotEmpty()) it.copy(homeProviders = providers.sorted()) else it
+        }
+    }
+
+    private fun onCloseDirectoryPicker() {
+        _state.update {
             it.copy(
                 showDirectoryPicker = false,
                 initialPath = null,
@@ -117,11 +128,11 @@ class ConfigurationComponentImpl(
         }
     }
 
-    override fun openDirectoryPicker(
+    private fun onOpenDirectoryPicker(
         initialPath: String?,
         onSelectPath: ConfigurationData.(String) -> ConfigurationData
     ) {
-        _uiState.update {
+        _state.update {
             it.copy(
                 showDirectoryPicker = true,
                 initialPath = initialPath ?: "/",
@@ -130,13 +141,13 @@ class ConfigurationComponentImpl(
         }
     }
 
-    override fun toggleCustomMemory() {
-        _uiState.update { it.copy(hasCustomMemory = !it.hasCustomMemory) }
+    private fun onToggleCustomMemory() {
+        _state.update { it.copy(hasCustomMemory = !it.hasCustomMemory) }
     }
 
-    override fun onCustomMemoryChange(value: Int, fromSlider: Boolean) {
+    private fun onUpdateCustomMemory(value: Int, fromSlider: Boolean) {
         val currentMemory = if (fromSlider) (value / 512.0).roundToInt() * 512 else value
-        _uiState.update { it.copy(currentMemory = currentMemory) }
+        _state.update { it.copy(currentMemory = currentMemory) }
     }
 
     private suspend fun checkJavaPath(
@@ -165,7 +176,7 @@ class ConfigurationComponentImpl(
     }
 
     private fun batchSaveConfig() {
-        val defaultAllocatedRam = if (uiState.value.hasCustomMemory) uiState.value.currentMemory else null
-        onConfigChange(configurationService.config.copy(defaultAllocatedRam = defaultAllocatedRam))
+        val defaultAllocatedRam = if (state.value.hasCustomMemory) state.value.currentMemory else null
+        onUpdateConfig { it.copy(defaultAllocatedRam = defaultAllocatedRam) }
     }
 }

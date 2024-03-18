@@ -23,8 +23,7 @@
 
 package app.vercors.root.error
 
+import app.vercors.common.StatefulComponent
 import app.vercors.root.RootChildComponent
 
-interface ErrorComponent : RootChildComponent {
-    val error: Throwable
-}
+interface ErrorComponent : StatefulComponent<ErrorState>, RootChildComponent

@@ -23,12 +23,7 @@
 
 package app.vercors.dialog.login
 
+import app.vercors.common.DefaultComponent
 import app.vercors.dialog.DialogChildComponent
-import kotlinx.coroutines.flow.StateFlow
 
-interface LoginDialogComponent : DialogChildComponent {
-    val uiState: StateFlow<LoginDialogUiState>
-    val canOpenInBrowser: Boolean
-
-    fun openInBrowser(url: String)
-}
+interface LoginDialogComponent : DefaultComponent<LoginDialogState, LoginDialogIntent>, DialogChildComponent
