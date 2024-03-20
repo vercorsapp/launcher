@@ -23,6 +23,7 @@
 
 package app.vercors
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -43,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.vercors.common.AppColoredPalette
 import app.vercors.common.AppPalette
-import app.vercors.configuration.ConfigurationData
+import app.vercors.configuration.Configuration
 import app.vercors.di.DI
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -56,6 +57,7 @@ import java.time.Instant
 import javax.swing.SwingUtilities
 
 object UI {
+    val screenAnimation = tween<Float>(200)
     val defaultRoundedCornerShape = RoundedCornerShape(5.dp)
     val largeRoundedCornerShape = RoundedCornerShape(10.dp)
     val normalLineHeight = 16.sp
@@ -240,7 +242,7 @@ val AppTypography: Typography
         )
     )
 
-val LocalConfiguration = compositionLocalOf { ConfigurationData() }
+val LocalConfiguration = compositionLocalOf { Configuration.Default }
 val LocalPalette = compositionLocalOf { AppColoredPalette(AppPalette.Macchiato) }
 val LocalImageLoader = compositionLocalOf { ImageLoader.Builder(PlatformContext.INSTANCE).build() }
 val LocalDI = compositionLocalOf { DI {} }

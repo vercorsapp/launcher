@@ -35,11 +35,11 @@ import app.vercors.LocalConfiguration
 import app.vercors.LocalPalette
 import app.vercors.common.AppColoredPalette
 import app.vercors.common.AppPalette
-import app.vercors.configuration.ConfigurationData
+import app.vercors.configuration.Configuration
 
 @Composable
 fun AppWindowContent(
-    config: ConfigurationData = ConfigurationData.DEFAULT,
+    config: Configuration = Configuration.Default,
     palette: AppPalette = AppPalette.Macchiato,
     content: @Composable () -> Unit
 ) {

@@ -39,7 +39,6 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
 import app.vercors.UI
 import app.vercors.common.*
-import app.vercors.project.ModLoader
 import app.vercors.project.icon
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box

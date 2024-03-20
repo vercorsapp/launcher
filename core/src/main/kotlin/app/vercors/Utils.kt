@@ -47,28 +47,6 @@ private val logger = KotlinLogging.logger { }
 const val APP_VERSION = "0.1.0"
 const val APP_NAME = "Vercors"
 
-private val appDataFile = Path.of("vercors.properties")
-val appDataFileExists: Boolean get() = appDataFile.isRegularFile()
-private var _appBasePath: Path? = null
-var appBasePath: Path?
-    get() {
-        if (_appBasePath == null && appDataFileExists) {
-            _appBasePath =
-                Path.of(Properties().apply { appDataFile.inputStream().use { load(it) } }.getProperty("path"))
-        }
-        return _appBasePath
-    }
-    set(value) {
-        if (value != null) {
-            Properties().apply {
-                set("path", value.absolutePathString())
-                appDataFile.outputStream().use { store(it, null) }
-            }
-            _appBasePath = value
-        }
-    }
-val logsFolder: Path get() = appBasePath?.resolve("logs") ?: Path.of("logs")
-
 fun loadProperties(file: String) = Properties().apply { load(resourceAsStream(file)) }
 
 fun resourceAsStream(name: String) = Utils::class.java.getResourceAsStream(name)!!

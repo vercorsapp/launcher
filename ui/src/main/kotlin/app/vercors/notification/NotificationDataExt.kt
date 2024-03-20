@@ -37,21 +37,21 @@ import vercors.ui.generated.resources.Res
 import vercors.ui.generated.resources.instanceNotFound
 import vercors.ui.generated.resources.notificationError
 
-val NotificationData.icon: ImageVector
+val Notification.icon: ImageVector
     @Stable get() = when (level) {
         NotificationLevel.INFO -> FeatherIcons.Info
         NotificationLevel.WARN -> FeatherIcons.AlertTriangle
         NotificationLevel.ERROR -> FeatherIcons.AlertOctagon
     }
 
-val NotificationData.color: Color
+val Notification.color: Color
     @Composable get() = when (level) {
         NotificationLevel.INFO -> LocalPalette.current.blue
         NotificationLevel.WARN -> LocalPalette.current.yellow
         NotificationLevel.ERROR -> LocalPalette.current.red
     }
 
-val NotificationData.actualText: String
+val Notification.actualText: String
     @Composable get() = when (text) {
         is NotificationText.Literal -> (text as NotificationText.Literal).text
         NotificationText.Template.InstanceNotFound -> stringResource(Res.string.instanceNotFound, *args)

@@ -52,7 +52,7 @@ import app.vercors.*
 import app.vercors.common.AppAsyncImage
 import app.vercors.common.IconTextButton
 import app.vercors.common.appAnimateContentSize
-import app.vercors.project.ProjectData
+import app.vercors.project.Project
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Calendar
 import compose.icons.feathericons.Download
@@ -65,9 +65,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun HomeProjectsSectionContent(
-    projects: List<ProjectData>?,
-    onProjectClick: (ProjectData) -> Unit,
-    onProjectInstallClick: (ProjectData) -> Unit
+    projects: List<Project>?,
+    onProjectClick: (Project) -> Unit,
+    onProjectInstallClick: (Project) -> Unit
 ) {
     var count by rememberSaveable { mutableStateOf(0) }
     val localDensity = LocalDensity.current
@@ -105,9 +105,9 @@ private fun RowScope.ProjectCardBox(
 
 @Composable
 private fun RowScope.ProjectCardContent(
-    project: ProjectData,
-    onProjectClick: (ProjectData) -> Unit,
-    onProjectInstallClick: (ProjectData) -> Unit
+    project: Project,
+    onProjectClick: (Project) -> Unit,
+    onProjectInstallClick: (Project) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()

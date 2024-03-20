@@ -38,15 +38,15 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import app.vercors.UI
+import app.vercors.instance.Instance
 import app.vercors.instance.InstanceCardContent
-import app.vercors.instance.InstanceData
 import kotlin.math.roundToInt
 
 @Composable
 fun HomeInstancesSectionContent(
-    instances: List<InstanceData>?,
-    onInstanceClick: (InstanceData) -> Unit,
-    onInstanceLaunchClick: (InstanceData) -> Unit,
+    instances: List<Instance>?,
+    onInstanceClick: (Instance) -> Unit,
+    onInstanceLaunchClick: (Instance) -> Unit,
 ) {
     var count by rememberSaveable { mutableStateOf(0) }
     val localDensity = LocalDensity.current

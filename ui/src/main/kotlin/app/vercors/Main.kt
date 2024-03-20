@@ -31,13 +31,17 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import app.vercors.common.AppComponentContext
+import app.vercors.di.DI
 import app.vercors.di.inject
+import app.vercors.di.single
 import app.vercors.root.RootComponent
 import app.vercors.root.RootContainer
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -58,6 +62,13 @@ fun main() {
         }
     }
     logger.info { "Goodbye!\n" }
+}
+
+private fun AppDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
+    module {
+        single<CoroutineScope> { coroutineScope }
+    }
+    PresentationModule(properties)
 }
 
 private fun ApplicationScope.onClose() {

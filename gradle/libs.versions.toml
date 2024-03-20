@@ -1,27 +1,27 @@
 [versions]
-kotlin = "1.9.22"
-serialization = "1.6.3"
-coroutines = "1.8.0"
-compose = "1.6.1"
-ktor = "2.3.9"
-decompose = "3.0.0-alpha08"
-essenty = "2.0.0-alpha07"
-compose-icons = "1.1.0"
-appdirs = "1.2.0"
-prettytime = "5.0.7.Final"
-kotlin-logging = "6.0.3"
-logback = "1.3.14"
-jsystemthemedetector = "3.6"
-reveal = "3.0.4"
-coil = "3.0.0-alpha06"
-rebugger = "1.0.0-rc02"
-mpfilepicker = "3.1.0"
-jna = "5.14.0"
-oshi = "6.5.0"
-junit = "5.10.2"
-mockk = "1.13.10"
-mockposable = "0.7"
-sonarqube = "4.4.1.3373"
+kotlin = "1.9.23"               # https://kotlinlang.org/docs/home.html
+serialization = "1.6.3"         # https://github.com/Kotlin/kotlinx.serialization/releases
+coroutines = "1.8.0"            # https://github.com/Kotlin/kotlinx.coroutines/releases
+compose = "1.6.1"               # https://github.com/JetBrains/compose-multiplatform/releases
+ktor = "2.3.9"                  # https://github.com/ktorio/ktor/releases
+decompose = "3.0.0-alpha09"     # https://github.com/arkivanov/Decompose/releases
+essenty = "2.0.0-alpha07"       # https://github.com/arkivanov/Essenty/releases
+compose-icons = "1.1.0"         # https://github.com/DevSrSouza/compose-icons/releases
+appdirs = "1.2.0"               # https://github.com/Syer10/Kotlin-Multiplatform-AppDirs/releases
+prettytime = "5.0.7.Final"      # https://github.com/ocpsoft/prettytime/tags
+kotlin-logging = "6.0.3"        # https://github.com/oshai/kotlin-logging/releases
+logback = "1.3.14"              # https://github.com/qos-ch/logback/tags
+jsystemthemedetector = "3.6"    # https://github.com/Dansoftowner/jSystemThemeDetector/releases
+reveal = "3.0.5"                # https://github.com/svenjacobs/reveal/releases
+coil = "3.0.0-alpha06"          # https://github.com/coil-kt/coil/releases
+rebugger = "1.0.0-rc02"         # https://github.com/theapache64/rebugger/releases
+mpfilepicker = "3.1.0"          # https://github.com/Wavesonics/compose-multiplatform-file-picker/releases
+jna = "5.14.0"                  # https://github.com/java-native-access/jna/tags
+oshi = "6.5.0"                  # https://github.com/oshi/oshi/releases
+junit = "5.10.2"                # https://github.com/junit-team/junit5/releases
+mockk = "1.13.10"               # https://github.com/mockk/mockk/releases
+mockposable = "0.7"             # https://central.sonatype.com/artifact/com.jeppeman.mockposable/mockposable-gradle
+sonarqube = "4.4.1.3373"        # https://github.com/SonarSource/sonar-scanner-gradle/releases
 
 [libraries]
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }

@@ -41,7 +41,7 @@ import androidx.compose.ui.window.WindowState
 import app.vercors.LocalImageLoader
 import app.vercors.LocalPalette
 import app.vercors.account.AccountListContainer
-import app.vercors.configuration.ConfigurationData
+import app.vercors.configuration.Configuration
 import app.vercors.dialog.DialogContainer
 import app.vercors.menu.MenuContainer
 import app.vercors.navigation.NavigationContainer
@@ -176,7 +176,7 @@ fun MainContent(
 
 @Composable
 private fun MainAppWindow(
-    config: ConfigurationData,
+    config: Configuration,
     windowState: WindowState,
     onClose: () -> Unit,
     content: @Composable (WindowScope.() -> Unit)

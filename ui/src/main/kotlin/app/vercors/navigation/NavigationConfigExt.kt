@@ -27,12 +27,13 @@ import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import vercors.ui.generated.resources.*
 
+@Deprecated("Screen title handling needs to be redone entirely")
 val NavigationConfig.title: String
     @Composable get() = when (this) {
         NavigationConfig.Home -> stringResource(Res.string.home)
         NavigationConfig.InstanceList -> stringResource(Res.string.instances)
         NavigationConfig.Search -> stringResource(Res.string.search)
         NavigationConfig.Configuration -> stringResource(Res.string.settings)
-        is NavigationConfig.InstanceDetails -> instance.name
+        is NavigationConfig.InstanceDetails -> "TODO"
         is NavigationConfig.ProjectDetails -> project.name
     }

@@ -49,7 +49,7 @@ import vercors.ui.generated.resources.markAsUnread
 
 @Composable
 fun NotificationContent(
-    notification: NotificationData,
+    notification: Notification,
     onToggleNotificationReadStatus: () -> Unit,
     onClearNotification: () -> Unit
 ) {

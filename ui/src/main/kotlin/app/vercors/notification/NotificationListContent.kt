@@ -115,7 +115,7 @@ fun NotificationListContent(
                         ) {
                             items(
                                 items = state.notifications,
-                                key = NotificationData::id
+                                key = Notification::id
                             ) {
                                 NotificationContent(
                                     notification = it,

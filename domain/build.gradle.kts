@@ -38,11 +38,8 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)
-    implementation(libs.decompose)
-    implementation(libs.essenty.lifecycle.coroutines)
     implementation(libs.appdirs)
     implementation(libs.kotlin.logging.jvm)
-    implementation(libs.logback)
     implementation(libs.jsystemthemedetector)
     implementation(libs.coil)
     implementation(libs.coil.network.ktor)
@@ -73,21 +70,4 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
-}
-
-tasks {
-    val appProperties by registering(WriteProperties::class) {
-        fun appProperty(name: String, env: String) =
-            property(name, findProperty(name) as String? ?: System.getenv(env) ?: "")
-
-        destinationFile = layout.buildDirectory.file("app.properties")
-        encoding = "UTF-8"
-        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
-        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
-        appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
-    }
-
-    processResources {
-        from(appProperties)
-    }
 }

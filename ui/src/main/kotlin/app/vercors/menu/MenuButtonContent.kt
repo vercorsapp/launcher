@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.vercors.UI
-import app.vercors.account.AccountData
+import app.vercors.account.Account
 import app.vercors.account.AccountImage
 import app.vercors.common.*
 import compose.icons.FeatherIcons
@@ -56,7 +56,7 @@ import vercors.ui.generated.resources.createInstance
 fun MenuButtonContent(
     button: MenuButton,
     isSelected: Boolean,
-    currentAccount: AccountData?,
+    currentAccount: Account?,
     onClick: () -> Unit
 ) {
     when (button) {
@@ -76,7 +76,7 @@ fun MenuButtonContent(
 }
 
 @Composable
-private fun AccountsButton(currentAccount: AccountData?, title: String, onClick: () -> Unit) {
+private fun AccountsButton(currentAccount: Account?, title: String, onClick: () -> Unit) {
     currentAccount?.let {
         MenuButtonFrame(title, false, onClick, 0.dp) {
             AccountImage(it, Modifier.fillMaxSize())

@@ -45,10 +45,7 @@ import app.vercors.dialog.login.LoginDialogComponent
 import app.vercors.dialog.login.LoginDialogContainer
 
 @Composable
-fun DialogContent(
-    state: DialogState,
-    onIntent: (DialogIntent) -> Unit,
-) {
+fun DialogContent(state: DialogState) {
     Crossfade(
         targetState = state.child,
         animationSpec = if (LocalConfiguration.current.animations) tween() else tween(0)
@@ -60,7 +57,7 @@ fun DialogContent(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { onIntent(DialogIntent.CloseDialog) }
+                        onClick = { it.onClose() }
                     ),
                 contentAlignment = Alignment.Center
             ) {

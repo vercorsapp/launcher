@@ -58,9 +58,9 @@ import vercors.ui.generated.resources.view
 
 @Composable
 fun InstanceCardContent(
-    instance: InstanceData,
-    onInstanceClick: (InstanceData) -> Unit,
-    onInstanceLaunchClick: (InstanceData) -> Unit,
+    instance: Instance,
+    onInstanceClick: (Instance) -> Unit,
+    onInstanceLaunchClick: (Instance) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -86,13 +86,13 @@ fun InstanceCardContent(
                 }
 
                 when (instance.status) {
-                    is InstanceStatus.Launching -> {
+                    is InstanceStatus.Preparing -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             val animatedProgress by animateFloatAsState(
-                                targetValue = (instance.status as InstanceStatus.Launching).progress,
+                                targetValue = (instance.status as InstanceStatus.Preparing).progress,
                                 animationSpec = tween(500)
                             )
 
@@ -104,7 +104,7 @@ fun InstanceCardContent(
                         }
                     }
 
-                    InstanceStatus.Running -> {
+                    is InstanceStatus.Running -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -161,7 +161,7 @@ fun InstanceCardContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = instance.name,
+                    text = instance.data.name,
                     style = MaterialTheme.typography.h6,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

@@ -41,13 +41,14 @@ dependencies {
     implementation(libs.compose.icons.feather)
     implementation(libs.prettytime)
     implementation(libs.kotlin.logging.jvm)
-    implementation(libs.logback)
     implementation(libs.reveal)
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor)
     implementation(libs.rebugger)
     implementation(libs.mpfilepicker)
+    implementation(project(":data"))
+    implementation(project(":domain"))
     implementation(project(":presentation"))
     implementation(project(":core"))
     testImplementation(compose.desktop.uiTestJUnit4)
@@ -62,6 +63,7 @@ kotlin {
         "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
         "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
         "-opt-in=org.jetbrains.compose.resources.ExperimentalResourceApi",
+        "-opt-in=com.arkivanov.decompose.ExperimentalDecomposeApi"
     )
 }
 
@@ -78,6 +80,9 @@ mockposable {
 }
 
 compose {
+    val kotlinVersion = libs.versions.kotlin.asProvider().get()
+    kotlinCompilerPlugin.set(dependencies.compiler.forKotlin(kotlinVersion))
+    kotlinCompilerPluginArgs.add("suppressKotlinVersionCompatibilityCheck=$kotlinVersion")
     desktop {
         application {
             mainClass = "app.vercors.MainKt"

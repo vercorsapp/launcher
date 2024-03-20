@@ -27,6 +27,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import app.vercors.LocalConfiguration
+import app.vercors.UI
 import app.vercors.configuration.ConfigurationComponent
 import app.vercors.configuration.ConfigurationContainer
 import app.vercors.home.HomeComponent
@@ -40,7 +41,7 @@ import app.vercors.project.SearchContainer
 fun NavigationContent(state: NavigationState) {
     Crossfade(
         targetState = state.child,
-        animationSpec = if (LocalConfiguration.current.animations) tween() else tween(0)
+        animationSpec = if (LocalConfiguration.current.animations) UI.screenAnimation else tween(0)
     ) {
         when (it) {
             is HomeComponent -> HomeContainer(it)

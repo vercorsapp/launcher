@@ -31,23 +31,16 @@ plugins {
 dependencies {
     implementation(compose.runtime)
     implementation(libs.serialization.json)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
     implementation(libs.decompose)
     implementation(libs.essenty.lifecycle.coroutines)
     implementation(libs.appdirs)
     implementation(libs.kotlin.logging.jvm)
-    implementation(libs.logback)
     implementation(libs.jsystemthemedetector)
     implementation(libs.coil)
     implementation(libs.coil.network.ktor)
     implementation(libs.jna)
     implementation(libs.oshi)
+    implementation(project(":data"))
     implementation(project(":domain"))
     implementation(project(":core"))
     testImplementation(libs.junit)
@@ -63,6 +56,7 @@ kotlin {
         "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
         "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
         "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+        "-opt-in=com.arkivanov.decompose.ExperimentalDecomposeApi"
     )
 }
 
@@ -73,21 +67,4 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test) // tests are required to run before generating the report
-}
-
-tasks {
-    val appProperties by registering(WriteProperties::class) {
-        fun appProperty(name: String, env: String) =
-            property(name, findProperty(name) as String? ?: System.getenv(env) ?: "")
-
-        destinationFile = layout.buildDirectory.file("app.properties")
-        encoding = "UTF-8"
-        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
-        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
-        appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
-    }
-
-    processResources {
-        from(appProperties)
-    }
 }

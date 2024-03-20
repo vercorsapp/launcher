@@ -31,8 +31,5 @@ import androidx.compose.runtime.getValue
 fun DialogContainer(component: DialogComponent) {
     val state by component.state.collectAsState()
 
-    DialogContent(
-        state = state,
-        onIntent = component::onIntent
-    )
+    DialogContent(state = state)
 }

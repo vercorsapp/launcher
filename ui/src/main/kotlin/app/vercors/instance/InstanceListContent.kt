@@ -225,7 +225,7 @@ private fun InstanceListAreaContent(
                         )
                     }
                 } else if (state.sorter.groupBy === InstanceGroupBy.None) {
-                    items(state.instanceGroups[""]!!, key = { it.id }) {
+                    items(state.instanceGroups[""]!!, key = { it.data.id }) {
                         Card(modifier = Modifier.padding(UI.mediumPadding)) {
                             InstanceCardContent(
                                 instance = it,
@@ -258,7 +258,7 @@ private fun InstanceListAreaContent(
                             }
 
                         }
-                        items(instances, key = { it.id }) {
+                        items(instances, key = { it.data.id }) {
                             Card(modifier = Modifier.padding(UI.mediumPadding)) {
                                 InstanceCardContent(
                                     instance = it,

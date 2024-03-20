@@ -25,6 +25,7 @@ package app.vercors.project
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import app.vercors.common.ModLoader
 import org.jetbrains.compose.resources.vectorResource
 import vercors.ui.generated.resources.*
 

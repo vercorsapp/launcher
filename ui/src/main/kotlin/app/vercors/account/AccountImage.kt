@@ -33,7 +33,7 @@ import compose.icons.feathericons.User
 
 @Composable
 fun AccountImage(
-    accountData: AccountData,
+    accountData: Account,
     modifier: Modifier = Modifier
 ) {
     AppAsyncImage(

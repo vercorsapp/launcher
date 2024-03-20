@@ -40,7 +40,7 @@ import kotlin.io.path.absolutePathString
 class LoggerConfigurator : ContextAwareBase(), Configurator {
     override fun configure(lc: LoggerContext): Configurator.ExecutionStatus {
         addInfo("Setting up custom logger")
-        val logsPath = logsFolder
+        val logsPath = StaticData.logsFolder
 
         // Encoder for all appenders
         val appEncoder = PatternLayoutEncoder().apply {

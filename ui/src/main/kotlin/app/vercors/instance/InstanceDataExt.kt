@@ -24,7 +24,7 @@
 package app.vercors.instance
 
 import androidx.compose.runtime.*
-import app.vercors.project.ModLoader
+import app.vercors.common.ModLoader
 import app.vercors.readable
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -32,11 +32,11 @@ import vercors.ui.generated.resources.Res
 import vercors.ui.generated.resources.lastPlayedTime
 import vercors.ui.generated.resources.notPlayedBefore
 
-val InstanceData.loaderAndVersionString: String @Stable get() = "${loader?.value ?: ModLoader.Vanilla} ${gameVersion.id}"
+val Instance.loaderAndVersionString: String @Stable get() = "${data.loader?.value ?: ModLoader.Vanilla} ${data.gameVersion.id}"
 
-val InstanceData.lastPlayedString: String
+val Instance.lastPlayedString: String
     @Composable get() {
-        val lastPlayed = this.lastPlayed ?: return stringResource(Res.string.notPlayedBefore)
+        val lastPlayed = data.lastPlayed ?: return stringResource(Res.string.notPlayedBefore)
         var text by remember { mutableStateOf(lastPlayed.readable()) }
         var refresh by remember { mutableStateOf(false) }
 
