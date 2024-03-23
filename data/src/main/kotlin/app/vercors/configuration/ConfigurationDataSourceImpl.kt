@@ -36,7 +36,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class ConfigurationDataSourceImpl(
     private val json: Json,

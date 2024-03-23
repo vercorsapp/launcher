@@ -26,4 +26,6 @@ package app.vercors.instance
 data class Instance(
     val data: InstanceData,
     val status: InstanceStatus
-)
+) {
+    val id get() = data.id
+}

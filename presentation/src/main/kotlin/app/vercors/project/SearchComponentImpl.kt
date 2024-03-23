@@ -25,10 +25,11 @@ package app.vercors.project
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 internal class SearchComponentImpl(
     componentContext: AppComponentContext
-) : AbstractAppComponent(componentContext), SearchComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), SearchComponent {
 
     override fun refresh() {
         // TODO

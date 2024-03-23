@@ -30,7 +30,7 @@ fun <T> createLoadableStateFlow(): MutableStateFlow<Resource<T>> = MutableStateF
 
 fun <T> StateFlow<Resource<T>>.toResultStateFlow(
     scope: CoroutineScope,
-    started: SharingStarted = SharingStarted.WhileSubscribed()
+    started: SharingStarted = SharingStarted.Eagerly
 ): StateFlow<T?> = map {
     when (it) {
         is Resource.Loaded -> it.result

@@ -23,7 +23,6 @@
 
 package app.vercors.account
 
-import app.vercors.common.AppInstant
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -36,7 +35,6 @@ data class Account(
         name: String,
         uuid: String,
         refreshToken: String,
-        token: String,
-        exp: AppInstant
-    ) : this(name, uuid, AccountToken(refreshToken, token, exp))
+        token: String
+    ) : this(name, uuid, AccountToken(refreshToken, token))
 }

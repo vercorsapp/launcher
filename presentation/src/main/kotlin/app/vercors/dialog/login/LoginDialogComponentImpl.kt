@@ -24,13 +24,14 @@
 package app.vercors.dialog.login
 
 import app.vercors.account.AccountRepository
-import app.vercors.account.AuthenticationState
-import app.vercors.account.LoginUseCase
+import app.vercors.account.auth.AuthenticateUseCase
+import app.vercors.account.auth.AuthenticationState
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.openURL
 import com.arkivanov.decompose.value.ObserveLifecycleMode
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.*
 import java.awt.Desktop
 import java.net.URI
@@ -39,21 +40,25 @@ internal class LoginDialogComponentImpl(
     componentContext: AppComponentContext,
     private val _onClose: () -> Unit,
     private val accountService: AccountRepository = componentContext.inject(),
-    private val loginUseCase: LoginUseCase = componentContext.inject()
-) : AbstractAppComponent(componentContext), LoginDialogComponent {
+    authenticateUseCase: AuthenticateUseCase = componentContext.inject()
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), LoginDialogComponent {
     private val _state = MutableStateFlow(LoginDialogState(Desktop.isDesktopSupported()))
     override val state: StateFlow<LoginDialogState> = _state
+    private var cancelCallback: (() -> Unit)? = null
 
     init {
-        loginUseCase.startAuthentication()
+        authenticateUseCase()
             .catch { error -> if (error is Exception) _state.update { it.copy(error = error) } }
-            .onCompletion { _ -> loginUseCase.cancelAuthentication() }
+            .onCompletion { _ -> cancelCallback?.invoke() }
             .collectInLifecycle(ObserveLifecycleMode.CREATE_DESTROY) { state ->
                 when (state) {
                     is AuthenticationState.Progress -> _state.update { it.copy(progress = state.progress) }
                     is AuthenticationState.Success -> {
                         accountService.addAccount(state.account)
                         _state.update { it.copy(account = state.account) }
+                    }
+                    is AuthenticationState.CancelCallback -> {
+                        cancelCallback = state.callback
                     }
 
                     is AuthenticationState.Waiting -> _state.update { it.copy(url = state.url) }

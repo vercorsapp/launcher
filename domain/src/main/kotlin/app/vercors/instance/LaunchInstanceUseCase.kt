@@ -23,9 +23,6 @@
 
 package app.vercors.instance
 
-import kotlinx.coroutines.Job
-
-interface LaunchInstanceUseCase {
-    fun prepareInstance(instance: Instance): Job
-    fun launchInstance(instance: Instance): Job
+fun interface LaunchInstanceUseCase {
+    suspend operator fun invoke(instance: Instance)
 }

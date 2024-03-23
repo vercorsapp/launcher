@@ -21,17 +21,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.instance
+package app.vercors.home
 
-sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
-
-    @JvmInline
-    value class RefreshingToken(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
+fun interface LoadInstancesHomeSectionUseCase {
+    suspend operator fun invoke(): HomeSection.Instances
 }

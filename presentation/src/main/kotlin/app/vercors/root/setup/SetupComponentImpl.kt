@@ -31,6 +31,7 @@ import app.vercors.common.inject
 import app.vercors.configuration.Configuration
 import app.vercors.configuration.ConfigurationRepository
 import ca.gosyer.appdirs.AppDirs
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -42,7 +43,7 @@ internal class SetupComponentImpl(
     override val onClose: () -> Unit,
     appDirs: AppDirs = componentContext.inject(),
     private val configurationRepository: ConfigurationRepository = componentContext.inject()
-) : AbstractAppComponent(componentContext), SetupComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), SetupComponent {
     private val _state = MutableStateFlow(
         SetupState(
             config = Configuration.Default,

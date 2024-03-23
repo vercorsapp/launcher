@@ -25,7 +25,6 @@ package app.vercors.home
 
 import app.vercors.project.ProjectProviderType
 
-interface LoadHomeSectionUseCase {
-    suspend fun loadProjects(sectionType: HomeSectionType, provider: ProjectProviderType): HomeSection.Projects
-    suspend fun loadInstances(): HomeSection.Instances
+fun interface LoadProjectsHomeSectionUseCase {
+    suspend operator fun invoke(sectionType: HomeSectionType, provider: ProjectProviderType): HomeSection.Projects
 }

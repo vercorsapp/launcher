@@ -23,7 +23,6 @@
 
 package app.vercors.account
 
-import app.vercors.common.AppInstant
 import io.ktor.util.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -37,8 +36,7 @@ import kotlinx.serialization.json.*
 @Serializable(AccountTokenSerializer::class)
 data class AccountToken(
     val refreshToken: String,
-    val token: String,
-    val exp: AppInstant
+    val token: String
 )
 
 private class AccountTokenSerializer : KSerializer<AccountToken> {
@@ -49,8 +47,7 @@ private class AccountTokenSerializer : KSerializer<AccountToken> {
         val jsonObject = json.decodeFromString<JsonObject>(decoder.decodeString().decodeBase64String())
         val refreshToken = jsonObject.getValue("refreshToken").jsonPrimitive.content
         val token = jsonObject.getValue("token").jsonPrimitive.content
-        val exp = json.decodeFromString<AppInstant>(jsonObject.getValue("exp").jsonPrimitive.content)
-        return AccountToken(refreshToken, token, exp)
+        return AccountToken(refreshToken, token)
     }
 
     override fun serialize(encoder: Encoder, value: AccountToken) {
@@ -58,7 +55,6 @@ private class AccountTokenSerializer : KSerializer<AccountToken> {
         val jsonObject = buildJsonObject {
             put("refreshToken", value.refreshToken)
             put("token", value.token)
-            put("exp", json.encodeToString(value.exp))
         }
         return encoder.encodeString(json.encodeToString(jsonObject).encodeBase64())
     }

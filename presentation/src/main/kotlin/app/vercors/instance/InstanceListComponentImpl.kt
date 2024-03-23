@@ -30,6 +30,7 @@ import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogManager
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,7 +45,7 @@ internal class InstanceListComponentImpl(
     private val launchInstanceUseCase: LaunchInstanceUseCase = componentContext.inject(),
     private val loadInstancesUseCase: LoadInstancesUseCase = componentContext.inject(),
     private val dialogManager: DialogManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), InstanceListComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), InstanceListComponent {
 
     private val _state =
         MutableStateFlow(InstanceListState(sorter = configurationRepository.current.savedInstanceSorter))
@@ -128,7 +129,7 @@ internal class InstanceListComponentImpl(
     }
 
     private fun onLaunchInstance(instance: Instance) {
-        localScope.launch { launchInstanceUseCase.launchInstance(instance) }
+        localScope.launch { launchInstanceUseCase(instance) }
     }
 
     private fun onOpenCreateInstanceDialog() {

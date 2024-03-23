@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class ConfigurationRepositoryImpl(
     private val externalScope: CoroutineScope,

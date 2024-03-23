@@ -31,6 +31,7 @@ import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogManager
 import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -42,7 +43,7 @@ internal class MenuComponentImpl(
     private val navigationManager: NavigationManager = componentContext.inject(),
     accountRepository: AccountRepository = componentContext.inject(),
     private val dialogManager: DialogManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), MenuComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), MenuComponent {
     private val _state = MutableStateFlow(
         MenuState(
             topButtons = listOf(

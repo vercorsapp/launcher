@@ -23,26 +23,24 @@
 
 package app.vercors.home
 
-import app.vercors.common.Resource
-import app.vercors.instance.Instance
-import app.vercors.instance.InstanceRepository
 import app.vercors.project.Project
 import app.vercors.project.ProjectProviderType
 import app.vercors.project.ProjectRepository
 import app.vercors.project.curseforge.CurseforgeProjectRepository
 import app.vercors.project.modrinth.ModrinthProjectRepository
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-internal class LoadHomeSectionUseCaseImpl(
-    private val instanceRepository: InstanceRepository,
+internal class LoadProjectsHomeSectionUseCaseImpl(
     private val modrinthProjectRepository: ModrinthProjectRepository,
-    private val curseforgeProjectRepository: CurseforgeProjectRepository
-) : LoadHomeSectionUseCase {
-    override suspend fun loadProjects(
+    private val curseforgeProjectRepository: CurseforgeProjectRepository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : LoadProjectsHomeSectionUseCase {
+    override suspend fun invoke(
         sectionType: HomeSectionType,
         provider: ProjectProviderType
-    ): HomeSection.Projects =
+    ): HomeSection.Projects = withContext(ioDispatcher) {
         HomeSection.Projects(
             sectionType, when (sectionType) {
                 HomeSectionType.PopularMods -> fetch(provider, ProjectRepository::getPopularMods)
@@ -52,6 +50,7 @@ internal class LoadHomeSectionUseCaseImpl(
                 else -> throw IllegalArgumentException("Section type $sectionType not supported by this method")
             }
         )
+    }
 
     private suspend fun fetch(
         provider: ProjectProviderType,
@@ -61,11 +60,5 @@ internal class LoadHomeSectionUseCaseImpl(
             ProjectProviderType.Modrinth -> modrinthProjectRepository
             ProjectProviderType.Curseforge -> curseforgeProjectRepository
         }
-    )
-
-    override suspend fun loadInstances(): HomeSection.Instances = HomeSection.Instances(
-        instanceRepository.loadingState
-            .filterIsInstance<Resource.Loaded<List<Instance>>>().first()
-            .result.sortedByDescending { it.data.lastPlayed ?: it.data.dateCreated }
     )
 }

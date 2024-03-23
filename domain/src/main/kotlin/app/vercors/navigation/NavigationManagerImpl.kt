@@ -80,7 +80,7 @@ internal class NavigationManagerImpl(
         NavigationEvent.InstanceList -> NavigationConfig.InstanceList
         NavigationEvent.Search -> NavigationConfig.Search
         NavigationEvent.Configuration -> NavigationConfig.Configuration
-        is NavigationEvent.InstanceDetails -> NavigationConfig.InstanceDetails(event.instance.data.id)
+        is NavigationEvent.InstanceDetails -> NavigationConfig.InstanceDetails(event.instance.id)
         is NavigationEvent.ProjectDetails -> NavigationConfig.ProjectDetails(event.project)
         else -> throw IllegalArgumentException("Can't create NavigationConfig for NavigationEvent $event")
     }

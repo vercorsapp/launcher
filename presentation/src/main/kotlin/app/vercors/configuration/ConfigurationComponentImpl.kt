@@ -39,13 +39,11 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.absolutePathString
 import kotlin.math.roundToInt
 
-private val logger = KotlinLogging.logger { }
-
 internal class ConfigurationComponentImpl(
     componentContext: AppComponentContext,
     private val configurationRepository: ConfigurationRepository = componentContext.inject(),
     private val systemInfo: SystemInfo = componentContext.inject()
-) : AbstractAppComponent(componentContext), ConfigurationComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), ConfigurationComponent {
     private val _state = MutableStateFlow(
         ConfigurationState(
             hasCustomMemory = configurationRepository.current.defaultAllocatedRam != null,

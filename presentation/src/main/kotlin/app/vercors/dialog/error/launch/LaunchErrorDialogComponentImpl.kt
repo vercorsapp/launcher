@@ -26,12 +26,13 @@ package app.vercors.dialog.error.launch
 import app.vercors.StaticData
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Desktop
 
 internal class LaunchErrorDialogComponentImpl(
     componentContext: AppComponentContext,
     private val _onClose: () -> Unit
-) : AbstractAppComponent(componentContext), LaunchErrorDialogComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), LaunchErrorDialogComponent {
     override fun openLogFolder() = Desktop.getDesktop().open(StaticData.logsFolder.toFile())
 
     override fun onClose() = _onClose()

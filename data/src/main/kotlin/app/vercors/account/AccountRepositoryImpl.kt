@@ -38,7 +38,7 @@ internal class AccountRepositoryImpl(
     override val current: AccountList get() = state.value!!
     override val selectedState: StateFlow<Account?> = state
         .map { it?.findAccount(it.selected) }
-        .stateIn(externalScope, SharingStarted.WhileSubscribed(), null)
+        .stateIn(externalScope, SharingStarted.Eagerly, null)
     override val currentSelected: Account get() = selectedState.value!!
 
     override suspend fun loadAccounts() {

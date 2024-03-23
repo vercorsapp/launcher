@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.io.path.*
 import kotlin.system.measureTimeMillis
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class InstanceDataSourceImpl(
     private val json: Json,

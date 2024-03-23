@@ -28,6 +28,7 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 internal class JavaVersionErrorDialogComponentImpl(
     componentContext: AppComponentContext,
@@ -35,7 +36,7 @@ internal class JavaVersionErrorDialogComponentImpl(
     private val instanceId: String,
     override val javaVersion: Int,
     private val navigationManager: NavigationManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), JavaVersionErrorDialogComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), JavaVersionErrorDialogComponent {
     override fun openSettings() {
         navigationManager.navigateTo(NavigationConfig.Configuration)
         onClose()

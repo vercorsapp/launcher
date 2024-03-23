@@ -38,6 +38,7 @@ import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -46,7 +47,7 @@ internal class RootComponentImpl(
     componentContext: AppComponentContext,
     private val onClose: () -> Unit,
     configurationService: ConfigurationRepository = componentContext.inject()
-) : AbstractAppComponent(componentContext), RootComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), RootComponent {
     private val navigation = SlotNavigation<RootContentConfig>()
     private val _state: Value<ChildSlot<RootContentConfig, RootChildComponent>> = childSlot(
         source = navigation,

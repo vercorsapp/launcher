@@ -39,13 +39,14 @@ import com.arkivanov.decompose.router.stack.bringToFront
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
 internal class NavigationComponentImpl(
     componentContext: AppComponentContext,
     navigationManager: NavigationManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), NavigationComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), NavigationComponent {
     private val navigation = StackNavigation<NavigationConfig>()
     private val _childState: Value<ChildStack<NavigationConfig, NavigationChildComponent>> = childStack(
         source = navigation,

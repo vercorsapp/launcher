@@ -42,7 +42,7 @@ import kotlin.io.path.*
 
 private class Utils
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 const val APP_VERSION = "0.1.0"
 const val APP_NAME = "Vercors"

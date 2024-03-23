@@ -28,6 +28,7 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -38,7 +39,7 @@ internal class AccountListComponentImpl(
     componentContext: AppComponentContext,
     private val accountRepository: AccountRepository = componentContext.inject(),
     private val dialogManager: DialogManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), AccountListComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), AccountListComponent {
     private val _state: MutableStateFlow<AccountListState> = MutableStateFlow(AccountListState())
     override val state: StateFlow<AccountListState> = _state
 

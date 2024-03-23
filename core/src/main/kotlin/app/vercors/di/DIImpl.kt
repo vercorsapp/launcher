@@ -30,14 +30,14 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class DIImpl(
     coroutineScope: CoroutineScope,
     coroutineContext: CoroutineContext,
     private val providerMap: Map<KClass<*>, DIProvider<*>>
 ) : DI {
-    private val singletonMap = ConcurrentHashMap<KClass<*>, DISingleton<*>>(mapOf(DI::class to DISingleton.Lazy(this)))
+    private val singletonMap = ConcurrentHashMap<KClass<*>, DISingleton<*>>()
     private val initJob: Job
 
     init {

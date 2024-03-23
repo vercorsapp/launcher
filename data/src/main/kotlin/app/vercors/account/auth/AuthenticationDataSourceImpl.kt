@@ -21,10 +21,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.account
+package app.vercors.account.auth
 
-import app.vercors.encodeBase64
-import app.vercors.sha256
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -37,94 +35,22 @@ import io.ktor.server.engine.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.serialization.json.*
-import java.time.Instant
-import java.util.*
-import kotlin.coroutines.CoroutineContext
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
-internal class LoginUseCaseImpl(
-    private val globalScope: CoroutineScope,
+internal class AuthenticationDataSourceImpl(
     private val httpClient: HttpClient,
     private val clientId: String,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : LoginUseCase {
+) : AuthenticationDataSource {
     private var server: CIOApplicationEngine? = null
 
-    override fun startAuthentication(): Flow<AuthenticationState> = channelFlow {
-        val emitter: suspend (AuthenticationState) -> Unit = { send(it) }
-        withContext(ioDispatcher) {
-            var progress = 0
-            val state = UUID.randomUUID().toString()
-            val codeVerifier = UUID.randomUUID().toString()
-            val codeChallenge = codeVerifier.sha256().encodeBase64().take(43)
-            val (authorizationCode, port) = getAuthorizationCode(emitter, state, codeChallenge, ioDispatcher)
-            progress(emitter, ++progress)
-            val (msAccessToken, refreshToken) = getMicrosoftAccessToken(codeVerifier, authorizationCode, port)
-            progress(emitter, ++progress)
-            val (xblToken, userHash) = getXblToken(msAccessToken)
-            progress(emitter, ++progress)
-            val xstsToken = getXstsToken(xblToken, userHash)
-            progress(emitter, ++progress)
-            val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
-            progress(emitter, ++progress)
-            val (uuid, username) = getMinecraftProfile(token)
-            progress(emitter, ++progress)
-            emitter(AuthenticationState.Success(Account(username, uuid, refreshToken, token, exp)))
-        }
-    }
-
-    override fun cancelAuthentication() {
-        globalScope.launch { stopServer() }
-    }
-
-    private suspend fun stopServer(context: CoroutineContext = Dispatchers.IO) = withContext(context) {
-        server?.let {
-            it.stop()
-            server = null
-            logger.debug { "Server stopped" }
-        }
-    }
-
-    override suspend fun validateToken(account: Account?): Account? =
-        withContext(ioDispatcher) {
-            logger.info { "Validating token" }
-            if (account == null) {
-                logger.info { "No account selected - requiring full login" }
-                return@withContext null
-            }
-            if (account.tokenData.exp > Instant.now().plusSeconds(60)) {
-                return@withContext account
-            }
-            try {
-                logger.info { "Verifying access token" }
-                getMinecraftProfile(account.tokenData.token)
-                return@withContext account
-            } catch (e: Exception) {
-                logger.info { "Access token expired - refreshing token" }
-                try {
-                    val (msAccessToken, refreshToken) = refreshMicrosoftAccessToken(account.tokenData.refreshToken)
-                    val (xblToken, userHash) = getXblToken(msAccessToken)
-                    val xstsToken = getXstsToken(xblToken, userHash)
-                    val (token, exp) = getMinecraftAccessToken(userHash, xstsToken)
-                    val (uuid, username) = getMinecraftProfile(token)
-                    return@withContext Account(username, uuid, refreshToken, token, exp)
-                } catch (e: Exception) {
-                    logger.warn(e) { "Unable to refresh token - requiring full login" }
-                    return@withContext null
-                }
-            }
-        }
-
-    private suspend fun getAuthorizationCode(
+    override suspend fun getAuthorizationCode(
         emitter: suspend (AuthenticationState) -> Unit,
         state: String,
-        codeChallenge: String,
-        context: CoroutineContext
-    ): Pair<String, Int> = coroutineScope {
+        codeChallenge: String
+    ): AuthorizationCodeResult = coroutineScope {
         logger.info { "Getting authorization code" }
         var authorizationCode: String? = null
         var responseState: String? = null
@@ -172,17 +98,27 @@ internal class LoginUseCaseImpl(
             }
             error?.let { throw AuthenticationException(it) }
             if (state != responseState) throw AuthenticationException("Response state doesn't match")
-            authorizationCode!! to port
+            AuthorizationCodeResult(authorizationCode!!, port)
         }
-        stopServer(context)
+        stopServer()
         result.getOrThrow()
     }
 
-    private suspend fun getMicrosoftAccessToken(
+    override suspend fun cancelAuthentication() = stopServer()
+
+    private suspend fun stopServer(): Unit = withContext(ioDispatcher) {
+        server?.let {
+            it.stop()
+            server = null
+            logger.debug { "Server stopped" }
+        }
+    }
+
+    override suspend fun getMicrosoftAccessToken(
         codeVerifier: String,
         authorizationCode: String,
         port: Int
-    ): Pair<String, String> {
+    ): MicrosoftAccessTokenResult {
         logger.info { "Getting access token" }
         return getMicrosoftAccessTokenWithParams(
             "code" to authorizationCode,
@@ -192,7 +128,7 @@ internal class LoginUseCaseImpl(
         )
     }
 
-    private suspend fun refreshMicrosoftAccessToken(refreshToken: String): Pair<String, String> {
+    override suspend fun refreshMicrosoftAccessToken(refreshToken: String): MicrosoftAccessTokenResult {
         logger.info { "Refreshing access token" }
         return getMicrosoftAccessTokenWithParams(
             "refresh_token" to refreshToken,
@@ -200,7 +136,7 @@ internal class LoginUseCaseImpl(
         )
     }
 
-    private suspend fun getMicrosoftAccessTokenWithParams(vararg params: Pair<String, String>): Pair<String, String> {
+    private suspend fun getMicrosoftAccessTokenWithParams(vararg params: Pair<String, String>): MicrosoftAccessTokenResult {
         val tokenResult = httpClient.submitForm(
             url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
             formParameters = parameters {
@@ -220,12 +156,15 @@ internal class LoginUseCaseImpl(
                 invalidResponse(tokenResult)
             }
         }
-        return xblAccessToken to refreshToken
+        return MicrosoftAccessTokenResult(xblAccessToken, refreshToken)
     }
 
-    private suspend fun getXblToken(
-        xblAccessToken: String
-    ): Pair<String, String> {
+    private fun invalidResponse(result: JsonObject): Nothing {
+        logger.warn { "Invalid response: $result" }
+        throw AuthenticationException("Invalid response, see logs for more info")
+    }
+
+    override suspend fun getXblToken(xblAccessToken: String): XblTokenResult {
         logger.info { "Authenticating with Xbox Live" }
         val xboxResult = httpClient.post("https://user.auth.xboxlive.com/user/authenticate") {
             contentType(ContentType.Application.Json)
@@ -244,18 +183,10 @@ internal class LoginUseCaseImpl(
         val userHash = xboxResult["DisplayClaims"]?.jsonObject?.get("xui")
             ?.jsonArray?.get(0)?.jsonObject?.get("uhs")?.string
         if (xblToken == null || userHash == null) invalidResponse(xboxResult)
-        return xblToken to userHash
+        return XblTokenResult(xblToken, userHash)
     }
 
-    private fun invalidResponse(result: JsonObject): Nothing {
-        logger.warn { "Invalid response: $result" }
-        throw AuthenticationException("Invalid response, see logs for more info")
-    }
-
-    private suspend fun getXstsToken(
-        xblToken: String,
-        userHash: String
-    ): String {
+    override suspend fun getXstsToken(xblToken: String, userHash: String): String {
         logger.info { "Obtaining XSTS token" }
         val xstsResult = httpClient.post("https://xsts.auth.xboxlive.com/xsts/authorize") {
             contentType(ContentType.Application.Json)
@@ -278,10 +209,7 @@ internal class LoginUseCaseImpl(
         return xstsToken
     }
 
-    private suspend fun getMinecraftAccessToken(
-        userHash: String,
-        xstsToken: String
-    ): Pair<String, Instant> {
+    override suspend fun getMinecraftAccessToken(userHash: String, xstsToken: String): String {
         logger.info { "Authenticating with Minecraft" }
         val minecraftResult = httpClient.post("https://api.minecraftservices.com/authentication/login_with_xbox") {
             contentType(ContentType.Application.Json)
@@ -291,17 +219,12 @@ internal class LoginUseCaseImpl(
             })
         }.body<JsonObject>()
         val mcAccessToken = minecraftResult["access_token"]?.string
-        val expiresIn = minecraftResult["expires_in"]?.jsonPrimitive?.int
-        if (mcAccessToken == null || expiresIn == null) {
-            if (minecraftResult.containsKey("errorMessage")) throw AuthenticationException(minecraftResult["errorMessage"]?.string)
+            ?: if (minecraftResult.containsKey("errorMessage")) throw AuthenticationException(minecraftResult["errorMessage"]?.string)
             else invalidResponse(minecraftResult)
-        }
-        return mcAccessToken to Instant.now().plusSeconds(expiresIn.toLong())
+        return mcAccessToken
     }
 
-    private suspend fun getMinecraftProfile(
-        mcAccessToken: String
-    ): Pair<String, String> {
+    override suspend fun getMinecraftProfile(mcAccessToken: String): MinecraftProfileResult {
         logger.info { "Getting Minecraft profile" }
         val profileResult = httpClient.get("https://api.minecraftservices.com/minecraft/profile") {
             bearerAuth(mcAccessToken)
@@ -310,11 +233,7 @@ internal class LoginUseCaseImpl(
         val uuid = profileResult["id"]?.string
         val username = profileResult["name"]?.string
         if (uuid == null || username == null) invalidResponse(profileResult)
-        return uuid to username
-    }
-
-    private suspend fun progress(emitter: suspend (AuthenticationState) -> Unit, progress: Int) {
-        emitter(AuthenticationState.Progress(progress.toFloat() / 6))
+        return MinecraftProfileResult(uuid, username)
     }
 
     private val JsonElement.string get() = jsonPrimitive.content

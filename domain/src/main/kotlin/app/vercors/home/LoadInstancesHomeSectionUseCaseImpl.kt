@@ -21,12 +21,26 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.account
+package app.vercors.home
 
-import kotlinx.coroutines.flow.Flow
+import app.vercors.common.Resource
+import app.vercors.instance.Instance
+import app.vercors.instance.InstanceRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
-interface LoginUseCase {
-    fun startAuthentication(): Flow<AuthenticationState>
-    fun cancelAuthentication()
-    suspend fun validateToken(account: Account?): Account?
+internal class LoadInstancesHomeSectionUseCaseImpl(
+    private val instanceRepository: InstanceRepository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : LoadInstancesHomeSectionUseCase {
+    override suspend fun invoke(): HomeSection.Instances = withContext(ioDispatcher) {
+        HomeSection.Instances(
+            instanceRepository.loadingState
+                .filterIsInstance<Resource.Loaded<List<Instance>>>().first()
+                .result.sortedByDescending { it.data.lastPlayed ?: it.data.dateCreated }
+        )
+    }
 }

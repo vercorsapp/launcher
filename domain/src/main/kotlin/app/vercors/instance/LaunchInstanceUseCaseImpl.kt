@@ -27,248 +27,91 @@ import app.vercors.APP_NAME
 import app.vercors.APP_VERSION
 import app.vercors.account.Account
 import app.vercors.account.AccountRepository
-import app.vercors.account.LoginUseCase
 import app.vercors.configuration.ConfigurationRepository
 import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogManager
 import app.vercors.instance.mojang.*
 import app.vercors.system.StorageManager
-import app.vercors.unzipFile
-import app.vercors.validate
-import com.sun.jna.Platform
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
-import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.absolutePathString
-import kotlin.io.path.inputStream
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 class LaunchInstanceUseCaseImpl(
     private val externalScope: CoroutineScope,
-    private val json: Json,
-    private val mojangRepository: MojangRepository,
+    private val prepareInstanceUseCase: PrepareInstanceUseCase,
     private val accountRepository: AccountRepository,
     private val instanceRepository: InstanceRepository,
     private val configurationRepository: ConfigurationRepository,
-    private val loginUseCase: LoginUseCase,
     private val storageManager: StorageManager,
     private val dialogManager: DialogManager
 ) : LaunchInstanceUseCase {
-    override fun prepareInstance(instance: Instance): Deferred<LaunchPreparationResult> {
-        lateinit var preparationJob: Deferred<LaunchPreparationResult>
-        preparationJob = externalScope.async {
-            instance.updateStatus(InstanceStatus.Preparing(0f, preparationJob))
-            logger.info { "Preparing instance ${instance.data.name}" }
-            val selectedAccount = accountRepository.selectedState.value
-            val account = loginUseCase.validateToken(selectedAccount)
-            if (account == null) {
-                val job = Job()
-                dialogManager.openDialog(DialogConfig.Login { job.complete() })
-                job.join()
-                if (job.isCancelled || accountRepository.selectedState.value == null) {
-                    logger.info { "Login cancelled" }
-                    throw CancellationException("Login cancelled. You must log into an account in order to launch the game.")
-                }
-            } else {
-                accountRepository.addAccount(account)
-            }
-            logger.info { "Access token validated - preparing to launch instance" }
-            instance.updateProgress(2)
-            val versionInfo = validateVersionInfo(instance.data.gameVersion)
-            instance.updateProgress(3)
-            val clientJarPath = validateClientJar(versionInfo)
-            instance.updateProgress(4)
-            val nativesPath = storageManager.getInstanceNativesPath(instance.data.id)
-            instance.updateProgress(5)
-            val libraryPaths = validateLibraries(versionInfo, nativesPath)
-            instance.updateProgress(6)
-            val assetIndex = validateAssetIndex(versionInfo)
-            instance.updateProgress(7)
-            validateAssets(assetIndex)
-            instance.updateProgress(8)
-            val logConfigPath = versionInfo.logging?.let { validateLogConfig(it.client) }
-            LaunchPreparationResult(versionInfo, clientJarPath, libraryPaths, logConfigPath)
-        }
-        return preparationJob
-    }
-
-    override fun launchInstance(instance: Instance): Job = externalScope.launch {
-        val (versionInfo, clientJarPath, libraryPaths, logConfigPath) = prepareInstance(instance).await()
-        lateinit var runJob: Job
-        runJob = launch {
-            val run = runCatching {
-                val selectedAccount = accountRepository.currentSelected
-                val classpath = buildList {
-                    add(clientJarPath)
-                    addAll(libraryPaths)
-                    add(".")
-                }.joinToString(";", "\"", "\"")
-                val processBuilder = buildProcess(
-                    instance,
-                    versionInfo,
-                    classpath,
-                    logConfigPath,
-                    selectedAccount
-                )
-                System.gc()
-                val process = launchProcess(processBuilder)
-                instance.updateStatus(InstanceStatus.Running(process, runJob))
-                instanceRepository.updateInstanceData(instance.data.id) {
-                    it.copy(lastPlayed = Instant.now())
-                }
-
-                while (process.isAlive) {
-                    delay(1000) // TODO find another way to track MC process
-                    instance.tickRunning()
-                }
-
-                logger.info { "Instance ${instance.data.name} stopped" }
-            }
-            run.onFailure {
-                logger.error(it) { "An error occured while running instance ${instance.data.name}" }
-                when (it) {
-                    is JavaVersionException -> dialogManager.openDialog(
-                        DialogConfig.Error.JavaVersion(
-                            instance.data.id,
-                            it.javaVersion
-                        )
-                    )
-
-                    else -> dialogManager.openDialog(DialogConfig.Error.Launch)
-                }
-            }
+    override suspend fun invoke(instance: Instance) = externalScope.launch {
+        val (versionInfo, clientJarPath, libraryPaths, logConfigPath) = prepareInstanceUseCase(instance)
+        val run = runCatching {
+            val selectedAccount = accountRepository.currentSelected
+            val classpath = buildList {
+                add(clientJarPath)
+                addAll(libraryPaths)
+                add(".")
+            }.joinToString(";", "\"", "\"")
+            val processBuilder = buildProcess(
+                instance,
+                versionInfo,
+                classpath,
+                logConfigPath,
+                selectedAccount
+            )
             System.gc()
-            instanceRepository.updateInstanceStatus(instance.data.id) { InstanceStatus.Stopped }
-        }
-    }
+            val process = launchProcess(processBuilder)
+            instance.updateStatus(InstanceStatus.Running(process))
+            instanceRepository.updateInstanceData(instance.id) {
+                it.copy(lastPlayed = Instant.now())
+            }
 
-    private fun Instance.updateProgress(progress: Int) = instanceRepository.updateInstanceStatus(data.id) {
-        if (it is InstanceStatus.Preparing) it.copy(progress = progress / 10f) else it
-    }
+            while (process.isAlive) {
+                delay(1000) // TODO find another way to track MC process
+                instance.tickRunning()
+            }
+
+            logger.info { "Instance ${instance.data.name} stopped" }
+        }
+        run.onFailure {
+            logger.error(it) { "An error occured while running instance ${instance.data.name}" }
+            when (it) {
+                is JavaVersionException -> dialogManager.openDialog(
+                    DialogConfig.Error.JavaVersion(
+                        instance.id,
+                        it.javaVersion
+                    )
+                )
+
+                else -> dialogManager.openDialog(DialogConfig.Error.Launch)
+            }
+        }
+        System.gc()
+        instanceRepository.updateInstanceStatus(instance.id) { InstanceStatus.Stopped }
+    }.join()
 
     private fun Instance.updateStatus(status: InstanceStatus) =
-        instanceRepository.updateInstanceStatus(data.id) {
+        instanceRepository.updateInstanceStatus(id) {
             if (!(it is InstanceStatus.Running && status is InstanceStatus.Preparing)) status else it
         }
 
     private suspend fun Instance.tickRunning() {
-        instanceRepository.updateInstanceData(data.id) {
+        instanceRepository.updateInstanceData(id) {
             val now = Instant.now()
             it.copy(
                 lastPlayed = now,
                 timePlayed = it.timePlayed + Duration.between(it.lastPlayed, now)
             )
         }
-    }
-
-    private suspend fun validateVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo {
-        logger.debug { "Validating version information" }
-        val path = storageManager.getVersionJsonPath(version.id)
-        validate(
-            path = path,
-            url = version.url,
-            sha1 = version.sha1,
-        )
-        return path.inputStream().use { json.decodeFromStream(it) }
-    }
-
-    private suspend fun validateClientJar(version: MojangVersionInfo): String {
-        logger.debug { "Validating client JAR" }
-        val path = storageManager.getVersionJarPath(version.id)
-        val file = version.downloads.client
-        validate(
-            path = path,
-            url = file.url,
-            sha1 = file.sha1,
-            size = file.size
-        )
-        return path.absolutePathString()
-    }
-
-    private suspend fun validateLibraries(version: MojangVersionInfo, nativesPath: Path): List<String> =
-        coroutineScope {
-            logger.debug { "Validating libraries" }
-            val context = Dispatchers.IO.limitedParallelism(configurationRepository.current.maximumParallelDownloads)
-            version.libraries.filter { it.rules?.all(::isRuleValid) ?: true }.map {
-                async(context) {
-                    val file = it.downloads.artifact
-                    if (file != null) {
-                        val path = storageManager.getLibraryPath(file.path)
-                        validate(
-                            path = path,
-                            url = file.url,
-                            sha1 = file.sha1,
-                            size = file.size
-                        )
-                        path.absolutePathString()
-                    } else {
-                        val os = when {
-                            Platform.isWindows() -> "windows"
-                            Platform.isMac() -> "osx"
-                            else -> "linux"
-                        }
-                        val native = it.natives!!.getValue(os)
-                        val nativeFile = it.downloads.classifiers!!.getValue(native)
-                        val path = storageManager.getLibraryPath(nativeFile.path)
-                        validate(
-                            path = path,
-                            url = nativeFile.url,
-                            sha1 = nativeFile.sha1,
-                            size = nativeFile.size
-                        )
-                        unzipFile(path, nativesPath, it.extract!!.exclude)
-                        null
-                    }
-                }
-            }.awaitAll().filterNotNull()
-        }
-
-    private suspend fun validateAssetIndex(version: MojangVersionInfo): MojangAssetIndex {
-        logger.debug { "Validating asset index" }
-        val path = storageManager.getAssetIndexPath(version.assets)
-        validate(
-            path = path,
-            url = version.assetIndex.url,
-            sha1 = version.assetIndex.sha1,
-            size = version.assetIndex.size
-        )
-        return path.inputStream().use { json.decodeFromStream(it) }
-    }
-
-    private suspend fun validateAssets(assetIndex: MojangAssetIndex) = coroutineScope {
-        logger.debug { "Validating assets" }
-        val context = Dispatchers.IO.limitedParallelism(configurationRepository.current.maximumParallelDownloads)
-        assetIndex.objects.forEach { name, (sha1, size) ->
-            launch(context) {
-                val path = storageManager.getAssetPath(sha1)
-                val url = mojangRepository.getAssetUrl(sha1, name)
-                validate(
-                    path = path,
-                    url = url,
-                    sha1 = sha1,
-                    size = size
-                )
-            }
-        }
-    }
-
-    private suspend fun validateLogConfig(client: MojangVersionInfo.Logging.Client): Path {
-        logger.debug { "Validating log config" }
-        val file = client.file
-        val path = storageManager.getLogConfigPath(client.type, file.id)
-        validate(
-            path = path,
-            url = file.url,
-            sha1 = file.sha1,
-            size = file.size
-        )
-        return path
     }
 
     private fun buildProcess(
@@ -278,8 +121,8 @@ class LaunchInstanceUseCaseImpl(
         logConfigPath: Path?,
         account: Account
     ): ProcessBuilder {
-        val instancePath = storageManager.getInstancePath(instance.data.id)
-        val nativesPath = storageManager.getInstanceNativesPath(instance.data.id).absolutePathString()
+        val instancePath = storageManager.getInstancePath(instance.id)
+        val nativesPath = storageManager.getInstanceNativesPath(instance.id).absolutePathString()
         val assetsPath = storageManager.assetsPath.absolutePathString()
         val variables = mapOf(
             "auth_player_name" to account.name,
@@ -335,32 +178,14 @@ class LaunchInstanceUseCaseImpl(
         args.flatMap {
             when (it) {
                 is BasicArgument -> listOf(it.value)
-                is ConditionalArgument -> if (it.rules.all(::isRuleValid)) it.value else emptyList()
+                is ConditionalArgument -> if (it.rules.all(MojangVersionInfo.Rule::isValid)) it.value else emptyList()
             }
         }.map { it.replaceVariables(variables) }
 
-    private suspend fun launchProcess(
-        processBuilder: ProcessBuilder,
-        context: CoroutineContext = Dispatchers.IO
-    ): Process = withContext(context) {
+    private fun launchProcess(processBuilder: ProcessBuilder): Process {
         logger.info { "Launching game" }
         logger.debug { "Command arguments: ${processBuilder.command()}" }
-        processBuilder.inheritIO().start()
-    }
-
-    private fun isRuleValid(rule: MojangVersionInfo.Rule): Boolean {
-        val isOsValid = rule.os == null || (when (rule.os!!.name) {
-            "windows" -> Platform.isWindows()
-            "linux" -> Platform.isLinux()
-            "osx" -> Platform.isMac()
-            else -> true
-        } && when (rule.os!!.arch) {
-            "x86" -> !Platform.is64Bit()
-            else -> true
-        } && (rule.os!!.version == null || System.getProperty("os.version").matches(rule.os!!.version!!.toRegex())))
-        val isFeaturesValid = rule.features == null // TODO handle feature rules
-        val isValid = isOsValid && isFeaturesValid
-        return if (rule.action == "allow") isValid else !isValid
+        return processBuilder.inheritIO().start()
     }
 
     private fun String.replaceVariables(variables: Map<String, String>) =

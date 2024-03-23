@@ -24,7 +24,6 @@
 package app.vercors
 
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
@@ -40,21 +39,21 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.decompose.extensions.compose.lifecycle.LifecycleController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
+private val externalScope = CoroutineScope(SupervisorJob())
 
 fun main() {
     logger.info { "Hello world! $APP_NAME v$APP_VERSION" }
-    val properties = loadProperties("/app.properties")
-    logger.info { "Loaded application properties" }
+    val deferredDI = externalScope.async { AppDI(loadProperties("/app.properties")) }
     application(exitProcessOnExit = false) {
-        val coroutineScope = rememberCoroutineScope()
+        logger.info { "Launching application" }
         val lifecycle = LifecycleRegistry()
         val windowState = rememberWindowState(size = DpSize(1280.dp, 720.dp))
         LifecycleController(lifecycle, windowState)
-        val di = AppDI(properties, coroutineScope)
+        val di = runBlocking { deferredDI.await() }
         CompositionLocalProvider(LocalDI provides di) {
             val componentContext = inject<AppComponentContext>(DefaultComponentContext(lifecycle), di)
             val rootComponent = inject<RootComponent>(componentContext, ::onClose)
@@ -64,14 +63,15 @@ fun main() {
     logger.info { "Goodbye!\n" }
 }
 
-private fun AppDI(properties: Properties, coroutineScope: CoroutineScope) = DI(coroutineScope) {
+private fun AppDI(properties: Properties) = DI(externalScope) {
     module {
-        single<CoroutineScope> { coroutineScope }
+        single<CoroutineScope> { externalScope }
     }
     PresentationModule(properties)
 }
 
 private fun ApplicationScope.onClose() {
     logger.info { "Exiting application" }
+    externalScope.cancel()
     exitApplication()
 }

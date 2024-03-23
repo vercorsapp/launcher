@@ -43,9 +43,9 @@ import app.vercors.system.SystemThemeManager
 import app.vercors.toolbar.ToolbarButton
 import app.vercors.toolbar.ToolbarComponent
 import com.arkivanov.decompose.childContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 internal class MainComponentImpl(
@@ -58,7 +58,7 @@ internal class MainComponentImpl(
     private val navigationManager: NavigationManager = componentContext.inject(),
     private val dialogManager: DialogManager = componentContext.inject(),
     private val storageManager: StorageManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), MainComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), MainComponent {
     private val dialogComponent = inject<DialogComponent>(childContext("dialog"))
     private val accountListComponent = inject<AccountListComponent>(childContext("account"))
     private val menuComponent = inject<MenuComponent>(childContext("menu"), ::onAccountsMenuButtonClick)
@@ -83,10 +83,8 @@ internal class MainComponentImpl(
         // Load instances and accounts after configuration is loaded
         localScope.launch {
             configurationRepository.state.filterNotNull().first().let {
-                listOf(
-                    launch { loadInstancesUseCase() },
-                    launch { accountRepository.loadAccounts() }
-                ).joinAll()
+                loadInstancesUseCase()
+                accountRepository.loadAccounts()
             }
         }
         // Update UI state on configuration / system theme change

@@ -21,17 +21,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.instance
+package app.vercors.account.auth
 
-sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
+import app.vercors.account.Account
+
+sealed interface AuthenticationState {
+    @JvmInline
+    value class Waiting(val url: String) : AuthenticationState
 
     @JvmInline
-    value class RefreshingToken(val progress: Float) : InstanceStatus
+    value class CancelCallback(val callback: () -> Unit) : AuthenticationState
 
     @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
+    value class Progress(val progress: Float) : AuthenticationState
 
     @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
+    value class Success(val account: Account) : AuthenticationState
+    data object Closed : AuthenticationState
 }
+

@@ -23,19 +23,20 @@
 
 package app.vercors
 
-import app.vercors.account.LoginUseCase
-import app.vercors.account.LoginUseCaseImpl
+import app.vercors.account.auth.AuthenticateUseCase
+import app.vercors.account.auth.AuthenticateUseCaseImpl
+import app.vercors.account.auth.ValidateTokenUseCase
+import app.vercors.account.auth.ValidateTokenUseCaseImpl
 import app.vercors.di.DIBuilder
 import app.vercors.di.inject
 import app.vercors.di.single
 import app.vercors.dialog.DialogManager
 import app.vercors.dialog.DialogManagerImpl
-import app.vercors.home.LoadHomeSectionUseCase
-import app.vercors.home.LoadHomeSectionUseCaseImpl
-import app.vercors.instance.LaunchInstanceUseCase
-import app.vercors.instance.LaunchInstanceUseCaseImpl
-import app.vercors.instance.LoadInstancesUseCase
-import app.vercors.instance.LoadInstancesUseCaseImpl
+import app.vercors.home.LoadInstancesHomeSectionUseCase
+import app.vercors.home.LoadInstancesHomeSectionUseCaseImpl
+import app.vercors.home.LoadProjectsHomeSectionUseCase
+import app.vercors.home.LoadProjectsHomeSectionUseCaseImpl
+import app.vercors.instance.*
 import app.vercors.navigation.NavigationManager
 import app.vercors.navigation.NavigationManagerImpl
 import app.vercors.notification.NotificationManager
@@ -51,12 +52,26 @@ fun DIBuilder.DomainModule(properties: Properties) {
         single<DialogManager> { DialogManagerImpl() }
         single<NavigationManager> { NavigationManagerImpl(inject(), inject()) }
         single<SystemThemeManager> { SystemThemeManagerImpl(inject()) }
-        single<LoginUseCase> { LoginUseCaseImpl(inject(), inject(), properties.getProperty("microsoftClientId")) }
-        single<LoadHomeSectionUseCase> { LoadHomeSectionUseCaseImpl(inject(), inject(), inject()) }
+        single<AuthenticateUseCase> { AuthenticateUseCaseImpl(inject()) }
+        single<ValidateTokenUseCase> { ValidateTokenUseCaseImpl(inject()) }
+        single<LoadProjectsHomeSectionUseCase> { LoadProjectsHomeSectionUseCaseImpl(inject(), inject()) }
+        single<LoadInstancesHomeSectionUseCase> { LoadInstancesHomeSectionUseCaseImpl(inject()) }
+        single<PrepareInstanceUseCase> {
+            PrepareInstanceUseCaseImpl(
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject(),
+                inject()
+            )
+        }
         single<LaunchInstanceUseCase> {
             LaunchInstanceUseCaseImpl(
-                inject(),
-                inject(),
                 inject(),
                 inject(),
                 inject(),

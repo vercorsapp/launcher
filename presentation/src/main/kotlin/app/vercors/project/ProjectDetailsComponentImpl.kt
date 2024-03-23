@@ -25,10 +25,11 @@ package app.vercors.project
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 internal class ProjectDetailsComponentImpl(
     componentContext: AppComponentContext
-) : AbstractAppComponent(componentContext), ProjectDetailsComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), ProjectDetailsComponent {
 
     override fun refresh() {
         // TODO

@@ -21,7 +21,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.account
+package app.vercors.account.auth
 
-class AuthenticationException(message: String? = "An error has occurred", cause: Exception? = null) :
-    Exception(message, cause)
+import app.vercors.account.Account
+
+sealed interface TokenValidationState {
+    @JvmInline
+    value class Progress(val progress: Float) : TokenValidationState
+
+    @JvmInline
+    value class Success(val account: Account) : TokenValidationState
+    data object FullLoginRequired : TokenValidationState
+}

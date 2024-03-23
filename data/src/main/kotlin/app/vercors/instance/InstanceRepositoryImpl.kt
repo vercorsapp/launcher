@@ -28,51 +28,49 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class InstanceRepositoryImpl(
     private val externalScope: CoroutineScope,
     private val dataSource: InstanceDataSource
 ) : InstanceRepository {
-    private val _state: MutableStateFlow<Resource<List<Instance>>> = createLoadableStateFlow()
-    override val loadingState: StateFlow<Resource<List<Instance>>> = _state
+    private val _loadingState: MutableStateFlow<Resource<List<Instance>>> = createLoadableStateFlow()
+    override val loadingState: StateFlow<Resource<List<Instance>>> = _loadingState
     override val state: StateFlow<List<Instance>?> = loadingState.toResultStateFlow(externalScope)
     override val current: List<Instance> get() = state.value!!
 
-    override fun loadInstances() = channelFlow {
-        externalScope.launch {
-            try {
-                _state.emitLoading(0f, emptyList())
-                dataSource.loadInstances().collect { (progress, result) ->
-                    send(result)
-                    if (result is InstanceResult.Success) {
-                        _state.updateLoading(progress) { it!! + Instance(result.instance, InstanceStatus.Stopped) }
-                    }
+    override fun loadInstances() = flow {
+        try {
+            _loadingState.emitLoading(0f, emptyList())
+            dataSource.loadInstances().collect { (progress, result) ->
+                emit(result)
+                if (result is InstanceResult.Success) {
+                    _loadingState.updateLoading(progress) { it!! + Instance(result.instance, InstanceStatus.Stopped) }
                 }
-                _state.toLoaded()
-            } catch (e: Exception) {
-                _state.emitErrored(e)
             }
-        }.join()
+            _loadingState.toLoaded()
+        } catch (e: Exception) {
+            _loadingState.emitErrored(e)
+        }
     }
 
     override suspend fun updateInstanceData(id: String, updater: (InstanceData) -> InstanceData) {
         externalScope.launch {
-            val instances = _state.updateLoadedAndGet { instances ->
-                instances.map { if (it.data.id == id) it.copy(data = updater(it.data)) else it }
+            val instances = _loadingState.updateLoadedAndGet { instances ->
+                instances.map { if (it.id == id) it.copy(data = updater(it.data)) else it }
             }
             if (instances is Resource.Loaded) {
-                instances.result.find { it.data.id == id }?.let { dataSource.saveInstance(it.data) }
+                instances.result.find { it.id == id }?.let { dataSource.saveInstance(it.data) }
             }
         }.join()
     }
 
     override fun updateInstanceStatus(id: String, updater: (InstanceStatus) -> InstanceStatus) {
-        _state.updateLoaded { instances ->
-            instances.map { if (it.data.id == id) it.copy(status = updater(it.status)) else it }
+        _loadingState.updateLoaded { instances ->
+            instances.map { if (it.id == id) it.copy(status = updater(it.status)) else it }
         }
     }
 
@@ -80,7 +78,7 @@ internal class InstanceRepositoryImpl(
         externalScope.launch {
             logger.info { "Creating instance ${instance.name}" }
             val savedInstance = dataSource.saveInstance(instance)
-            _state.updateLoaded { it + Instance(savedInstance, InstanceStatus.Stopped) }
+            _loadingState.updateLoaded { it + Instance(savedInstance, InstanceStatus.Stopped) }
             logger.info { "Created instance ${savedInstance.name}" }
         }.join()
     }

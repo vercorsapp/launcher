@@ -30,6 +30,7 @@ import app.vercors.common.inject
 import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceRepository
 import app.vercors.instance.mojang.MojangRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -40,7 +41,7 @@ internal class CreateInstanceDialogComponentImpl(
     private val _onClose: () -> Unit,
     private val mojangRepository: MojangRepository = componentContext.inject(),
     private val instanceRepository: InstanceRepository = componentContext.inject()
-) : AbstractAppComponent(componentContext), CreateInstanceDialogComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), CreateInstanceDialogComponent {
     private val _state = MutableStateFlow(CreateInstanceDialogState())
     override val state: StateFlow<CreateInstanceDialogState> = _state
 

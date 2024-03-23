@@ -33,12 +33,13 @@ import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.StateFlow
 
 internal class DialogComponentImpl(
     componentContext: AppComponentContext,
     private val dialogManager: DialogManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), DialogComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), DialogComponent {
     private val navigation = SlotNavigation<DialogConfig>()
     private val _childState: Value<ChildSlot<DialogConfig, DialogChildComponent>> = childSlot(
         source = navigation,

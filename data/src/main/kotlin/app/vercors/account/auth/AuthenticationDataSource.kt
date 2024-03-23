@@ -21,17 +21,25 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.account
+package app.vercors.account.auth
 
-sealed interface AuthenticationState {
-    @JvmInline
-    value class Waiting(val url: String) : AuthenticationState
+interface AuthenticationDataSource {
+    suspend fun getAuthorizationCode(
+        emitter: suspend (AuthenticationState) -> Unit,
+        state: String,
+        codeChallenge: String
+    ): AuthorizationCodeResult
 
-    @JvmInline
-    value class Progress(val progress: Float) : AuthenticationState
+    suspend fun getMicrosoftAccessToken(
+        codeVerifier: String,
+        authorizationCode: String,
+        port: Int
+    ): MicrosoftAccessTokenResult
 
-    @JvmInline
-    value class Success(val account: Account) : AuthenticationState
-    data object Closed : AuthenticationState
+    suspend fun refreshMicrosoftAccessToken(refreshToken: String): MicrosoftAccessTokenResult
+    suspend fun getXblToken(xblAccessToken: String): XblTokenResult
+    suspend fun getXstsToken(xblToken: String, userHash: String): String
+    suspend fun getMinecraftAccessToken(userHash: String, xstsToken: String): String
+    suspend fun getMinecraftProfile(mcAccessToken: String): MinecraftProfileResult
+    suspend fun cancelAuthentication()
 }
-

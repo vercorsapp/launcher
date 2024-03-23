@@ -21,17 +21,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.instance
+package app.vercors.instance.mojang
 
-sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
+import com.sun.jna.Platform
 
-    @JvmInline
-    value class RefreshingToken(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
-}
+val MojangVersionInfo.Rule.isValid: Boolean
+    get() {
+        val isOsValid = os == null || (when (os!!.name) {
+            "windows" -> Platform.isWindows()
+            "linux" -> Platform.isLinux()
+            "osx" -> Platform.isMac()
+            else -> true
+        } && when (os!!.arch) {
+            "x86" -> !Platform.is64Bit()
+            else -> true
+        } && (os!!.version == null || System.getProperty("os.version").matches(os!!.version!!.toRegex())))
+        val isFeaturesValid = features == null // TODO handle feature rules
+        val isValid = isOsValid && isFeaturesValid
+        return if (action == "allow") isValid else !isValid
+    }

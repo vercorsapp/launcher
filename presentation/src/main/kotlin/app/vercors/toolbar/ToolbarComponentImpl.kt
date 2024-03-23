@@ -30,6 +30,7 @@ import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationManager
 import app.vercors.notification.NotificationLevel
 import app.vercors.notification.NotificationManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -41,7 +42,7 @@ internal class ToolbarComponentImpl(
     private val onNotificationButtonClick: () -> Unit,
     private val navigationManager: NavigationManager = componentContext.inject(),
     notificationManager: NotificationManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), ToolbarComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), ToolbarComponent {
     private val _uiState = MutableStateFlow(ToolbarState())
     override val state: StateFlow<ToolbarState> = _uiState
 

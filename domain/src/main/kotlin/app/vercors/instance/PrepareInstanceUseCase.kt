@@ -23,15 +23,6 @@
 
 package app.vercors.instance
 
-sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
-
-    @JvmInline
-    value class RefreshingToken(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
+fun interface PrepareInstanceUseCase {
+    suspend operator fun invoke(instance: Instance): LaunchPreparationResult
 }

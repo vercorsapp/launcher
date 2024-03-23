@@ -24,7 +24,9 @@
 package app.vercors.system
 
 import com.jthemedetecor.OsThemeDetector
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -32,12 +34,13 @@ import kotlinx.coroutines.launch
 
 internal class SystemThemeManagerImpl(
     externalScope: CoroutineScope,
-    osThemeDetectorProvider: () -> OsThemeDetector = { OsThemeDetector.getDetector() }
+    osThemeDetectorProvider: () -> OsThemeDetector = { OsThemeDetector.getDetector() },
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SystemThemeManager {
     private lateinit var osThemeDetector: OsThemeDetector
     private val _darkState = MutableStateFlow(true)
     override val darkState: StateFlow<Boolean> = _darkState
-    private val initJob = externalScope.launch {
+    private val initJob = externalScope.launch(ioDispatcher) {
         osThemeDetector = osThemeDetectorProvider()
         _darkState.update { osThemeDetector.isDark }
         osThemeDetector.registerListener { _darkState.update { _ -> it } }

@@ -27,6 +27,10 @@ import app.vercors.account.AccountDataSource
 import app.vercors.account.AccountDataSourceImpl
 import app.vercors.account.AccountRepository
 import app.vercors.account.AccountRepositoryImpl
+import app.vercors.account.auth.AuthenticationDataSource
+import app.vercors.account.auth.AuthenticationDataSourceImpl
+import app.vercors.account.auth.AuthenticationRepository
+import app.vercors.account.auth.AuthenticationRepositoryImpl
 import app.vercors.common.AppHttpClient
 import app.vercors.common.AppJson
 import app.vercors.configuration.ConfigurationDataSource
@@ -69,6 +73,14 @@ fun DIBuilder.DataModule(properties: Properties) {
         single<InstanceRepository> { InstanceRepositoryImpl(inject(), inject()) }
         single<InstanceDataSource> { InstanceDataSourceImpl(inject(), inject()) }
         single<AccountRepository> { AccountRepositoryImpl(inject(), inject()) }
+        single<AccountDataSource> { AccountDataSourceImpl(inject(), inject()) }
+        single<AuthenticationRepository> { AuthenticationRepositoryImpl(inject()) }
+        single<AuthenticationDataSource> {
+            AuthenticationDataSourceImpl(
+                inject(),
+                properties.getProperty("microsoftClientId")
+            )
+        }
         single<AccountDataSource> { AccountDataSourceImpl(inject(), inject()) }
         single<CurseforgeProjectRepository> { CurseforgeProjectRepositoryImpl(inject()) }
         single<CurseforgeProjectDataSource> {

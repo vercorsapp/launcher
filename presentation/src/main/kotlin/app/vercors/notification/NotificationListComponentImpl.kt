@@ -26,6 +26,7 @@ package app.vercors.notification
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -33,7 +34,7 @@ import kotlinx.coroutines.flow.update
 internal class NotificationListComponentImpl(
     componentContext: AppComponentContext,
     private val notificationManager: NotificationManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), NotificationListComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), NotificationListComponent {
     private val _uiState: MutableStateFlow<NotificationListState> = MutableStateFlow(NotificationListState())
     override val state: StateFlow<NotificationListState> = _uiState
 

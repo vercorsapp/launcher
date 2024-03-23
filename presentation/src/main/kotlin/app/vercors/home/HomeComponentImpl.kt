@@ -34,8 +34,10 @@ import app.vercors.navigation.NavigationEvent
 import app.vercors.navigation.NavigationManager
 import app.vercors.project.Project
 import app.vercors.project.ProjectProviderType
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
@@ -44,9 +46,10 @@ internal class HomeComponentImpl(
     configurationRepository: ConfigurationRepository = componentContext.inject(),
     instanceRepository: InstanceRepository = componentContext.inject(),
     private val launchInstanceUseCase: LaunchInstanceUseCase = componentContext.inject(),
-    private val loadHomeSectionUseCase: LoadHomeSectionUseCase = componentContext.inject(),
+    private val loadInstancesHomeSectionUseCase: LoadInstancesHomeSectionUseCase = componentContext.inject(),
+    private val loadProjectsHomeSectionUseCase: LoadProjectsHomeSectionUseCase = componentContext.inject(),
     private val navigationManager: NavigationManager = componentContext.inject()
-) : AbstractAppComponent(componentContext), HomeComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), HomeComponent {
     private val configState =
         configurationRepository.state.filterNotNull().map { it.homeSections to it.homeProviders }
             .stateIn(localScope, SharingStarted.Eagerly, null)
@@ -80,25 +83,22 @@ internal class HomeComponentImpl(
         sectionTypes: List<HomeSectionType>, providerTypes: List<ProjectProviderType>
     ) = coroutineScope {
         _state.update { HomeState(emptySections(sectionTypes)) }
-        sectionTypes.forEach { sectionType ->
+        sectionTypes.map { sectionType ->
             launch {
                 val section = when (sectionType) {
-                    HomeSectionType.JumpBackIn -> loadHomeSectionUseCase.loadInstances()
+                    HomeSectionType.JumpBackIn -> loadInstancesHomeSectionUseCase()
                     else -> providerTypes.map { providerType -> getProjectData(sectionType, providerType) }.merge()
                 }
                 _state.update { state ->
                     HomeState(state.sections.map { if (it.type === sectionType) section else it })
                 }
             }
-        }
+        }.joinAll()
     }
 
     private suspend fun getProjectData(sectionType: HomeSectionType, providerType: ProjectProviderType) =
         cachedProjectData.getOrPut(sectionType to providerType) {
-            loadHomeSectionUseCase.loadProjects(
-                sectionType,
-                providerType
-            )
+            loadProjectsHomeSectionUseCase(sectionType, providerType)
         }
 
     override fun refresh() {
@@ -116,7 +116,7 @@ internal class HomeComponentImpl(
     }
 
     private fun onLaunchInstance(instance: Instance) {
-        localScope.launch { launchInstanceUseCase.launchInstance(instance) }
+        localScope.launch { launchInstanceUseCase.invoke(instance) }
     }
 
     private fun onShowProjectDetails(project: Project) {

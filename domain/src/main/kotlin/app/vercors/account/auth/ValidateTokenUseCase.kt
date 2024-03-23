@@ -21,17 +21,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.instance
+package app.vercors.account.auth
 
-sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
+import app.vercors.account.Account
+import kotlinx.coroutines.flow.Flow
 
-    @JvmInline
-    value class RefreshingToken(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
-
-    @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
+fun interface ValidateTokenUseCase {
+    operator fun invoke(account: Account?): Flow<TokenValidationState>
 }

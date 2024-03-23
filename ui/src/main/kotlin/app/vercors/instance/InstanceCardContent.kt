@@ -86,45 +86,6 @@ fun InstanceCardContent(
                 }
 
                 when (instance.status) {
-                    is InstanceStatus.Preparing -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val animatedProgress by animateFloatAsState(
-                                targetValue = (instance.status as InstanceStatus.Preparing).progress,
-                                animationSpec = tween(500)
-                            )
-
-                            CircularProgressIndicator(
-                                progress = animatedProgress,
-                                strokeWidth = 6.dp,
-                                modifier = Modifier.size(64.dp)
-                            )
-                        }
-                    }
-
-                    is InstanceStatus.Running -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            IconButton(
-                                onClick = { onInstanceClick(instance) },
-                                modifier = Modifier.size(64.dp)
-                                    .background(MaterialTheme.colors.primary, CircleShape),
-                                content = {
-                                    Icon(
-                                        imageVector = FeatherIcons.Eye,
-                                        contentDescription = stringResource(Res.string.view),
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colors.onPrimary
-                                    )
-                                }
-                            )
-                        }
-                    }
-
                     InstanceStatus.Stopped -> {
                         AppAnimatedVisibility(
                             visible = isHovered,
@@ -149,6 +110,45 @@ fun InstanceCardContent(
                                     }
                                 )
                             }
+                        }
+                    }
+
+                    is InstanceStatus.RefreshingToken -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = (instance.status as InstanceStatus.RefreshingToken).progress,
+                                animationSpec = tween(500)
+                            )
+
+                            CircularProgressIndicator(
+                                progress = animatedProgress,
+                                strokeWidth = 6.dp,
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
+                    }
+
+                    else -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IconButton(
+                                onClick = { onInstanceClick(instance) },
+                                modifier = Modifier.size(64.dp)
+                                    .background(MaterialTheme.colors.primary, CircleShape),
+                                content = {
+                                    Icon(
+                                        imageVector = FeatherIcons.Eye,
+                                        contentDescription = stringResource(Res.string.view),
+                                        modifier = Modifier.size(32.dp),
+                                        tint = MaterialTheme.colors.onPrimary
+                                    )
+                                }
+                            )
                         }
                     }
                 }

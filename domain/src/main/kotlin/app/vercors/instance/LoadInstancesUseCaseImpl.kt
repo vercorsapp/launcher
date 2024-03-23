@@ -28,43 +28,45 @@ import app.vercors.notification.NotificationLevel
 import app.vercors.notification.NotificationManager
 import app.vercors.notification.NotificationText
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
-private val logger = KotlinLogging.logger { }
+private val logger = KotlinLogging.logger {}
 
 internal class LoadInstancesUseCaseImpl(
     private val externalScope: CoroutineScope,
     private val instanceRepository: InstanceRepository,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : LoadInstancesUseCase {
     override suspend operator fun invoke() {
         externalScope.launch {
-            instanceRepository.loadInstances().collect {
-                when (it) {
-                    is InstanceResult.Error -> {
-                        logger.error(it.error) { "An error occurred while loading an instance" }
-                        notificationManager.sendNotification(
-                            Notification(
-                                level = NotificationLevel.ERROR,
-                                text = NotificationText.Template.Error,
-                                args = arrayOf(it.error.localizedMessage)
+            withContext(ioDispatcher) {
+                instanceRepository.loadInstances().collect {
+                    when (it) {
+                        is InstanceResult.Error -> {
+                            logger.error(it.error) { "An error occurred while loading an instance" }
+                            notificationManager.sendNotification(
+                                Notification(
+                                    level = NotificationLevel.ERROR,
+                                    text = NotificationText.Template.Error,
+                                    args = arrayOf(it.error.localizedMessage)
+                                )
                             )
-                        )
-                    }
+                        }
 
-                    is InstanceResult.Warn -> {
-                        logger.warn { "Could not find instance at location ${it.path}" }
-                        notificationManager.sendNotification(
-                            Notification(
-                                level = NotificationLevel.WARN,
-                                text = NotificationText.Template.InstanceNotFound,
-                                args = arrayOf(it)
+                        is InstanceResult.Warn -> {
+                            logger.warn { "Could not find instance at location ${it.path}" }
+                            notificationManager.sendNotification(
+                                Notification(
+                                    level = NotificationLevel.WARN,
+                                    text = NotificationText.Template.InstanceNotFound,
+                                    args = arrayOf(it)
+                                )
                             )
-                        )
-                    }
+                        }
 
-                    else -> { // Nothing needs to be done, state is automatically updated
+                        else -> { // Nothing needs to be done, state is automatically updated
+                        }
                     }
                 }
             }

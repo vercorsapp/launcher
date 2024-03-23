@@ -25,6 +25,7 @@ package app.vercors.root.error
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -32,7 +33,7 @@ internal class ErrorComponentImpl(
     componentContext: AppComponentContext,
     override val onClose: () -> Unit,
     error: Exception
-) : AbstractAppComponent(componentContext), ErrorComponent {
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), ErrorComponent {
     private val _state = MutableStateFlow(ErrorState(error))
     override val state: StateFlow<ErrorState> = _state
 }

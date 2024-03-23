@@ -35,7 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 
 internal class AppComponentContextImpl(
     componentContext: ComponentContext,
-    override val di: DI,
+    override val di: DI
 ) : AppComponentContext,
     LifecycleOwner by componentContext,
     StateKeeperOwner by componentContext,
