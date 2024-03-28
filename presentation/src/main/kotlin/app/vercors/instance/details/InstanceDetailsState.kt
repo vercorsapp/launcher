@@ -21,34 +21,12 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.instance
+package app.vercors.instance.details
 
-import androidx.compose.runtime.*
-import app.vercors.common.ModLoader
-import app.vercors.readable
-import kotlinx.coroutines.delay
-import org.jetbrains.compose.resources.stringResource
-import vercors.ui.generated.resources.Res
-import vercors.ui.generated.resources.lastPlayedTime
-import vercors.ui.generated.resources.notPlayedBefore
+import app.vercors.instance.Instance
+import app.vercors.instance.InstanceStatus
 
-val Instance.loaderAndVersionString: String @Stable get() = "${data.loader?.value ?: ModLoader.Vanilla} ${data.gameVersion.id}"
-
-val Instance.lastPlayedString: String
-    @Composable get() {
-        val lastPlayed = data.lastPlayed ?: return stringResource(Res.string.notPlayedBefore)
-        var text by remember { mutableStateOf(lastPlayed.readable()) }
-        var refresh by remember { mutableStateOf(false) }
-
-        LaunchedEffect(refresh) {
-            text = lastPlayed.readable()
-            delay(10_000)
-            refresh = !refresh
-        }
-
-        LaunchedEffect(lastPlayed) {
-            text = lastPlayed.readable()
-        }
-
-        return stringResource(Res.string.lastPlayedTime, text)
-    }
+data class InstanceDetailsState(
+    val instance: Instance,
+    val progress: InstanceStatus.Progress? = null
+)

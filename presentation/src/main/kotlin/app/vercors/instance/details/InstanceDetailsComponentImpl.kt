@@ -25,11 +25,55 @@ package app.vercors.instance.details
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
+import app.vercors.common.inject
+import app.vercors.instance.InstanceRepository
+import app.vercors.instance.InstanceStatus
+import app.vercors.instance.LaunchInstanceUseCase
+import app.vercors.instance.StopInstanceUseCase
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 internal class InstanceDetailsComponentImpl(
-    componentContext: AppComponentContext
+    componentContext: AppComponentContext,
+    private val instanceId: String,
+    private val instanceRepository: InstanceRepository = componentContext.inject(),
+    private val launchInstanceUseCase: LaunchInstanceUseCase = componentContext.inject(),
+    private val stopInstanceUseCase: StopInstanceUseCase = componentContext.inject()
 ) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), InstanceDetailsComponent {
+    private val _state: MutableStateFlow<InstanceDetailsState> =
+        MutableStateFlow(InstanceDetailsState(instanceRepository.findInstance(instanceId)!!))
+    override val state: StateFlow<InstanceDetailsState> = _state
+
+    init {
+        instanceRepository.state.map { it?.find { i -> i.id == instanceId } }.filterNotNull()
+            .collectInLifecycle { instance -> _state.update { it.copy(instance = instance) } }
+        launchInLifecycle {
+            while (isActive) {
+                _state.update {
+                    if (it.instance.status is InstanceStatus.Progress) {
+                        it.copy(progress = it.instance.status as InstanceStatus.Progress)
+                    } else it.copy(progress = null)
+                }
+                delay(250)
+            }
+        }
+    }
+
+    override fun onIntent(intent: InstanceDetailsIntent) = when (intent) {
+        InstanceDetailsIntent.LaunchInstance -> onLaunchInstance()
+        InstanceDetailsIntent.StopInstance -> onStopInstance()
+    }
+
+    private fun onLaunchInstance() {
+        localScope.launch { launchInstanceUseCase(state.value.instance) }
+    }
+
+    private fun onStopInstance() {
+        localScope.launch { stopInstanceUseCase(state.value.instance) }
+    }
 
     override fun refresh() {
         // TODO

@@ -43,4 +43,7 @@ sealed interface InstanceListIntent {
 
     @JvmInline
     value class LaunchInstance(val instance: Instance) : InstanceListIntent
+
+    @JvmInline
+    value class StopInstance(val instance: Instance) : InstanceListIntent
 }

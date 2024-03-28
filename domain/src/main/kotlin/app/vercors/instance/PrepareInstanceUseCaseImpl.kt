@@ -30,26 +30,35 @@ import app.vercors.account.auth.ValidateTokenUseCase
 import app.vercors.configuration.ConfigurationRepository
 import app.vercors.dialog.DialogConfig
 import app.vercors.dialog.DialogManager
-import app.vercors.instance.mojang.*
+import app.vercors.instance.mojang.MojangAssetIndex
+import app.vercors.instance.mojang.MojangRepository
+import app.vercors.instance.mojang.MojangVersionInfo
+import app.vercors.instance.mojang.isValid
 import app.vercors.navigation.NavigationConfig
 import app.vercors.navigation.NavigationManager
 import app.vercors.system.StorageManager
-import app.vercors.unzipFile
-import app.vercors.validate
 import com.sun.jna.Platform
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.net.URL
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.inputStream
+import java.security.DigestInputStream
+import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import kotlin.io.path.*
 
 private val logger = KotlinLogging.logger {}
 
 class PrepareInstanceUseCaseImpl(
     private val externalScope: CoroutineScope,
     private val json: Json,
+    private val httpClient: HttpClient,
     private val instanceRepository: InstanceRepository,
     private val accountRepository: AccountRepository,
     private val configurationRepository: ConfigurationRepository,
@@ -57,18 +66,77 @@ class PrepareInstanceUseCaseImpl(
     private val validateTokenUseCase: ValidateTokenUseCase,
     private val storageManager: StorageManager,
     private val dialogManager: DialogManager,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : PrepareInstanceUseCase {
     override suspend fun invoke(instance: Instance): LaunchPreparationResult = externalScope.async {
+        val verificationContext = defaultDispatcher + SupervisorJob()
+        val extractionContext = defaultDispatcher + SupervisorJob()
+        val downloadContext =
+            Dispatchers.IO.limitedParallelism(configurationRepository.current.maximumParallelDownloads) + SupervisorJob()
         logger.info { "Preparing instance ${instance.data.name}" }
+        validateAccessToken(instance)
+        logger.info { "Access token validated - preparing to launch instance" }
+        navigationManager.navigateTo(NavigationConfig.InstanceDetails(instance.id))
+        instance.updateStatus(InstanceStatus.Preparing)
+        val versionInfo = mojangRepository.getVersionInfo(instance.data.gameVersion)
+        val assetIndex = mojangRepository.getAssetIndex(versionInfo)
+        val clientJarPath = storageManager.getVersionJarPath(versionInfo.id)
+        val logConfigPath =
+            versionInfo.logging?.let { storageManager.getLogConfigPath(it.client.type, it.client.file.id) }
+        val filesToVerify = getFilesToVerify(instance, versionInfo, assetIndex, clientJarPath, logConfigPath)
+
+        instance.updateStatus(InstanceStatus.Verifying(filesToVerify.size))
+        val verificationResult = filesToVerify.map {
+            async(verificationContext) {
+                verifyFile(it, instance)
+            }
+        }.awaitAll().filterNotNull()
+        val verificationFailures =
+            verificationResult.filter { it.second is FileVerificationResult.Failure }.map { it.first }
+        logger.info { "Verification complete" }
+
+        val filesToDownload = verificationResult
+            .filter { it.second is FileVerificationResult.RequiresDownload }
+            .map { it.first }
+        val downloadResult = filesToDownload.map {
+            async(downloadContext) {
+                downloadFile(it, instance)
+            }
+        }.awaitAll().filterNotNull()
+        val downloadFailures = downloadResult.map { it.first }
+        if (filesToDownload.isNotEmpty()) logger.info { "Download complete" }
+
+        instance.updateStatus(InstanceStatus.Extracting)
+        val filesToExtract = filesToVerify.filterIsInstance<DownloadableFile.Native>()
+        val extractionResult = filesToExtract.map {
+            async(extractionContext) {
+                extractFile(it)
+            }
+        }.awaitAll().filterNotNull()
+        if (filesToExtract.isNotEmpty()) logger.info { "Extraction complete" }
+
+        // TODO better error handling
+        verificationFailures.forEach { logger.error { "Failure to verify file ${it.path}" } }
+        downloadFailures.forEach { logger.error { "Failure to download file ${it.url}" } }
+        extractionResult.forEach { (file, e) -> logger.error(e) { "Failure to extract file ${file.path}" } }
+
+        LaunchPreparationResult(
+            versionInfo,
+            clientJarPath.absolutePathString(),
+            filesToVerify.filterIsInstance<DownloadableFile.Library>().map { it.path.absolutePathString() },
+            logConfigPath
+        )
+    }.await()
+
+    private suspend fun validateAccessToken(instance: Instance) {
         val selectedAccount = accountRepository.selectedState.value
         var account: Account? = null
         validateTokenUseCase(selectedAccount).collect {
             when (it) {
-                is TokenValidationState.Progress -> instance.updateRefreshingTokenProgress(it.progress)
+                is TokenValidationState.Progress -> instance.updateStatus(InstanceStatus.RefreshingToken(it.progress))
                 is TokenValidationState.Success -> account = it.account
-                else -> { // Do nothing
-                }
+                TokenValidationState.FullLoginRequired -> account = null
             }
         }
         if (account == null) {
@@ -77,141 +145,170 @@ class PrepareInstanceUseCaseImpl(
             job.join()
             if (job.isCancelled || accountRepository.selectedState.value == null) {
                 logger.warn { "Login cancelled - aborting..." }
-                instanceRepository.updateInstanceStatus(instance.id) { InstanceStatus.Stopped }
+                instanceRepository.updateInstanceStatus(instance.id) { InstanceStatus.NotRunning }
                 throw CancellationException("Login cancelled")
             }
         } else {
             accountRepository.addAccount(account!!)
         }
-        logger.info { "Access token validated - preparing to launch instance" }
-        navigationManager.navigateTo(NavigationConfig.InstanceDetails(instance.id))
-        instance.updatePreparingProgress(1)
-        val versionInfo = validateVersionInfo(instance.data.gameVersion)
-        instance.updatePreparingProgress(2)
-        val clientJarPath = validateClientJar(versionInfo)
-        instance.updatePreparingProgress(3)
+    }
+
+    private fun getFilesToVerify(
+        instance: Instance,
+        version: MojangVersionInfo,
+        assetIndex: MojangAssetIndex,
+        clientJarPath: Path,
+        logConfigPath: Path?
+    ): List<DownloadableFile> = buildList {
+        add(DownloadableFile.Client(clientJarPath, version.downloads.client))
+        addAll(getLibraryFiles(instance, version))
+        addAll(getAssetFiles(assetIndex))
+        logConfigPath?.let { add(DownloadableFile.LogConfig(it, version.logging!!.client.file)) }
+    }
+
+    private fun getLibraryFiles(
+        instance: Instance,
+        version: MojangVersionInfo
+    ): List<DownloadableFile> {
         val nativesPath = storageManager.getInstanceNativesPath(instance.id)
-        instance.updatePreparingProgress(4)
-        val libraryPaths = validateLibraries(versionInfo, nativesPath)
-        instance.updatePreparingProgress(5)
-        val assetIndex = validateAssetIndex(versionInfo)
-        instance.updatePreparingProgress(6)
-        validateAssets(assetIndex)
-        instance.updatePreparingProgress(7)
-        val logConfigPath = versionInfo.logging?.let { validateLogConfig(it.client) }
-        instance.updatePreparingProgress(8)
-        LaunchPreparationResult(versionInfo, clientJarPath, libraryPaths, logConfigPath)
-    }.await()
-
-    private suspend fun validateVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo {
-        logger.debug { "Validating version information" }
-        val path = storageManager.getVersionJsonPath(version.id)
-        validate(
-            path = path,
-            url = version.url,
-            sha1 = version.sha1,
-        )
-        return path.inputStream().use { json.decodeFromStream(it) }
-    }
-
-    private suspend fun validateClientJar(version: MojangVersionInfo): String {
-        logger.debug { "Validating client JAR" }
-        val path = storageManager.getVersionJarPath(version.id)
-        val file = version.downloads.client
-        validate(
-            path = path,
-            url = file.url,
-            sha1 = file.sha1,
-            size = file.size
-        )
-        return path.absolutePathString()
-    }
-
-    private suspend fun validateLibraries(version: MojangVersionInfo, nativesPath: Path): List<String> =
-        coroutineScope {
-            logger.debug { "Validating libraries" }
-            val context = Dispatchers.IO.limitedParallelism(configurationRepository.current.maximumParallelDownloads)
-            version.libraries.filter { it.rules?.all(MojangVersionInfo.Rule::isValid) ?: true }.map {
-                async(context) {
-                    val file = it.downloads.artifact
-                    if (file != null) {
-                        val path = storageManager.getLibraryPath(file.path)
-                        validate(
-                            path = path,
-                            url = file.url,
-                            sha1 = file.sha1,
-                            size = file.size
-                        )
-                        path.absolutePathString()
-                    } else {
-                        val os = when {
-                            Platform.isWindows() -> "windows"
-                            Platform.isMac() -> "osx"
-                            else -> "linux"
-                        }
-                        val native = it.natives!!.getValue(os)
-                        val nativeFile = it.downloads.classifiers!!.getValue(native)
-                        val path = storageManager.getLibraryPath(nativeFile.path)
-                        validate(
-                            path = path,
-                            url = nativeFile.url,
-                            sha1 = nativeFile.sha1,
-                            size = nativeFile.size
-                        )
-                        unzipFile(path, nativesPath, it.extract!!.exclude)
-                        null
+        return version.libraries
+            .filter { it.rules?.all(MojangVersionInfo.Rule::isValid) ?: true }
+            .map {
+                val file = it.downloads.artifact
+                if (file != null) {
+                    val path = storageManager.getLibraryPath(file.path)
+                    DownloadableFile.Library(path, file)
+                } else {
+                    val os = when {
+                        Platform.isWindows() -> "windows"
+                        Platform.isMac() -> "osx"
+                        else -> "linux"
                     }
+                    val native = it.natives!!.getValue(os)
+                    val nativeFile = it.downloads.classifiers!!.getValue(native)
+                    val path = storageManager.getLibraryPath(nativeFile.path)
+                    DownloadableFile.Native(path, nativeFile, nativesPath, it.extract!!.exclude)
                 }
-            }.awaitAll().filterNotNull()
+            }
+    }
+
+    private fun getAssetFiles(assetIndex: MojangAssetIndex): List<DownloadableFile> =
+        assetIndex.objects.map { (name, assertObj) ->
+            val path = storageManager.getAssetPath(assertObj.hash)
+            val url = mojangRepository.getAssetUrl(assertObj.hash, name)
+            DownloadableFile.Asset(path, url, assertObj.size, assertObj.hash)
         }
 
-    private suspend fun validateAssetIndex(version: MojangVersionInfo): MojangAssetIndex {
-        logger.debug { "Validating asset index" }
-        val path = storageManager.getAssetIndexPath(version.assets)
-        validate(
-            path = path,
-            url = version.assetIndex.url,
-            sha1 = version.assetIndex.sha1,
-            size = version.assetIndex.size
-        )
-        return path.inputStream().use { json.decodeFromStream(it) }
+    private fun verifyFile(
+        file: DownloadableFile,
+        instance: Instance
+    ): Pair<DownloadableFile, FileVerificationResult>? = runCatching {
+        logger.trace { "Verifying file at location ${file.path}" }
+        val result = file.verify()
+        instance.incrementVerifyingStatus()
+        return if (result != FileVerificationResult.Success) file to result else null
+    }.getOrElse {
+        if (it is Exception) file to FileVerificationResult.Failure.Unknown(it) else throw it
     }
 
-    private suspend fun validateAssets(assetIndex: MojangAssetIndex) = coroutineScope {
-        logger.debug { "Validating assets" }
-        val context = Dispatchers.IO.limitedParallelism(configurationRepository.current.maximumParallelDownloads)
-        assetIndex.objects.forEach { name, (sha1, size) ->
-            launch(context) {
-                val path = storageManager.getAssetPath(sha1)
-                val url = mojangRepository.getAssetUrl(sha1, name)
-                validate(
-                    path = path,
-                    url = url,
-                    sha1 = sha1,
-                    size = size
-                )
+    private fun downloadFile(
+        file: DownloadableFile,
+        instance: Instance
+    ): Pair<DownloadableFile, DownloadResult.Failure>? = runCatching {
+        logger.trace { "Starting download of file ${file.url}" }
+        val url = URL(file.url)
+        val connection = url.openConnection()
+        val size = connection.contentLength
+        if (size != file.size) return@runCatching file to DownloadResult.Failure.SizeMismatch
+        val md = MessageDigest.getInstance("SHA1")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var bytesCopied = 0
+        connection.getInputStream().use { input ->
+            file.path.deleteRecursively()
+            file.path.createParentDirectories().outputStream().use { output ->
+                var bytes = input.read(buffer)
+                while (bytes >= 0) {
+                    output.write(buffer, 0, bytes)
+                    md.update(buffer, 0, bytes)
+                    bytesCopied += bytes
+                    instance.incrementDownloadingStatus(bytes)
+                    bytes = input.read(buffer)
+                }
             }
         }
+        val actualSha1 = md.digest().toHexString()
+        if (actualSha1 != file.sha1) return@runCatching file to DownloadResult.Failure.HashMismatch
+        null
+    }.getOrElse {
+        if (it is Exception) file to DownloadResult.Failure.Unknown(it) else throw it
     }
 
-    private suspend fun validateLogConfig(client: MojangVersionInfo.Logging.Client): Path {
-        logger.debug { "Validating log config" }
-        val file = client.file
-        val path = storageManager.getLogConfigPath(client.type, file.id)
-        validate(
-            path = path,
-            url = file.url,
-            sha1 = file.sha1,
-            size = file.size
-        )
-        return path
+    private fun extractFile(file: DownloadableFile.Native): Pair<DownloadableFile.Native, Exception>? = runCatching {
+        logger.trace { "Extracting file ${file.path} to location ${file.dest}" }
+        val zis = ZipInputStream(FileInputStream(file.path.toFile()))
+        zis.use {
+            var zipEntry = zis.nextEntry
+            while (zipEntry != null) {
+                if (file.excludes.none { zipEntry!!.name.startsWith(it) }) {
+                    processZipEntry(zis, zipEntry, file.dest)
+                }
+                zipEntry = zis.nextEntry
+            }
+            zis.closeEntry()
+        }
+        null
+    }.getOrElse {
+        if (it is Exception) file to it else throw it
     }
 
-    private fun Instance.updateRefreshingTokenProgress(progress: Float) = instanceRepository.updateInstanceStatus(id) {
-        InstanceStatus.RefreshingToken(progress)
+    private fun processZipEntry(
+        zis: ZipInputStream,
+        zipEntry: ZipEntry,
+        dest: Path,
+    ) {
+        val newFile = createFileForZipEntry(dest, zipEntry)
+        if (zipEntry.isDirectory) {
+            if (!newFile.isDirectory()) newFile.createDirectories()
+        } else {
+            val parent = newFile.parent
+            if (!parent.isDirectory()) parent.createDirectories()
+            newFile.outputStream().use { zis.copyTo(it) }
+        }
     }
 
-    private fun Instance.updatePreparingProgress(progress: Int) = instanceRepository.updateInstanceStatus(id) {
-        InstanceStatus.Preparing(progress / 8f)
+    private fun createFileForZipEntry(
+        destinationDir: Path,
+        zipEntry: ZipEntry,
+    ): Path {
+        val destFile = destinationDir.resolve(zipEntry.name)
+        val destDirPath = destinationDir.absolutePathString()
+        val destFilePath = destFile.absolutePathString()
+        if (!destFilePath.startsWith(destDirPath + File.separator))
+            throw IOException("Entry is outside of the target dir: " + zipEntry.name)
+        return destFile
+    }
+
+    private fun Instance.incrementVerifyingStatus() = instanceRepository.updateInstanceStatus(id) {
+        if (it is InstanceStatus.Verifying) it.copy(current = it.current + 1) else it
+    }
+
+    private fun Instance.incrementDownloadingStatus(amount: Int) = instanceRepository.updateInstanceStatus(id) {
+        if (it is InstanceStatus.Downloading) it.copy(current = it.current + amount) else it
+    }
+
+    private fun Instance.updateStatus(status: InstanceStatus) = instanceRepository.updateInstanceStatus(id) { status }
+
+    private fun DownloadableFile.verify(): FileVerificationResult = when {
+        !path.exists() -> FileVerificationResult.RequiresDownload
+        path.fileSize().toInt() != size -> FileVerificationResult.Failure.SizeMismatch
+        path.sha1() != sha1 -> FileVerificationResult.Failure.HashMismatch
+        else -> FileVerificationResult.Success
+    }
+
+    private fun Path.sha1(): String {
+        val md = MessageDigest.getInstance("SHA1")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        DigestInputStream(inputStream(), md).use { while (it.read(buffer) != -1); }
+        return md.digest().toHexString()
     }
 }

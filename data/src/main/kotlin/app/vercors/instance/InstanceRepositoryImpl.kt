@@ -26,6 +26,7 @@ package app.vercors.instance
 import app.vercors.common.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
@@ -48,7 +49,12 @@ internal class InstanceRepositoryImpl(
             dataSource.loadInstances().collect { (progress, result) ->
                 emit(result)
                 if (result is InstanceResult.Success) {
-                    _loadingState.updateLoading(progress) { it!! + Instance(result.instance, InstanceStatus.Stopped) }
+                    _loadingState.updateLoading(progress) {
+                        it!! + Instance(
+                            result.instance,
+                            InstanceStatus.NotRunning
+                        )
+                    }
                 }
             }
             _loadingState.toLoaded()
@@ -56,6 +62,8 @@ internal class InstanceRepositoryImpl(
             _loadingState.emitErrored(e)
         }
     }
+
+    override fun findInstance(id: String): Instance? = current.find { it.id == id }
 
     override suspend fun updateInstanceData(id: String, updater: (InstanceData) -> InstanceData) {
         externalScope.launch {
@@ -74,12 +82,13 @@ internal class InstanceRepositoryImpl(
         }
     }
 
-    override suspend fun createInstance(instance: InstanceData) {
-        externalScope.launch {
+    override suspend fun createInstance(instance: InstanceData): String {
+        return externalScope.async {
             logger.info { "Creating instance ${instance.name}" }
             val savedInstance = dataSource.saveInstance(instance)
-            _loadingState.updateLoaded { it + Instance(savedInstance, InstanceStatus.Stopped) }
+            _loadingState.updateLoaded { it + Instance(savedInstance, InstanceStatus.NotRunning) }
             logger.info { "Created instance ${savedInstance.name}" }
-        }.join()
+            savedInstance.id
+        }.await()
     }
 }

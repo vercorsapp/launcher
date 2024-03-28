@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.dialog.instance.create
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -40,9 +40,9 @@ import androidx.compose.ui.unit.dp
 import app.vercors.UI
 import app.vercors.common.*
 import app.vercors.project.icon
+import app.vercors.project.string
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.Box
-import compose.icons.feathericons.Feather
 import compose.icons.feathericons.Plus
 import compose.icons.feathericons.X
 import org.jetbrains.compose.resources.stringResource
@@ -191,17 +191,10 @@ private fun FormField(name: String, modifier: Modifier = Modifier, content: @Com
 
 @Composable
 private fun LoaderChip(value: ModLoader?, selected: Boolean, onClick: () -> Unit) {
-    value?.let {
-        SelectIconChip(
-            selected = selected,
-            onClick = onClick,
-            text = it.text,
-            imageVector = it.icon,
-        )
-    } ?: SelectIconChip(
+    SelectIconChip(
         selected = selected,
         onClick = onClick,
-        text = ModLoader.Vanilla,
-        imageVector = FeatherIcons.Feather
+        text = value.string,
+        imageVector = value.icon,
     )
 }

@@ -44,8 +44,7 @@ import app.vercors.instance.InstanceDataSource
 import app.vercors.instance.InstanceDataSourceImpl
 import app.vercors.instance.InstanceRepository
 import app.vercors.instance.InstanceRepositoryImpl
-import app.vercors.instance.mojang.MojangRepository
-import app.vercors.instance.mojang.MojangRepositoryImpl
+import app.vercors.instance.mojang.*
 import app.vercors.project.curseforge.CurseforgeProjectDataSource
 import app.vercors.project.curseforge.CurseforgeProjectDataSourceImpl
 import app.vercors.project.curseforge.CurseforgeProjectRepository
@@ -96,7 +95,9 @@ fun DIBuilder.DataModule(properties: Properties) {
                 properties.getProperty("modrinthApiKey")
             )
         }
-        single<MojangRepository> { MojangRepositoryImpl(inject()) }
+        single<MojangRepository> { MojangRepositoryImpl(inject(), inject()) }
+        single<MojangRemoteDataSource> { MojangRemoteDataSourceImpl(inject()) }
+        single<MojangLocalDataSource> { MojangLocalDataSourceImpl(inject(), inject()) }
         single<StorageManager> { StorageManagerImpl() }
     }
 }

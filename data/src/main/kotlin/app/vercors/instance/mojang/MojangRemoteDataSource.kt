@@ -21,10 +21,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.instance.mojang
 
-import app.vercors.common.DefaultComponent
-import app.vercors.dialog.DialogChildComponent
-
-interface CreateInstanceDialogComponent : DefaultComponent<CreateInstanceDialogState, CreateInstanceDialogIntent>,
-    DialogChildComponent
+interface MojangRemoteDataSource {
+    suspend fun getVersionManifest(): MojangVersionManifest
+    suspend fun getVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo
+    suspend fun getAssetIndex(index: MojangVersionInfo.AssetIndex): MojangAssetIndex
+    fun getAssetUrl(sha1: String, name: String): String
+}

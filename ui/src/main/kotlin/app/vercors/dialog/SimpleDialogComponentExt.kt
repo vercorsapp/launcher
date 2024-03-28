@@ -21,25 +21,27 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.project
+package app.vercors.dialog
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.ui.graphics.vector.ImageVector
-import app.vercors.common.ModLoader
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Feather
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
+import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
+import app.vercors.dialog.instance.kill.KillInstanceDialogComponent
+import org.jetbrains.compose.resources.stringResource
 import vercors.ui.generated.resources.*
 
-val ModLoader?.icon: ImageVector
+val SimpleDialogComponent.title: String
     @Composable get() = when (this) {
-        ModLoader.Forge -> vectorResource(Res.drawable.forge)
-        ModLoader.NeoForge -> vectorResource(Res.drawable.neoforge)
-        ModLoader.Fabric -> vectorResource(Res.drawable.fabric)
-        ModLoader.Quilt -> vectorResource(Res.drawable.quilt)
-        null -> FeatherIcons.Feather
+        is LaunchErrorDialogComponent -> stringResource(Res.string.launchErrorTitle)
+        is JavaVersionErrorDialogComponent -> stringResource(Res.string.javaVersionErrorTitle)
+        is KillInstanceDialogComponent -> stringResource(Res.string.killInstanceTitle)
+        else -> ""
     }
 
-val ModLoader?.string: String
-    @Stable get() = this?.text ?: ModLoader.Vanilla
+val SimpleDialogComponent.message: String
+    @Composable get() = when (this) {
+        is LaunchErrorDialogComponent -> stringResource(Res.string.launchErrorMessage)
+        is JavaVersionErrorDialogComponent -> stringResource(Res.string.javaVersionErrorMessage, javaVersion)
+        is KillInstanceDialogComponent -> stringResource(Res.string.killInstanceMessage)
+        else -> ""
+    }

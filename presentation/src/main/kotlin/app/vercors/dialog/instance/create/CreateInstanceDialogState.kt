@@ -21,12 +21,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.dialog.instance.create
 
-import kotlinx.serialization.json.Json
+import app.vercors.common.ModLoader
+import app.vercors.instance.mojang.MojangReleaseType
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+data class CreateInstanceDialogState(
+    val instanceName: String = "",
+    val minecraftVersion: CreateInstanceDialogMinecraftVersion? = null,
+    val includeSnapshots: Boolean = false,
+    val allMinecraftVersions: List<CreateInstanceDialogMinecraftVersion> = listOf(),
+    val loader: ModLoader? = null,
+    val loaderVersion: String? = null,
+) {
+    val isValid: Boolean = instanceName.filter { it.isLetterOrDigit() }.isNotBlank()
+            && minecraftVersion != null
+            && (loader == null || !loaderVersion.isNullOrBlank())
+    val filteredMinecraftVersions: List<CreateInstanceDialogMinecraftVersion> = allMinecraftVersions
+        .filter { it.data.type === MojangReleaseType.Release || includeSnapshots }
 }

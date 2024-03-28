@@ -75,7 +75,7 @@ internal class NavigationComponentImpl(
             NavigationConfig.InstanceList -> inject<InstanceListComponent>(componentContext)
             NavigationConfig.Search -> inject<SearchComponent>(componentContext)
             NavigationConfig.Configuration -> inject<ConfigurationComponent>(componentContext)
-            is NavigationConfig.InstanceDetails -> inject<InstanceDetailsComponent>(componentContext)
+            is NavigationConfig.InstanceDetails -> inject<InstanceDetailsComponent>(componentContext, config.instanceId)
             is NavigationConfig.ProjectDetails -> inject<ProjectDetailsComponent>(componentContext)
         }
 }

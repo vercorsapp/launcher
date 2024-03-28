@@ -25,5 +25,7 @@ package app.vercors.instance.mojang
 
 interface MojangRepository {
     suspend fun getVersionManifest(): MojangVersionManifest
+    suspend fun getVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo
+    suspend fun getAssetIndex(version: MojangVersionInfo): MojangAssetIndex
     fun getAssetUrl(sha1: String, name: String): String
 }

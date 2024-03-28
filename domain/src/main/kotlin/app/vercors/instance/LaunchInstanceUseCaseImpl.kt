@@ -33,12 +33,11 @@ import app.vercors.dialog.DialogManager
 import app.vercors.instance.mojang.*
 import app.vercors.system.StorageManager
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.path.absolutePathString
 
 private val logger = KotlinLogging.logger {}
@@ -50,10 +49,13 @@ class LaunchInstanceUseCaseImpl(
     private val instanceRepository: InstanceRepository,
     private val configurationRepository: ConfigurationRepository,
     private val storageManager: StorageManager,
-    private val dialogManager: DialogManager
+    private val dialogManager: DialogManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : LaunchInstanceUseCase {
     override suspend fun invoke(instance: Instance) = externalScope.launch {
         val (versionInfo, clientJarPath, libraryPaths, logConfigPath) = prepareInstanceUseCase(instance)
+        val wasStopped = AtomicBoolean(false)
+        val wasKilled = AtomicBoolean(false)
         val run = runCatching {
             val selectedAccount = accountRepository.currentSelected
             val classpath = buildList {
@@ -61,65 +63,74 @@ class LaunchInstanceUseCaseImpl(
                 addAll(libraryPaths)
                 add(".")
             }.joinToString(";", "\"", "\"")
-            val processBuilder = buildProcess(
-                instance,
-                versionInfo,
-                classpath,
-                logConfigPath,
-                selectedAccount
-            )
+            val processBuilder = buildProcess(instance, versionInfo, classpath, logConfigPath, selectedAccount)
             System.gc()
             val process = launchProcess(processBuilder)
-            instance.updateStatus(InstanceStatus.Running(process))
-            instanceRepository.updateInstanceData(instance.id) {
-                it.copy(lastPlayed = Instant.now())
-            }
+            instance.updateStatus(InstanceStatus.Running { onCancellation(instance, process, wasStopped, wasKilled) })
+            instanceRepository.updateInstanceData(instance.id) { it.copy(lastPlayed = Instant.now()) }
 
             while (process.isAlive) {
-                delay(1000) // TODO find another way to track MC process
+                repeat(10) {
+                    ensureActive()
+                    delay(100)
+                }
                 instance.tickRunning()
             }
 
             logger.info { "Instance ${instance.data.name} stopped" }
+            process.exitValue()
         }
         run.onFailure {
-            logger.error(it) { "An error occured while running instance ${instance.data.name}" }
             when (it) {
                 is JavaVersionException -> dialogManager.openDialog(
-                    DialogConfig.Error.JavaVersion(
-                        instance.id,
-                        it.javaVersion
-                    )
+                    DialogConfig.Error.JavaVersion(instance.id, it.javaVersion)
                 )
 
-                else -> dialogManager.openDialog(DialogConfig.Error.Launch)
+                else -> {
+                    logger.error(it) { "An error occured while running instance ${instance.data.name}" }
+                    dialogManager.openDialog(DialogConfig.Error.Launch)
+                }
             }
         }
-        System.gc()
-        instanceRepository.updateInstanceStatus(instance.id) { InstanceStatus.Stopped }
+        instanceRepository.updateInstanceStatus(instance.id) {
+            if (run.isSuccess && 0 == run.getOrNull()) InstanceStatus.NotRunning
+            else if (wasKilled.get()) InstanceStatus.Killed
+            else InstanceStatus.Crashed
+        }
     }.join()
 
-    private fun Instance.updateStatus(status: InstanceStatus) =
-        instanceRepository.updateInstanceStatus(id) {
-            if (!(it is InstanceStatus.Running && status is InstanceStatus.Preparing)) status else it
+    private suspend fun onCancellation(
+        instance: Instance,
+        process: Process,
+        wasStopped: AtomicBoolean,
+        wasKilled: AtomicBoolean
+    ) = withContext(ioDispatcher) {
+        if (!wasStopped.get() && process.supportsNormalTermination()) {
+            logger.info { "Stopping instance ${instance.data.name}" }
+            wasStopped.set(true)
+            process.destroy()
+        } else {
+            dialogManager.openDialog(DialogConfig.KillInstance {
+                logger.info { "Killing instance ${instance.data.name}" }
+                wasKilled.set(true)
+                process.destroy()
+            })
         }
+    }
+
+    private fun Instance.updateStatus(status: InstanceStatus) = instanceRepository.updateInstanceStatus(id) { status }
 
     private suspend fun Instance.tickRunning() {
         instanceRepository.updateInstanceData(id) {
             val now = Instant.now()
             it.copy(
-                lastPlayed = now,
-                timePlayed = it.timePlayed + Duration.between(it.lastPlayed, now)
+                lastPlayed = now, timePlayed = it.timePlayed + Duration.between(it.lastPlayed, now)
             )
         }
     }
 
     private fun buildProcess(
-        instance: Instance,
-        versionInfo: MojangVersionInfo,
-        classpath: String,
-        logConfigPath: Path?,
-        account: Account
+        instance: Instance, versionInfo: MojangVersionInfo, classpath: String, logConfigPath: Path?, account: Account
     ): ProcessBuilder {
         val instancePath = storageManager.getInstancePath(instance.id)
         val nativesPath = storageManager.getInstanceNativesPath(instance.id).absolutePathString()
@@ -132,8 +143,8 @@ class LaunchInstanceUseCaseImpl(
             "assets_index_name" to versionInfo.assetIndex.id,
             "auth_uuid" to account.uuid,
             "auth_access_token" to account.tokenData.token,
-            "clientid" to "", // TODO
-            "auth_xuid" to "", // TODO
+            "clientid" to "",
+            "auth_xuid" to "",
             "user_type" to "msa",
             "version_type" to versionInfo.type,
             "natives_directory" to nativesPath,

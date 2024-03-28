@@ -21,10 +21,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.home
+package app.vercors.dialog.instance.kill
 
-import app.vercors.project.ProjectProviderType
+import app.vercors.dialog.SimpleDialogComponent
 
-fun interface LoadProjectsHomeSectionUseCase {
-    suspend operator fun invoke(sectionType: HomeSectionType, provider: ProjectProviderType): HomeSection.Projects
+interface KillInstanceDialogComponent : SimpleDialogComponent {
+    fun killInstance()
 }

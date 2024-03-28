@@ -23,9 +23,9 @@
 
 package app.vercors.dialog.error.javaversion
 
-import app.vercors.dialog.error.ErrorDialogComponent
+import app.vercors.dialog.SimpleDialogComponent
 
-interface JavaVersionErrorDialogComponent : ErrorDialogComponent {
+interface JavaVersionErrorDialogComponent : SimpleDialogComponent {
     val javaVersion: Int
     fun openSettings()
 }

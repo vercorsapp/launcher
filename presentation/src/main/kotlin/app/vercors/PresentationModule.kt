@@ -37,8 +37,10 @@ import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
 import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponentImpl
 import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
 import app.vercors.dialog.error.launch.LaunchErrorDialogComponentImpl
-import app.vercors.dialog.instance.CreateInstanceDialogComponent
-import app.vercors.dialog.instance.CreateInstanceDialogComponentImpl
+import app.vercors.dialog.instance.create.CreateInstanceDialogComponent
+import app.vercors.dialog.instance.create.CreateInstanceDialogComponentImpl
+import app.vercors.dialog.instance.kill.KillInstanceDialogComponent
+import app.vercors.dialog.instance.kill.KillInstanceDialogComponentImpl
 import app.vercors.dialog.login.LoginDialogComponent
 import app.vercors.dialog.login.LoginDialogComponentImpl
 import app.vercors.home.HomeComponent
@@ -92,11 +94,12 @@ fun DIBuilder.PresentationModule(properties: Properties) {
                 param()
             )
         }
+        factory<KillInstanceDialogComponent> { KillInstanceDialogComponentImpl(param(), param(), param()) }
         factory<AccountListComponent> { AccountListComponentImpl(param()) }
         factory<NotificationListComponent> { NotificationListComponentImpl(param()) }
         factory<HomeComponent> { HomeComponentImpl(param()) }
         factory<InstanceListComponent> { InstanceListComponentImpl(param()) }
-        factory<InstanceDetailsComponent> { InstanceDetailsComponentImpl(param()) }
+        factory<InstanceDetailsComponent> { InstanceDetailsComponentImpl(param(), param()) }
         factory<SearchComponent> { SearchComponentImpl(param()) }
         factory<ProjectDetailsComponent> { ProjectDetailsComponentImpl(param()) }
         factory<ConfigurationComponent> { ConfigurationComponentImpl(param()) }

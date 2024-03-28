@@ -21,26 +21,26 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.home
+package app.vercors.dialog.instance.create
 
-import app.vercors.common.Resource
-import app.vercors.instance.Instance
-import app.vercors.instance.InstanceRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.Clock
+import compose.icons.feathericons.Star
+import org.jetbrains.compose.resources.stringResource
+import vercors.ui.generated.resources.Res
+import vercors.ui.generated.resources.latestRelease
+import vercors.ui.generated.resources.latestSnapshot
 
-internal class LoadInstancesHomeSectionUseCaseImpl(
-    private val instanceRepository: InstanceRepository,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : LoadInstancesHomeSectionUseCase {
-    override suspend fun invoke(): HomeSection.Instances = withContext(ioDispatcher) {
-        HomeSection.Instances(
-            instanceRepository.loadingState
-                .filterIsInstance<Resource.Loaded<List<Instance>>>().first()
-                .result.sortedByDescending { it.data.lastPlayed ?: it.data.dateCreated }
-        )
-    }
-}
+val CreateInstanceDialogMinecraftVersion.text: String
+    @Composable get() =
+        if (isLatestRelease) stringResource(Res.string.latestRelease, data.id)
+        else if (isLatestSnapshot) stringResource(Res.string.latestSnapshot, data.id)
+        else data.id
+
+val CreateInstanceDialogMinecraftVersion.icon: ImageVector?
+    @Composable get() =
+        if (isLatestRelease) FeatherIcons.Star
+        else if (isLatestSnapshot) FeatherIcons.Clock
+        else null

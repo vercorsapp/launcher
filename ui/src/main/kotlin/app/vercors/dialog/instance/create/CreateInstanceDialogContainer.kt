@@ -21,12 +21,18 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.dialog.instance.create
 
-import kotlinx.serialization.json.Json
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+@Composable
+fun CreateInstanceDialogContainer(component: CreateInstanceDialogComponent) {
+    val uiState by component.state.collectAsState()
+
+    CreateInstanceDialogContent(
+        state = uiState,
+        onIntent = component::onIntent
+    )
 }

@@ -34,6 +34,9 @@ sealed interface HomeIntent {
     value class LaunchInstance(val instance: Instance) : HomeIntent
 
     @JvmInline
+    value class StopInstance(val instance: Instance) : HomeIntent
+
+    @JvmInline
     value class ShowProjectDetails(val project: Project) : HomeIntent
 
     @JvmInline

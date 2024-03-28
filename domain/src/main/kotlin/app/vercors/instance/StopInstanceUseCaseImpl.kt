@@ -21,8 +21,17 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.home
+package app.vercors.instance
 
-fun interface LoadInstancesHomeSectionUseCase {
-    suspend operator fun invoke(): HomeSection.Instances
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+class StopInstanceUseCaseImpl(
+    private val externalScope: CoroutineScope
+) : StopInstanceUseCase {
+    override suspend fun invoke(instance: Instance) = externalScope.launch {
+        if (instance.status is InstanceStatus.Running) {
+            (instance.status as InstanceStatus.Running).cancellation()
+        }
+    }.join()
 }

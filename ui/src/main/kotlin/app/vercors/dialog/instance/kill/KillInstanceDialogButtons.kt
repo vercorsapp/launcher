@@ -21,36 +21,38 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.navigation
+package app.vercors.dialog.instance.kill
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import app.vercors.LocalConfiguration
+import androidx.compose.ui.Modifier
 import app.vercors.UI
-import app.vercors.configuration.ConfigurationComponent
-import app.vercors.configuration.ConfigurationContainer
-import app.vercors.home.HomeComponent
-import app.vercors.home.HomeContainer
-import app.vercors.instance.InstanceListComponent
-import app.vercors.instance.InstanceListContainer
-import app.vercors.instance.details.InstanceDetailsComponent
-import app.vercors.instance.details.InstanceDetailsContainer
-import app.vercors.project.SearchComponent
-import app.vercors.project.SearchContainer
+import app.vercors.common.AppButton
+import compose.icons.FeatherIcons
+import compose.icons.feathericons.XCircle
+import org.jetbrains.compose.resources.stringResource
+import vercors.ui.generated.resources.Res
+import vercors.ui.generated.resources.killInstanceTitle
 
 @Composable
-fun NavigationContent(state: NavigationState) {
-    Crossfade(
-        targetState = state.child,
-        animationSpec = if (LocalConfiguration.current.animations) UI.screenAnimation else tween(0)
+fun KillInstanceDialogButtons(component: KillInstanceDialogComponent) {
+    AppButton(
+        onClick = component::killInstance,
+        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error),
     ) {
-        when (it) {
-            is HomeComponent -> HomeContainer(it)
-            is InstanceListComponent -> InstanceListContainer(it)
-            is SearchComponent -> SearchContainer(it)
-            is ConfigurationComponent -> ConfigurationContainer(it)
-            is InstanceDetailsComponent -> InstanceDetailsContainer(it)
-        }
+        Icon(
+            imageVector = FeatherIcons.XCircle,
+            contentDescription = null,
+            modifier = Modifier.size(UI.mediumIconSize)
+        )
+        Text(
+            text = stringResource(Res.string.killInstanceTitle),
+            modifier = Modifier.padding(start = UI.mediumPadding)
+        )
     }
 }

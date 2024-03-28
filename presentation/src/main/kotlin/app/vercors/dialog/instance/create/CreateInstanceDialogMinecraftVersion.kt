@@ -21,26 +21,12 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.dialog.instance.create
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import compose.icons.FeatherIcons
-import compose.icons.feathericons.Clock
-import compose.icons.feathericons.Star
-import org.jetbrains.compose.resources.stringResource
-import vercors.ui.generated.resources.Res
-import vercors.ui.generated.resources.latestRelease
-import vercors.ui.generated.resources.latestSnapshot
+import app.vercors.instance.mojang.MojangVersionManifest
 
-val CreateInstanceDialogMinecraftVersion.text: String
-    @Composable get() =
-        if (isLatestRelease) stringResource(Res.string.latestRelease, data.id)
-        else if (isLatestSnapshot) stringResource(Res.string.latestSnapshot, data.id)
-        else data.id
-
-val CreateInstanceDialogMinecraftVersion.icon: ImageVector?
-    @Composable get() =
-        if (isLatestRelease) FeatherIcons.Star
-        else if (isLatestSnapshot) FeatherIcons.Clock
-        else null
+data class CreateInstanceDialogMinecraftVersion(
+    val data: MojangVersionManifest.Version,
+    val isLatestRelease: Boolean,
+    val isLatestSnapshot: Boolean
+)

@@ -51,8 +51,11 @@ import coil3.PlatformContext
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.ocpsoft.prettytime.PrettyTime
 import vercors.ui.generated.resources.*
+import java.time.Duration
 import java.time.Instant
 import javax.swing.SwingUtilities
 
@@ -61,6 +64,7 @@ object UI {
     val defaultRoundedCornerShape = RoundedCornerShape(5.dp)
     val largeRoundedCornerShape = RoundedCornerShape(10.dp)
     val normalLineHeight = 16.sp
+    val smallIconSize = 12.dp
     val mediumIconSize = 16.dp
     val largePadding = 20.dp
     val mediumLargePadding = 15.dp
@@ -72,7 +76,26 @@ object UI {
 private val PrettyTime = PrettyTime()
 
 @Stable
-fun Instant.readable(): String = PrettyTime.format(this)
+fun Instant.readable(): String = PrettyTime.format(plusSeconds(1))
+
+@Composable
+fun Duration.readable(): String {
+    val parts = mutableListOf<String>()
+
+    @Composable
+    fun format(value: Int, unit: StringResource, unitPlural: StringResource) {
+        if (value > 0) {
+            parts += "$value ${stringResource(if (value > 1) unitPlural else unit)}"
+        }
+    }
+
+    format(toDaysPart().toInt(), Res.string.day, Res.string.days)
+    format(toHoursPart(), Res.string.hour, Res.string.hours)
+    format(toMinutesPart(), Res.string.minute, Res.string.minutes)
+    format(toSecondsPart(), Res.string.second, Res.string.seconds)
+
+    return if (parts.size == 1) parts.first() else "${parts.dropLast(1).joinToString()} and ${parts.last()}"
+}
 
 fun LazyGridScope.header(
     key: Any?,

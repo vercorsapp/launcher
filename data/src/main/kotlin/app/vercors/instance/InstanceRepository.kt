@@ -53,6 +53,12 @@ interface InstanceRepository {
     fun loadInstances(): Flow<InstanceResult>
 
     /**
+     * Finds an instance from loaded instances, or returns null if no such instance is loaded
+     * @param id the id of the instance to find
+     */
+    fun findInstance(id: String): Instance?
+
+    /**
      * Updates the instance data and automatically saves when done.
      * @param id the id of the instance to update
      * @param updater the instance data updater
@@ -67,8 +73,9 @@ interface InstanceRepository {
     fun updateInstanceStatus(id: String, updater: (InstanceStatus) -> InstanceStatus)
 
     /**
-     * Created the instance and automatically saves when done.
+     * Creates the instance and automatically saves when done.
      * @param instance the instance to create
+     * @return the id of the created instance
      */
-    suspend fun createInstance(instance: InstanceData)
+    suspend fun createInstance(instance: InstanceData): String
 }

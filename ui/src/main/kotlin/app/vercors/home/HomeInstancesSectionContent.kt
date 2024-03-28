@@ -46,7 +46,8 @@ import kotlin.math.roundToInt
 fun HomeInstancesSectionContent(
     instances: List<Instance>?,
     onInstanceClick: (Instance) -> Unit,
-    onInstanceLaunchClick: (Instance) -> Unit,
+    onInstanceLaunch: (Instance) -> Unit,
+    onInstanceStop: (Instance) -> Unit,
 ) {
     var count by rememberSaveable { mutableStateOf(0) }
     val localDensity = LocalDensity.current
@@ -61,8 +62,9 @@ fun HomeInstancesSectionContent(
             for (instance in instances.take(count)) {
                 InstanceCardContent(
                     instance = instance,
-                    onInstanceClick = onInstanceClick,
-                    onInstanceLaunchClick = onInstanceLaunchClick,
+                    onClick = { onInstanceClick(instance) },
+                    onLaunch = { onInstanceLaunch(instance) },
+                    onStop = { onInstanceStop(instance) },
                     modifier = Modifier.weight(1f)
                 )
             }

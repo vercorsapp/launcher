@@ -80,9 +80,6 @@ mockposable {
 }
 
 compose {
-    val kotlinVersion = libs.versions.kotlin.asProvider().get()
-    kotlinCompilerPlugin.set(dependencies.compiler.forKotlin(kotlinVersion))
-    kotlinCompilerPluginArgs.add("suppressKotlinVersionCompatibilityCheck=$kotlinVersion")
     desktop {
         application {
             mainClass = "app.vercors.MainKt"

@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.dialog.instance.create
 
 import app.vercors.common.AbstractAppComponent
 import app.vercors.common.AppComponentContext
@@ -30,6 +30,8 @@ import app.vercors.common.inject
 import app.vercors.instance.InstanceData
 import app.vercors.instance.InstanceRepository
 import app.vercors.instance.mojang.MojangRepository
+import app.vercors.navigation.NavigationConfig
+import app.vercors.navigation.NavigationManager
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +42,8 @@ internal class CreateInstanceDialogComponentImpl(
     componentContext: AppComponentContext,
     private val _onClose: () -> Unit,
     private val mojangRepository: MojangRepository = componentContext.inject(),
-    private val instanceRepository: InstanceRepository = componentContext.inject()
+    private val instanceRepository: InstanceRepository = componentContext.inject(),
+    private val navigationManager: NavigationManager = componentContext.inject()
 ) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), CreateInstanceDialogComponent {
     private val _state = MutableStateFlow(CreateInstanceDialogState())
     override val state: StateFlow<CreateInstanceDialogState> = _state
@@ -106,7 +109,7 @@ internal class CreateInstanceDialogComponentImpl(
         val state = state.value
         if (state.isValid) {
             localScope.launch {
-                instanceRepository.createInstance(
+                val instanceId = instanceRepository.createInstance(
                     InstanceData(
                         name = state.instanceName,
                         gameVersion = state.minecraftVersion!!.data,
@@ -115,6 +118,7 @@ internal class CreateInstanceDialogComponentImpl(
                     )
                 )
                 onClose()
+                navigationManager.navigateTo(NavigationConfig.InstanceDetails(instanceId))
             }
         }
     }

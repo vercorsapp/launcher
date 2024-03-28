@@ -21,12 +21,21 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.dialog.instance.kill
 
-import kotlinx.serialization.json.Json
+import app.vercors.common.AbstractAppComponent
+import app.vercors.common.AppComponentContext
+import io.github.oshai.kotlinlogging.KotlinLogging
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+internal class KillInstanceDialogComponentImpl(
+    componentContext: AppComponentContext,
+    private val _killInstance: () -> Unit,
+    private val _onClose: () -> Unit
+) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), KillInstanceDialogComponent {
+    override fun killInstance() {
+        _killInstance()
+        onClose()
+    }
+
+    override fun onClose() = _onClose()
 }

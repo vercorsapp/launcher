@@ -20,8 +20,8 @@ jna = "5.14.0"                  # https://github.com/java-native-access/jna/tags
 oshi = "6.5.0"                  # https://github.com/oshi/oshi/releases
 junit = "5.10.2"                # https://github.com/junit-team/junit5/releases
 mockk = "1.13.10"               # https://github.com/mockk/mockk/releases
-mockposable = "0.7"             # https://central.sonatype.com/artifact/com.jeppeman.mockposable/mockposable-gradle
-sonarqube = "4.4.1.3373"        # https://github.com/SonarSource/sonar-scanner-gradle/releases
+mockposable = "0.8"             # https://central.sonatype.com/artifact/com.jeppeman.mockposable/mockposable-gradle
+sonarqube = "5.0.0.4638"        # https://github.com/SonarSource/sonar-scanner-gradle/releases
 
 [libraries]
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }

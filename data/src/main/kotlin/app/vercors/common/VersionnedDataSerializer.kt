@@ -21,8 +21,31 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.error
+package app.vercors.common
 
-import app.vercors.dialog.DialogChildComponent
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-interface ErrorDialogComponent : DialogChildComponent
+abstract class VersionnedDataSerializer<T>(protected val serializer: KSerializer<T>) : KSerializer<VersionnedData<T>> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("VersionnedData") {
+        element<Int>("version")
+        element("data", serializer.descriptor)
+    }
+
+    override fun deserialize(decoder: Decoder): VersionnedData<T> {
+        val version = decoder.decodeInt()
+        val data = decodeDataForVersion(decoder, version)
+        return VersionnedData(version, data)
+    }
+
+    override fun serialize(encoder: Encoder, value: VersionnedData<T>) {
+        encoder.encodeInt(value.version)
+        encoder.encodeSerializableValue(serializer, value.data)
+    }
+
+    abstract fun decodeDataForVersion(decoder: Decoder, version: Int): T
+}

@@ -62,7 +62,8 @@ fun HomeContent(
                         is HomeSection.Instances -> HomeInstancesSectionContent(
                             instances = section.instances,
                             onInstanceClick = { onIntent(HomeIntent.ShowInstanceDetails(it)) },
-                            onInstanceLaunchClick = { onIntent(HomeIntent.LaunchInstance(it)) }
+                            onInstanceLaunch = { onIntent(HomeIntent.LaunchInstance(it)) },
+                            onInstanceStop = { onIntent(HomeIntent.StopInstance(it)) }
                         )
 
                         is HomeSection.Projects -> HomeProjectsSectionContent(

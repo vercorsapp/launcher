@@ -21,12 +21,27 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.instance.mojang
 
-import app.vercors.instance.mojang.MojangVersionManifest
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 
-data class CreateInstanceDialogMinecraftVersion(
-    val data: MojangVersionManifest.Version,
-    val isLatestRelease: Boolean,
-    val isLatestSnapshot: Boolean
-)
+internal class MojangRemoteDataSourceImpl(
+    private val httpClient: HttpClient,
+    private val manifestVersionUrl: String = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
+    private val assetUrlRoot: String = "https://resources.download.minecraft.net"
+) : MojangRemoteDataSource {
+    override suspend fun getVersionManifest(): MojangVersionManifest =
+        httpClient.get(manifestVersionUrl).body()
+
+    override suspend fun getVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo =
+        httpClient.get(version.url).body()
+
+    override suspend fun getAssetIndex(index: MojangVersionInfo.AssetIndex): MojangAssetIndex =
+        httpClient.get(index.url).body()
+
+    override fun getAssetUrl(sha1: String, name: String): String =
+        "$assetUrlRoot/${sha1.take(2)}/$sha1"
+
+}

@@ -28,14 +28,11 @@ import app.vercors.account.auth.AuthenticateUseCaseImpl
 import app.vercors.account.auth.ValidateTokenUseCase
 import app.vercors.account.auth.ValidateTokenUseCaseImpl
 import app.vercors.di.DIBuilder
+import app.vercors.di.factory
 import app.vercors.di.inject
 import app.vercors.di.single
 import app.vercors.dialog.DialogManager
 import app.vercors.dialog.DialogManagerImpl
-import app.vercors.home.LoadInstancesHomeSectionUseCase
-import app.vercors.home.LoadInstancesHomeSectionUseCaseImpl
-import app.vercors.home.LoadProjectsHomeSectionUseCase
-import app.vercors.home.LoadProjectsHomeSectionUseCaseImpl
 import app.vercors.instance.*
 import app.vercors.navigation.NavigationManager
 import app.vercors.navigation.NavigationManagerImpl
@@ -52,11 +49,9 @@ fun DIBuilder.DomainModule(properties: Properties) {
         single<DialogManager> { DialogManagerImpl() }
         single<NavigationManager> { NavigationManagerImpl(inject(), inject()) }
         single<SystemThemeManager> { SystemThemeManagerImpl(inject()) }
-        single<AuthenticateUseCase> { AuthenticateUseCaseImpl(inject()) }
-        single<ValidateTokenUseCase> { ValidateTokenUseCaseImpl(inject()) }
-        single<LoadProjectsHomeSectionUseCase> { LoadProjectsHomeSectionUseCaseImpl(inject(), inject()) }
-        single<LoadInstancesHomeSectionUseCase> { LoadInstancesHomeSectionUseCaseImpl(inject()) }
-        single<PrepareInstanceUseCase> {
+        factory<AuthenticateUseCase> { AuthenticateUseCaseImpl(inject()) }
+        factory<ValidateTokenUseCase> { ValidateTokenUseCaseImpl(inject()) }
+        factory<PrepareInstanceUseCase> {
             PrepareInstanceUseCaseImpl(
                 inject(),
                 inject(),
@@ -67,10 +62,11 @@ fun DIBuilder.DomainModule(properties: Properties) {
                 inject(),
                 inject(),
                 inject(),
+                inject(),
                 inject()
             )
         }
-        single<LaunchInstanceUseCase> {
+        factory<LaunchInstanceUseCase> {
             LaunchInstanceUseCaseImpl(
                 inject(),
                 inject(),
@@ -81,6 +77,7 @@ fun DIBuilder.DomainModule(properties: Properties) {
                 inject()
             )
         }
-        single<LoadInstancesUseCase> { LoadInstancesUseCaseImpl(inject(), inject(), inject()) }
+        factory<StopInstanceUseCase> { StopInstanceUseCaseImpl(inject()) }
+        factory<LoadInstancesUseCase> { LoadInstancesUseCaseImpl(inject(), inject(), inject()) }
     }
 }

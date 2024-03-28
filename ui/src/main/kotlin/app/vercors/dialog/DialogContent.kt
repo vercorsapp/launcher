@@ -37,10 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.vercors.LocalConfiguration
 import app.vercors.LocalPalette
-import app.vercors.dialog.error.ErrorDialogComponent
-import app.vercors.dialog.error.ErrorDialogContent
-import app.vercors.dialog.instance.CreateInstanceDialogComponent
-import app.vercors.dialog.instance.CreateInstanceDialogContainer
+import app.vercors.dialog.instance.create.CreateInstanceDialogComponent
+import app.vercors.dialog.instance.create.CreateInstanceDialogContainer
 import app.vercors.dialog.login.LoginDialogComponent
 import app.vercors.dialog.login.LoginDialogContainer
 
@@ -71,7 +69,7 @@ fun DialogContent(state: DialogState) {
                     when (it) {
                         is CreateInstanceDialogComponent -> CreateInstanceDialogContainer(it)
                         is LoginDialogComponent -> LoginDialogContainer(it)
-                        is ErrorDialogComponent -> ErrorDialogContent(it)
+                        is SimpleDialogComponent -> SimpleDialogContent(it)
                     }
                 }
             }

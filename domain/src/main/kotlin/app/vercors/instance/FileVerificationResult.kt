@@ -21,12 +21,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.instance
 
-import kotlinx.serialization.json.Json
-
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+sealed interface FileVerificationResult {
+    data object Success : FileVerificationResult
+    data object RequiresDownload : FileVerificationResult
+    sealed interface Failure : FileVerificationResult {
+        @JvmInline
+        value class Unknown(val error: Exception) : Failure
+        data object SizeMismatch : Failure
+        data object HashMismatch : Failure
+    }
 }

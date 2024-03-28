@@ -21,12 +21,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.dialog.instance.create
 
-import kotlinx.serialization.json.Json
+import app.vercors.common.DefaultComponent
+import app.vercors.dialog.DialogChildComponent
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
-}
+interface CreateInstanceDialogComponent : DefaultComponent<CreateInstanceDialogState, CreateInstanceDialogIntent>,
+    DialogChildComponent

@@ -21,12 +21,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.instance.mojang
 
-import kotlinx.serialization.json.Json
-
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+interface MojangLocalDataSource {
+    suspend fun getVersionInfo(versionId: String): MojangVersionInfo?
+    suspend fun saveVersionInfo(versionId: String, data: MojangVersionInfo)
+    suspend fun getAssetIndex(assetId: String): MojangAssetIndex?
+    suspend fun saveAssetIndex(assetId: String, data: MojangAssetIndex)
 }

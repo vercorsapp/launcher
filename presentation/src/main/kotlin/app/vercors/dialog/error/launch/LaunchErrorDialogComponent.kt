@@ -23,8 +23,8 @@
 
 package app.vercors.dialog.error.launch
 
-import app.vercors.dialog.error.ErrorDialogComponent
+import app.vercors.dialog.SimpleDialogComponent
 
-interface LaunchErrorDialogComponent : ErrorDialogComponent {
+interface LaunchErrorDialogComponent : SimpleDialogComponent {
     fun openLogFolder()
 }

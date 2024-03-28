@@ -28,7 +28,8 @@ import app.vercors.common.AppComponentContext
 import app.vercors.common.inject
 import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
 import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
-import app.vercors.dialog.instance.CreateInstanceDialogComponent
+import app.vercors.dialog.instance.create.CreateInstanceDialogComponent
+import app.vercors.dialog.instance.kill.KillInstanceDialogComponent
 import app.vercors.dialog.login.LoginDialogComponent
 import com.arkivanov.decompose.router.slot.*
 import com.arkivanov.decompose.value.Value
@@ -66,10 +67,18 @@ internal class DialogComponentImpl(
                 dialogManager.closeDialog()
                 config.onAuthenticationFinished?.invoke()
             })
+
+            is DialogConfig.KillInstance -> inject<KillInstanceDialogComponent>(
+                componentContext,
+                config.onKill,
+                dialogManager::closeDialog
+            )
+
             DialogConfig.Error.Launch -> inject<LaunchErrorDialogComponent>(
                 componentContext,
                 dialogManager::closeDialog
             )
+
             is DialogConfig.Error.JavaVersion -> inject<JavaVersionErrorDialogComponent>(
                 componentContext,
                 dialogManager::closeDialog,

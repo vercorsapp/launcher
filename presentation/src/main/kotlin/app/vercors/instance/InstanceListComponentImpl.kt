@@ -43,6 +43,7 @@ internal class InstanceListComponentImpl(
     private val instanceRepository: InstanceRepository = componentContext.inject(),
     private val navigationManager: NavigationManager = componentContext.inject(),
     private val launchInstanceUseCase: LaunchInstanceUseCase = componentContext.inject(),
+    private val stopInstanceUseCase: StopInstanceUseCase = componentContext.inject(),
     private val loadInstancesUseCase: LoadInstancesUseCase = componentContext.inject(),
     private val dialogManager: DialogManager = componentContext.inject()
 ) : AbstractAppComponent(componentContext, KotlinLogging.logger {}), InstanceListComponent {
@@ -72,6 +73,7 @@ internal class InstanceListComponentImpl(
         InstanceListIntent.SaveFilters -> onSaveFilters()
         is InstanceListIntent.ShowInstanceDetails -> onShowInstanceDetails(intent.instance)
         is InstanceListIntent.LaunchInstance -> onLaunchInstance(intent.instance)
+        is InstanceListIntent.StopInstance -> onStopInstance(intent.instance)
     }
 
     override fun refresh() {
@@ -124,14 +126,6 @@ internal class InstanceListComponentImpl(
         return result
     }
 
-    private fun onShowInstanceDetails(instance: Instance) {
-        navigationManager.handle(NavigationEvent.InstanceDetails(instance))
-    }
-
-    private fun onLaunchInstance(instance: Instance) {
-        localScope.launch { launchInstanceUseCase(instance) }
-    }
-
     private fun onOpenCreateInstanceDialog() {
         dialogManager.openDialog(DialogConfig.CreateInstance)
     }
@@ -161,5 +155,17 @@ internal class InstanceListComponentImpl(
             configurationRepository.updateConfiguration { it.copy(savedInstanceSorter = state.value.sorter) }
             _state.update { it.copy(canSaveFilters = false) }
         }
+    }
+
+    private fun onShowInstanceDetails(instance: Instance) {
+        navigationManager.handle(NavigationEvent.InstanceDetails(instance))
+    }
+
+    private fun onLaunchInstance(instance: Instance) {
+        localScope.launch { launchInstanceUseCase(instance) }
+    }
+
+    private fun onStopInstance(instance: Instance) {
+        localScope.launch { stopInstanceUseCase(instance) }
     }
 }

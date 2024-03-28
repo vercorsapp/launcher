@@ -103,6 +103,25 @@
     <string name="loader">Loader</string>
     <string name="loaderVersion">Loader version</string>
     <string name="create">Create</string>
+    <string name="timePlayed">Played for %1$s</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+    <string name="hour">hour</string>
+    <string name="hours">hours</string>
+    <string name="minute">minute</string>
+    <string name="minutes">minutes</string>
+    <string name="second">second</string>
+    <string name="seconds">seconds</string>
+    <string name="preparing">Preparing to launch</string>
+    <string name="verifying">Verifying files (%1$d/%2$d)</string>
+    <string name="downloading">Downloading files (%1$s/%2$s)</string>
+    <string name="extracting">Extracting files</string>
+    <string name="running">Running</string>
+    <string name="notRunning">Not running</string>
+    <string name="crashed">Crashed</string>
+    <string name="killed">Killed</string>
+    <string name="launching">Launching</string>
+    <string name="stop">Stop</string>
 
     <!-- Settings -->
     <string name="userInterface">User interface</string>
@@ -168,11 +187,13 @@
     <string name="logOut">Log out</string>
     <string name="refreshingToken">Refreshing access token</string>
 
-    <!-- Error dialogs -->
+    <!-- Dialogs -->
     <string name="launchErrorTitle">An error occured while launching the instance</string>
     <string name="launchErrorMessage">Please check the launcher logs for more details.</string>
     <string name="openLogs">Open logs</string>
     <string name="javaVersionErrorTitle">Java location needs to be set</string>
     <string name="javaVersionErrorMessage">Java %1$d path needs to be set in the launcher settings in order to launch this instance.</string>
     <string name="openSettings">Open settings</string>
+    <string name="killInstanceTitle">Kill instance</string>
+    <string name="killInstanceMessage">Are you sure you want to kill the instance? This operation can corrupt your saves and should only be done if the game is unresponsive!</string>
 </resources>

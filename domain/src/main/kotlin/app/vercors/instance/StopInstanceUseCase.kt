@@ -21,12 +21,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.instance
 
-import kotlinx.serialization.json.Json
-
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+fun interface StopInstanceUseCase {
+    suspend operator fun invoke(instance: Instance)
 }

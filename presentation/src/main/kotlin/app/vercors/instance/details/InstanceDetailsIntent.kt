@@ -21,24 +21,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.instance.details
 
-import app.vercors.common.ModLoader
-
-sealed interface CreateInstanceDialogIntent {
-    @JvmInline
-    value class UpdateInstanceName(val instanceName: String) : CreateInstanceDialogIntent
-
-    @JvmInline
-    value class UpdateMinecraftVersion(val minecraftVersion: CreateInstanceDialogMinecraftVersion) :
-        CreateInstanceDialogIntent
-
-    @JvmInline
-    value class UpdateIncludeSnapshots(val includeSnapshots: Boolean) : CreateInstanceDialogIntent
-    data object ToggleIncludeSnapshots : CreateInstanceDialogIntent
-
-    @JvmInline
-    value class UpdateLoader(val loader: ModLoader?) : CreateInstanceDialogIntent
-    data object CreateInstance : CreateInstanceDialogIntent
-    data object CloseDialog : CreateInstanceDialogIntent
+sealed interface InstanceDetailsIntent {
+    data object LaunchInstance : InstanceDetailsIntent
+    data object StopInstance : InstanceDetailsIntent
 }

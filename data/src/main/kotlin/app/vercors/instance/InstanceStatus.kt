@@ -24,14 +24,27 @@
 package app.vercors.instance
 
 sealed interface InstanceStatus {
-    data object Stopped : InstanceStatus
+    data object NotRunning : InstanceStatus
+    data object Crashed : InstanceStatus
+    data object Killed : InstanceStatus
 
     @JvmInline
     value class RefreshingToken(val progress: Float) : InstanceStatus
 
-    @JvmInline
-    value class Preparing(val progress: Float) : InstanceStatus
+    data object Preparing : InstanceStatus
+
+    sealed interface Progress : InstanceStatus {
+        val total: Int
+        val current: Int
+        val progress: Float get() = current / total.toFloat()
+    }
+
+    data class Verifying(override val total: Int, override val current: Int = 0) : Progress
+
+    data class Downloading(override val total: Int, override val current: Int = 0) : Progress
+
+    data object Extracting : InstanceStatus
 
     @JvmInline
-    value class Running(val process: Process) : InstanceStatus // TODO make stable
+    value class Running(val cancellation: suspend () -> Unit) : InstanceStatus
 }

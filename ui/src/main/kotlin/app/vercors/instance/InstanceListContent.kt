@@ -229,8 +229,9 @@ private fun InstanceListAreaContent(
                         Card(modifier = Modifier.padding(UI.mediumPadding)) {
                             InstanceCardContent(
                                 instance = it,
-                                onInstanceClick = { onIntent(InstanceListIntent.ShowInstanceDetails(it)) },
-                                onInstanceLaunchClick = { onIntent(InstanceListIntent.LaunchInstance(it)) }
+                                onClick = { onIntent(InstanceListIntent.ShowInstanceDetails(it)) },
+                                onLaunch = { onIntent(InstanceListIntent.LaunchInstance(it)) },
+                                onStop = { onIntent(InstanceListIntent.StopInstance(it)) }
                             )
                         }
                     }
@@ -262,8 +263,9 @@ private fun InstanceListAreaContent(
                             Card(modifier = Modifier.padding(UI.mediumPadding)) {
                                 InstanceCardContent(
                                     instance = it,
-                                    onInstanceClick = { onIntent(InstanceListIntent.ShowInstanceDetails(it)) },
-                                    onInstanceLaunchClick = { onIntent(InstanceListIntent.LaunchInstance(it)) }
+                                    onClick = { onIntent(InstanceListIntent.ShowInstanceDetails(it)) },
+                                    onLaunch = { onIntent(InstanceListIntent.LaunchInstance(it)) },
+                                    onStop = { onIntent(InstanceListIntent.StopInstance(it)) }
                                 )
                             }
                         }

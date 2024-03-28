@@ -23,10 +23,13 @@
 
 package app.vercors.common
 
-import kotlinx.serialization.json.Json
+sealed interface DownloadState {
+    @JvmInline
+    value class Progress(val progress: Float) : DownloadState
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+    @JvmInline
+    value class Success(val data: ByteArray) : DownloadState
+    data object SizeMismatch : DownloadState
+    data object HashMismatch : DownloadState
+    data object RequestError : DownloadState
 }

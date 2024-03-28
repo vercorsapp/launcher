@@ -21,12 +21,33 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.common
+package app.vercors.instance
 
-import kotlinx.serialization.json.Json
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import org.jetbrains.compose.resources.stringResource
+import vercors.ui.generated.resources.Res
+import vercors.ui.generated.resources.downloading
+import vercors.ui.generated.resources.verifying
+import java.text.DecimalFormat
+import kotlin.math.log10
+import kotlin.math.pow
 
-val AppJson = Json {
-    ignoreUnknownKeys = true
-    explicitNulls = false
-    prettyPrint = true
+val InstanceStatus.Progress.string: String
+    @Composable get() = when (this) {
+        is InstanceStatus.Verifying -> stringResource(Res.string.verifying, current, total)
+
+
+        is InstanceStatus.Downloading -> stringResource(
+            Res.string.downloading,
+            current.readableSize(),
+            total.readableSize()
+        )
+    }
+
+@Stable
+private fun Int.readableSize(): String {
+    val units = arrayOf("B", "kB", "MB", "GB", "TB", "PB", "EB")
+    val digitGroups = (log10(toDouble()) / log10(1024.0)).toInt()
+    return DecimalFormat("#,##0.#").format(this / 1024.0.pow(digitGroups.toDouble())) + " " + units[digitGroups]
 }

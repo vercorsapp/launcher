@@ -21,22 +21,40 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.instance
 
-import app.vercors.common.ModLoader
-import app.vercors.instance.mojang.MojangReleaseType
+import app.vercors.instance.mojang.MojangFile
+import java.nio.file.Path
 
-data class CreateInstanceDialogState(
-    val instanceName: String = "",
-    val minecraftVersion: CreateInstanceDialogMinecraftVersion? = null,
-    val includeSnapshots: Boolean = false,
-    val allMinecraftVersions: List<CreateInstanceDialogMinecraftVersion> = listOf(),
-    val loader: ModLoader? = null,
-    val loaderVersion: String? = null,
-) {
-    val isValid: Boolean = instanceName.filter { it.isLetterOrDigit() }.isNotBlank()
-            && minecraftVersion != null
-            && (loader == null || !loaderVersion.isNullOrBlank())
-    val filteredMinecraftVersions: List<CreateInstanceDialogMinecraftVersion> = allMinecraftVersions
-        .filter { it.data.type === MojangReleaseType.Release || includeSnapshots }
+sealed interface DownloadableFile {
+    val path: Path
+    val url: String
+    val size: Int
+    val sha1: String
+
+    abstract class Basic(override val path: Path, mojangFile: MojangFile) : DownloadableFile {
+        override val url = mojangFile.url
+        override val size = mojangFile.size
+        override val sha1 = mojangFile.sha1
+    }
+
+    class Client(path: Path, mojangFile: MojangFile) : Basic(path, mojangFile)
+
+    class Library(path: Path, mojangFile: MojangFile) : Basic(path, mojangFile)
+
+    class Native(
+        path: Path,
+        mojangFile: MojangFile,
+        val dest: Path,
+        val excludes: List<String>
+    ) : Basic(path, mojangFile)
+
+    class Asset(
+        override val path: Path,
+        override val url: String,
+        override val size: Int,
+        override val sha1: String,
+    ) : DownloadableFile
+
+    class LogConfig(path: Path, mojangFile: MojangFile) : Basic(path, mojangFile)
 }

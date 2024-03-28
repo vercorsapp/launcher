@@ -33,6 +33,10 @@ sealed interface DialogConfig {
     @Serializable
     data class Login(val onAuthenticationFinished: (() -> Unit)? = null) : DialogConfig
 
+    @JvmInline
+    @Serializable
+    value class KillInstance(val onKill: () -> Unit) : DialogConfig
+
     @Serializable
     sealed interface Error : DialogConfig {
         @Serializable

@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.error
+package app.vercors.dialog
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -38,6 +38,8 @@ import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogButtons
 import app.vercors.dialog.error.javaversion.JavaVersionErrorDialogComponent
 import app.vercors.dialog.error.launch.LaunchErrorDialogButtons
 import app.vercors.dialog.error.launch.LaunchErrorDialogComponent
+import app.vercors.dialog.instance.kill.KillInstanceDialogButtons
+import app.vercors.dialog.instance.kill.KillInstanceDialogComponent
 import compose.icons.FeatherIcons
 import compose.icons.feathericons.X
 import org.jetbrains.compose.resources.stringResource
@@ -45,7 +47,7 @@ import vercors.ui.generated.resources.Res
 import vercors.ui.generated.resources.close
 
 @Composable
-fun ErrorDialogContent(component: ErrorDialogComponent) {
+fun SimpleDialogContent(component: SimpleDialogComponent) {
     Column(
         verticalArrangement = Arrangement.spacedBy(UI.largePadding),
         modifier = Modifier.padding(UI.largePadding).width(500.dp).appAnimateContentSize()
@@ -59,6 +61,7 @@ fun ErrorDialogContent(component: ErrorDialogComponent) {
             when (component) {
                 is JavaVersionErrorDialogComponent -> JavaVersionErrorDialogButtons(component)
                 is LaunchErrorDialogComponent -> LaunchErrorDialogButtons(component)
+                is KillInstanceDialogComponent -> KillInstanceDialogButtons(component)
             }
             AppTextButton(component::onClose) {
                 Icon(

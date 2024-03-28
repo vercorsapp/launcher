@@ -23,18 +23,38 @@
 
 package app.vercors.instance.mojang
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 
-internal class MojangRepositoryImpl(
-    private val httpClient: HttpClient,
-    private val manifestVersionUrl: String = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
-    private val assetUrlRoot: String = "https://resources.download.minecraft.net"
+class MojangRepositoryImpl(
+    private val mojangRemoteDataSource: MojangRemoteDataSource,
+    private val mojangLocalDataSource: MojangLocalDataSource
 ) : MojangRepository {
-    override suspend fun getVersionManifest(): MojangVersionManifest =
-        httpClient.get(manifestVersionUrl).body()
+    private val versionManifestMutex = Mutex()
+    private var versionManifestCache: MojangVersionManifest? = null
+    private val versionInfoCache = ConcurrentHashMap<String, MojangVersionInfo>()
+    private val assetIndexCache = ConcurrentHashMap<String, MojangAssetIndex>()
 
-    override fun getAssetUrl(sha1: String, name: String): String =
-        "$assetUrlRoot/${sha1.take(2)}/$sha1"
+    override suspend fun getVersionManifest(): MojangVersionManifest {
+        if (versionManifestCache == null) {
+            val result = mojangRemoteDataSource.getVersionManifest()
+            versionManifestMutex.withLock { versionManifestCache = result }
+        }
+        return versionManifestMutex.withLock { versionManifestCache!! }
+    }
+
+    override suspend fun getVersionInfo(version: MojangVersionManifest.Version): MojangVersionInfo =
+        versionInfoCache.getOrPut(version.id) {
+            mojangLocalDataSource.getVersionInfo(version.id) ?: mojangRemoteDataSource
+                .getVersionInfo(version).also { mojangLocalDataSource.saveVersionInfo(version.id, it) }
+        }
+
+    override suspend fun getAssetIndex(version: MojangVersionInfo): MojangAssetIndex =
+        assetIndexCache.getOrPut(version.id) {
+            mojangLocalDataSource.getAssetIndex(version.assets) ?: mojangRemoteDataSource
+                .getAssetIndex(version.assetIndex).also { mojangLocalDataSource.saveAssetIndex(version.assets, it) }
+        }
+
+    override fun getAssetUrl(sha1: String, name: String): String = mojangRemoteDataSource.getAssetUrl(sha1, name)
 }

@@ -21,18 +21,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package app.vercors.dialog.instance
+package app.vercors.dialog
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-
-@Composable
-fun CreateInstanceDialogContainer(component: CreateInstanceDialogComponent) {
-    val uiState by component.state.collectAsState()
-
-    CreateInstanceDialogContent(
-        state = uiState,
-        onIntent = component::onIntent
-    )
-}
+interface SimpleDialogComponent : DialogChildComponent
