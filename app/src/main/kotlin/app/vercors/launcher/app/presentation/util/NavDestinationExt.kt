@@ -1,24 +1,27 @@
 package app.vercors.launcher.app.presentation.util
 
-import androidx.compose.runtime.Composable
 import androidx.navigation.NavDestination
 import app.vercors.launcher.app.presentation.state.NavigationTab
 import app.vercors.launcher.generated.resources.*
-import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.StringResource
 
-val NavDestination?.screenName: String
-    @Composable get() = when (screenType) {
-        "Home" -> stringResource(Res.string.home)
-        "InstanceList" -> stringResource(Res.string.instances)
-        "ProjectList" -> stringResource(Res.string.projects)
-        "Accounts" -> stringResource(Res.string.accounts)
-        "Settings" -> stringResource(Res.string.settings)
-        else -> stringResource(Res.string.app_title)
+typealias ScreenType = String
+
+val NavDestination?.screenType: ScreenType?
+    get() = this?.route?.substringAfterLast(".")?.substringBefore("?")
+
+val ScreenType?.screenName: StringResource?
+    get() = when (this) {
+        "Home" -> Res.string.home
+        "InstanceList" -> Res.string.instances
+        "ProjectList" -> Res.string.projects
+        "Accounts" -> Res.string.accounts
+        "Settings" -> Res.string.settings
+        else -> null
     }
 
-
-val NavDestination?.currentTab: NavigationTab?
-    get() = when (screenType) {
+val ScreenType?.currentTab: NavigationTab?
+    get() = when (this) {
         "Home" -> NavigationTab.Home
         "InstanceList" -> NavigationTab.Instances
         "ProjectList" -> NavigationTab.Projects
@@ -26,5 +29,3 @@ val NavDestination?.currentTab: NavigationTab?
         "Settings" -> NavigationTab.Settings
         else -> null
     }
-
-private val NavDestination?.screenType: String? get() = this?.route?.substringAfterLast(".")?.substringBefore("?")

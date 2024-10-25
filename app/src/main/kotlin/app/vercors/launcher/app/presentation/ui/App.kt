@@ -3,9 +3,7 @@ package app.vercors.launcher.app.presentation.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
@@ -19,7 +17,11 @@ import app.vercors.launcher.app.presentation.theme.VercorsTheme
 import app.vercors.launcher.app.presentation.util.currentTab
 import app.vercors.launcher.app.presentation.util.defaultDestination
 import app.vercors.launcher.app.presentation.util.screenName
+import app.vercors.launcher.app.presentation.util.screenType
 import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
+import app.vercors.launcher.generated.resources.Res
+import app.vercors.launcher.generated.resources.app_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import java.awt.Dimension
 
@@ -37,12 +39,15 @@ fun ApplicationScope.App() {
         val uiState by viewModel.uiState.collectAsState()
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
+        val screenType by remember { derivedStateOf { currentBackStackEntry?.destination?.screenType } }
+        val screenName by remember { derivedStateOf { screenType.screenName ?: Res.string.app_title } }
+        val currentTab by remember { derivedStateOf { screenType.currentTab } }
 
         VercorsTheme(darkTheme = true) {
             Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     MenuBar(
-                        screenName = currentBackStackEntry?.destination.screenName,
+                        screenName = stringResource(screenName),
                         searchQuery = uiState.searchQuery,
                         isMaximized = windowState.placement == WindowPlacement.Maximized,
                         onAction = {
@@ -58,7 +63,7 @@ fun ApplicationScope.App() {
                     )
                     Row(modifier = Modifier.weight(1f)) {
                         NavigationBar(
-                            currentTab = currentBackStackEntry?.destination.currentTab,
+                            currentTab = currentTab,
                             onTabSelection = { navController.navigate(it.defaultDestination) }
                         )
                         Box(modifier = Modifier.padding(bottom = 5.dp, end = 5.dp)) {

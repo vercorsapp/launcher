@@ -9,4 +9,12 @@ pluginManagement {
 
 rootProject.name = "launcher"
 
-include("app")
+include(
+    "app",
+    "account:data", "account:domain", "account:presentation",
+    "core:data", "core:domain", "core:presentation",
+    "game:data", "game:domain", "game:presentation",
+    "home:data", "home:domain", "home:presentation",
+    "instance:data", "instance:domain", "instance:presentation",
+    "project:data", "project:domain", "project:presentation",
+)
