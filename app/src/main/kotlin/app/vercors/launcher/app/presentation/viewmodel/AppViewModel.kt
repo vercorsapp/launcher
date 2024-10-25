@@ -2,6 +2,7 @@ package app.vercors.launcher.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import app.vercors.launcher.app.presentation.action.AppAction
+import app.vercors.launcher.app.presentation.action.MenuBarAction
 import app.vercors.launcher.app.presentation.state.AppUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,8 @@ class AppViewModel : ViewModel() {
 
     fun onAction(action: AppAction) {
         when (action) {
-            is AppAction.SearchQueryChange -> _uiState.update { it.copy(searchQuery = action.query) }
+            is MenuBarAction.SearchQueryChange -> _uiState.update { it.copy(searchQuery = action.query) }
+            else -> Unit
         }
     }
 }

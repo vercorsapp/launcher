@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -47,10 +48,17 @@ dependencies {
     implementation(libs.logback.classic)
 }
 
+tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
+    compilerOptions.freeCompilerArgs.addAll(
+        "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+        "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+    )
+}
+
 compose {
     desktop {
         application {
-            mainClass = "app.vercors.launcher.app.MainKt"
+            mainClass = "app.vercors.launcher.MainKt"
 
             nativeDistributions {
                 targetFormats(*TargetFormat.values())

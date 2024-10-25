@@ -1,17 +1,22 @@
-package app.vercors.launcher.app
+package app.vercors.launcher
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.application
+import app.vercors.launcher.account.AccountModule
+import app.vercors.launcher.app.AppModule
 import app.vercors.launcher.app.presentation.ui.App
-import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
+import app.vercors.launcher.core.CoreModule
+import app.vercors.launcher.game.GameModule
+import app.vercors.launcher.home.HomeModule
+import app.vercors.launcher.instance.InstanceModule
+import app.vercors.launcher.project.ProjectModule
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import org.koin.compose.KoinApplication
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.KoinApplication
 import org.koin.core.qualifier.named
-import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.ksp.generated.module
 
@@ -33,10 +38,13 @@ private fun KoinApplication.setupKoin(externalScope: CoroutineScope) {
     modules(
         module {
             single(named("externalScope")) { externalScope }
-            single(named("mainDispatcher")) { Dispatchers.Main.immediate } bind CoroutineDispatcher::class
-            single(named("ioDispatcher")) { Dispatchers.IO }
-            single(named("defaultDispatcher")) { Dispatchers.Default }
         },
-        AppModule().module
+        CoreModule().module,
+        AppModule().module,
+        HomeModule().module,
+        InstanceModule().module,
+        ProjectModule().module,
+        AccountModule().module,
+        GameModule().module
     )
 }

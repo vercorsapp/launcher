@@ -1,34 +1,45 @@
 package app.vercors.launcher.app.presentation.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.window.WindowDraggableArea
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
+import app.vercors.launcher.app.presentation.action.MenuBarAction
+import app.vercors.launcher.core.presentation.animation.defaultAnimation
+import app.vercors.launcher.core.presentation.ui.applyIf
 import app.vercors.launcher.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun WindowScope.MenuBar(
+    screenName: String,
     searchQuery: String,
     isMaximized: Boolean,
-    onMinimize: () -> Unit,
-    onMaximize: () -> Unit,
-    onClose: () -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    onAction: (MenuBarAction) -> Unit
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
         WindowDraggableArea(
             modifier = Modifier.pointerInput(Unit) {
-                detectTapGestures(onDoubleTap = { onMaximize() })
+                detectTapGestures(onDoubleTap = { onAction(MenuBarAction.Maximize) })
             }
         ) {
             Row(
@@ -37,22 +48,28 @@ fun WindowScope.MenuBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Row(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(20.dp).weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(width = 44.dp, height = 32.dp),
                         imageVector = vectorResource(Res.drawable.vercors),
                         tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = stringResource(Res.string.app_title),
                     )
-                    Text(
-                        text = stringResource(Res.string.app_title),
-                        style = MaterialTheme.typography.titleLarge,
-                    )
+                    AnimatedContent(
+                        targetState = screenName,
+                        transitionSpec = { defaultAnimation }
+                    ) {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-                Row(
+                /*Row(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -63,8 +80,8 @@ fun WindowScope.MenuBar(
                     ) {
                         OutlinedTextField(
                             value = searchQuery,
-                            onValueChange = onSearchQueryChange,
-                            modifier = Modifier.padding(5.dp).width(600.dp).widthIn(min = 100.dp),
+                            onValueChange = { onAction(MenuBarAction.SearchQueryChange(it)) },
+                            modifier = Modifier.padding(5.dp).width(600.dp).widthIn(min = 150.dp),
                             singleLine = true,
                             placeholder = {
                                 Text(
@@ -75,22 +92,23 @@ fun WindowScope.MenuBar(
                         )
                     }
                     Spacer(Modifier.width(50.dp))
-                }
+                }*/
                 Row {
                     WindowButton(
                         imageVector = vectorResource(Res.drawable.minus),
                         contentDescription = null,
-                        onClick = onMinimize
+                        onClick = { onAction(MenuBarAction.Minimize) }
                     )
                     WindowButton(
                         imageVector = vectorResource(if (isMaximized) Res.drawable.minimize else Res.drawable.maximize),
                         contentDescription = null,
-                        onClick = onMaximize
+                        onClick = { onAction(MenuBarAction.Maximize) }
                     )
                     WindowButton(
                         imageVector = vectorResource(Res.drawable.x),
                         contentDescription = null,
-                        onClick = onClose
+                        onClick = { onAction(MenuBarAction.Close) },
+                        isClose = true
                     )
                 }
             }
@@ -103,15 +121,21 @@ private fun WindowButton(
     imageVector: ImageVector,
     contentDescription: String?,
     onClick: () -> Unit,
+    isClose: Boolean = false
 ) {
+    val mutableInteractionSource = remember { MutableInteractionSource() }
+    val isHovered by mutableInteractionSource.collectIsHoveredAsState()
+
     Box(
-        modifier = Modifier.clickable(onClick = onClick).fillMaxHeight().aspectRatio(1f),
+        modifier = Modifier.clickable(onClick = onClick).fillMaxHeight().aspectRatio(1f)
+            .applyIf(isClose) { hoverable(mutableInteractionSource) }
+            .applyIf(isHovered) { background(MaterialTheme.colorScheme.error) },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             modifier = Modifier.size(32.dp),
             imageVector = imageVector,
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = if (isClose && isHovered) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurface,
             contentDescription = contentDescription,
         )
     }

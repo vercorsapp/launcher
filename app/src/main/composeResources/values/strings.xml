@@ -1,4 +1,9 @@
 <resources>
     <string name="app_title">Vercors</string>
     <string name="search_bar">Search instances or projects...</string>
+    <string name="home">Home</string>
+    <string name="instances">Instances</string>
+    <string name="projects">Projects</string>
+    <string name="accounts">Accounts</string>
+    <string name="settings">Settings</string>
 </resources>
