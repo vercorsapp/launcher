@@ -15,6 +15,7 @@ out/
 
 ### Kotlin ###
 .kotlin
+.run
 
 ### Eclipse ###
 .apt_generated
