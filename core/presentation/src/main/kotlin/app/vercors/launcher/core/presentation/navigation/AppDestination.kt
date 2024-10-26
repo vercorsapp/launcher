@@ -18,11 +18,11 @@ sealed interface AppDestination {
     data object InstanceList : AppDestination
 
     @Serializable
-    data class InstanceDetails(@Contextual val id: Uuid) : AppDestination
+    data class InstanceDetails(@Contextual val instanceId: Uuid) : AppDestination
 
     @Serializable
     data object ProjectList : AppDestination
 
     @Serializable
-    data class ProjectDetails(val provider: String, val id: String) : AppDestination
+    data class ProjectDetails(val provider: String, val projectId: String) : AppDestination
 }

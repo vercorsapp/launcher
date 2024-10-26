@@ -2,7 +2,7 @@ package app.vercors.launcher.app.presentation.util
 
 import androidx.navigation.NavDestination
 import app.vercors.launcher.app.presentation.state.NavigationTab
-import app.vercors.launcher.generated.resources.*
+import app.vercors.launcher.core.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 
 typealias ScreenType = String

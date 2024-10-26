@@ -19,8 +19,8 @@ import app.vercors.launcher.app.presentation.util.defaultDestination
 import app.vercors.launcher.app.presentation.util.screenName
 import app.vercors.launcher.app.presentation.util.screenType
 import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
-import app.vercors.launcher.generated.resources.Res
-import app.vercors.launcher.generated.resources.app_title
+import app.vercors.launcher.core.generated.resources.Res
+import app.vercors.launcher.core.generated.resources.app_title
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import java.awt.Dimension

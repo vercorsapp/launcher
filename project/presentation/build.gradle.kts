@@ -7,6 +7,6 @@ plugins {
 }
 
 dependencies {
-    moduleImpl(Core.Presentation)
-    moduleImpl(Project.Domain)
+    moduleImpl(Core.presentation)
+    moduleImpl(Project.domain)
 }

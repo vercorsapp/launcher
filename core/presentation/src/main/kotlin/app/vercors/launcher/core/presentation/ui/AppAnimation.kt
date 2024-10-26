@@ -1,4 +1,4 @@
-package app.vercors.launcher.core.presentation.animation
+package app.vercors.launcher.core.presentation.ui
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn

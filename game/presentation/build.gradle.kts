@@ -7,6 +7,6 @@ plugins {
 }
 
 dependencies {
-    moduleImpl(Core.Presentation)
-    moduleImpl(Game.Domain)
+    moduleImpl(Core.presentation)
+    moduleImpl(Game.domain)
 }

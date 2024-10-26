@@ -24,6 +24,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.io)
     implementation(compose.runtime)
     // DI
     implementation(libs.koin.core)
@@ -39,8 +40,5 @@ tasks.test {
 }
 
 tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
-    compilerOptions.freeCompilerArgs.addAll(
-        "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-        "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
-    )
+    compilerOptions.freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
 }

@@ -7,6 +7,6 @@ plugins {
 }
 
 dependencies {
-    moduleImpl(Core.Data)
-    moduleImpl(Home.Domain)
+    moduleImpl(Core.data)
+    moduleImpl(Home.domain)
 }

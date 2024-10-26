@@ -21,12 +21,12 @@ dependencies {
     // Logging
     implementation(libs.logback.classic)
     // Modules
-    moduleImpl(Account.Parent)
-    moduleImpl(Core.Parent)
-    moduleImpl(Game.Parent)
-    moduleImpl(Home.Parent)
-    moduleImpl(Instance.Parent)
-    moduleImpl(Project.Parent)
+    moduleImpl(Account.parent)
+    moduleImpl(Core.parent)
+    moduleImpl(Game.parent)
+    moduleImpl(Home.parent)
+    moduleImpl(Instance.parent)
+    moduleImpl(Project.parent)
 }
 
 compose {
@@ -40,10 +40,5 @@ compose {
                 packageVersion = rootProject.version as String
             }
         }
-    }
-
-    resources {
-        publicResClass = true
-        packageOfResClass = "app.vercors.launcher.generated.resources"
     }
 }

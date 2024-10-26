@@ -4,10 +4,10 @@ import org.gradle.kotlin.dsl.DependencyHandlerScope
 import org.gradle.kotlin.dsl.project
 
 data class ProjectModule(private val name: String) {
-    val Data = ":$name:data"
-    val Domain = ":$name:domain"
-    val Presentation = ":$name:presentation"
-    val Parent = ":$name"
+    val data = ":$name:data"
+    val domain = ":$name:domain"
+    val presentation = ":$name:presentation"
+    val parent = ":$name"
 }
 
 val Account = ProjectModule("account")
@@ -22,9 +22,9 @@ fun DependencyHandlerScope.moduleImpl(module: String) {
 }
 
 fun DependencyHandlerScope.moduleImpl(module: ProjectModule) {
-    moduleImpl(module.Data)
-    moduleImpl(module.Domain)
-    moduleImpl(module.Presentation)
+    moduleImpl(module.data)
+    moduleImpl(module.domain)
+    moduleImpl(module.presentation)
 }
 
 fun DependencyHandlerScope.moduleApi(module: String) {
@@ -32,7 +32,7 @@ fun DependencyHandlerScope.moduleApi(module: String) {
 }
 
 fun DependencyHandlerScope.moduleApi(module: ProjectModule) {
-    moduleApi(module.Data)
-    moduleApi(module.Domain)
-    moduleApi(module.Presentation)
+    moduleApi(module.data)
+    moduleApi(module.domain)
+    moduleApi(module.presentation)
 }

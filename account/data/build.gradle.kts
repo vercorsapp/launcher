@@ -7,6 +7,6 @@ plugins {
 }
 
 dependencies {
-    moduleImpl(Core.Data)
-    moduleImpl(Account.Domain)
+    moduleImpl(Core.data)
+    moduleImpl(Account.domain)
 }

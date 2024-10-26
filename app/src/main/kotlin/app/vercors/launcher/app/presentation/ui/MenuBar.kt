@@ -23,9 +23,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import app.vercors.launcher.app.presentation.action.MenuBarAction
-import app.vercors.launcher.core.presentation.animation.defaultAnimation
+import app.vercors.launcher.core.generated.resources.*
 import app.vercors.launcher.core.presentation.ui.applyIf
-import app.vercors.launcher.generated.resources.*
+import app.vercors.launcher.core.presentation.ui.defaultAnimation
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 

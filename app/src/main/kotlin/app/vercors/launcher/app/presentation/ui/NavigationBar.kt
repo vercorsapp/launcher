@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import app.vercors.launcher.app.presentation.state.NavigationTab
-import app.vercors.launcher.generated.resources.*
+import app.vercors.launcher.core.generated.resources.*
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable

@@ -6,12 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import app.vercors.launcher.core.presentation.animation.defaultEnterAnimation
-import app.vercors.launcher.core.presentation.animation.defaultExitAnimation
 import app.vercors.launcher.core.presentation.navigation.AppDestination
 import app.vercors.launcher.core.presentation.navigation.NavigationAction
 import app.vercors.launcher.core.presentation.navigation.Navigator
 import app.vercors.launcher.core.presentation.ui.ObserveAsEvents
+import app.vercors.launcher.core.presentation.ui.defaultEnterAnimation
+import app.vercors.launcher.core.presentation.ui.defaultExitAnimation
 import app.vercors.launcher.home.presentation.ui.HomeScreen
 import app.vercors.launcher.home.presentation.viewmodel.HomeViewModel
 import org.koin.compose.koinInject

@@ -7,5 +7,5 @@ plugins {
 }
 
 dependencies {
-    moduleImpl(Core.Domain)
+    moduleImpl(Core.domain)
 }

@@ -1,4 +1,5 @@
 import org.gradle.accessors.dm.LibrariesForLibs
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     id("app.vercors.launcher.base")
@@ -19,4 +20,14 @@ dependencies {
 
 ksp {
     arg("KOIN_USE_COMPOSE_VIEWMODEL", "true")
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass =
+        "app.vercors.launcher.${if (project.name == "app") "app" else project.parent?.name ?: project.name}.generated.resources"
+}
+
+tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
+    compilerOptions.freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
 }

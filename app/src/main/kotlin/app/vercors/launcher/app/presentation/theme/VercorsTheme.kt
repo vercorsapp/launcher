@@ -9,7 +9,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import app.vercors.launcher.generated.resources.*
+import app.vercors.launcher.app.generated.resources.InterBold
+import app.vercors.launcher.app.generated.resources.InterMedium
+import app.vercors.launcher.app.generated.resources.InterRegular
+import app.vercors.launcher.app.generated.resources.Res
 import org.jetbrains.compose.resources.Font
 
 @Composable

@@ -1,12 +1,12 @@
 package app.vercors.launcher.core.presentation.navigation
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 interface Navigator {
     val startDestination: AppDestination
-    val navigationActions: Flow<NavigationAction>
+    val navigationActions: SharedFlow<NavigationAction>
 
     suspend fun navigateTo(destination: AppDestination)
     suspend fun navigateBack()
@@ -15,15 +15,15 @@ interface Navigator {
 class DefaultNavigator(
     override val startDestination: AppDestination
 ) : Navigator {
-    private val _navigationActions = Channel<NavigationAction>()
-    override val navigationActions = _navigationActions.receiveAsFlow()
+    private val _navigationActions = MutableSharedFlow<NavigationAction>()
+    override val navigationActions = _navigationActions.asSharedFlow()
 
     override suspend fun navigateTo(destination: AppDestination) {
-        _navigationActions.send(NavigationAction.NavigateTo(destination))
+        _navigationActions.emit(NavigationAction.NavigateTo(destination))
     }
 
     override suspend fun navigateBack() {
-        _navigationActions.send(NavigationAction.NavigateBack)
+        _navigationActions.emit(NavigationAction.NavigateBack)
     }
 }
 

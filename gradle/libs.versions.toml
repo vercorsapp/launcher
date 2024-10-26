@@ -1,10 +1,11 @@
 [versions]
 # Kotlin
 kotlin = "2.1.0-Beta2"
-ksp = "2.1.0-Beta2-1.0.25"
+ksp = "2.1.0-Beta2-1.0.26"
 coroutines = "1.9.0"
 serialization = "1.7.2"
 datetime = "0.6.1"
+io = "0.5.4"
 # Presentation
 compose = "1.7.0"
 lifecycle = "2.8.3"
@@ -25,6 +26,7 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime" }
+kotlinx-io = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core-jvm", version.ref = "io" }
 # Presentation
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
