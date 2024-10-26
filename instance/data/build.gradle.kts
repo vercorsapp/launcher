@@ -1,4 +1,5 @@
 import app.vercors.launcher.build.Core
+import app.vercors.launcher.build.Game
 import app.vercors.launcher.build.Instance
 import app.vercors.launcher.build.moduleImpl
 
@@ -9,4 +10,5 @@ plugins {
 dependencies {
     moduleImpl(Core.data)
     moduleImpl(Instance.domain)
+    moduleImpl(Game.data)
 }

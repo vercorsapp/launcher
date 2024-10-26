@@ -19,8 +19,8 @@ import app.vercors.launcher.app.presentation.util.defaultDestination
 import app.vercors.launcher.app.presentation.util.screenName
 import app.vercors.launcher.app.presentation.util.screenType
 import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
-import app.vercors.launcher.core.generated.resources.Res
 import app.vercors.launcher.core.generated.resources.app_title
+import app.vercors.launcher.core.presentation.CoreString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import java.awt.Dimension
@@ -40,7 +40,7 @@ fun ApplicationScope.App() {
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         val screenType by remember { derivedStateOf { currentBackStackEntry?.destination?.screenType } }
-        val screenName by remember { derivedStateOf { screenType.screenName ?: Res.string.app_title } }
+        val screenName by remember { derivedStateOf { screenType.screenName ?: CoreString.app_title } }
         val currentTab by remember { derivedStateOf { screenType.currentTab } }
 
         VercorsTheme(darkTheme = true) {

@@ -1,16 +1,11 @@
 package app.vercors.launcher.home.presentation.model
 
-import androidx.compose.ui.graphics.Color
-import org.jetbrains.compose.resources.DrawableResource
-
 sealed interface HomeSectionItemUi {
     data class Instance(
         val name: String,
         val loader: String,
         val gameVersion: String,
-        val status: String,
-        val statusIcon: DrawableResource,
-        val statusColor: Color
+        val status: HomeInstanceStatusUi
     ) : HomeSectionItemUi {
         val loaderAndGameVersion = "$loader $gameVersion"
     }
@@ -25,3 +20,4 @@ sealed interface HomeSectionItemUi {
         val lastUpdated: String
     ) : HomeSectionItemUi
 }
+

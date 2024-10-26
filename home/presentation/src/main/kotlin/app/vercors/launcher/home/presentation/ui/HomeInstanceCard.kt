@@ -6,11 +6,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.Res
+import app.vercors.launcher.core.generated.resources.play
 import app.vercors.launcher.core.generated.resources.vercors
+import app.vercors.launcher.core.presentation.CoreDrawable
+import app.vercors.launcher.home.presentation.model.HomeInstanceStatusUi
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
+import app.vercors.launcher.instance.generated.resources.last_played
+import app.vercors.launcher.instance.generated.resources.running
+import app.vercors.launcher.instance.presentation.InstanceString
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -27,7 +34,7 @@ fun HomeInstanceCard(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(20.dp)
         ) {
-            InstanceIconContent(
+            HomeInstanceIcon(
                 instance = instance,
                 onLaunch = {},
                 onStop = {},
@@ -53,7 +60,7 @@ fun HomeInstanceCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = vectorResource(Res.drawable.vercors),
+                            imageVector = vectorResource(CoreDrawable.vercors),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
@@ -66,15 +73,28 @@ fun HomeInstanceCard(
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val (statusIcon, statusText, statusColor) = when (instance.status) {
+                            is HomeInstanceStatusUi.NotRunning -> Triple(
+                                vectorResource(CoreDrawable.play),
+                                stringResource(InstanceString.last_played, instance.status.lastPlayed),
+                                Color.Unspecified
+                            )
+
+                            HomeInstanceStatusUi.Running -> Triple(
+                                vectorResource(CoreDrawable.play),
+                                stringResource(InstanceString.running),
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        }
                         Icon(
-                            imageVector = vectorResource(instance.statusIcon),
+                            imageVector = statusIcon,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = statusColor
                         )
                         Text(
-                            text = instance.status,
-                            color = instance.statusColor,
+                            text = statusText,
+                            color = statusColor,
                             //style = MaterialTheme.typography.subtitle2
                         )
                     }

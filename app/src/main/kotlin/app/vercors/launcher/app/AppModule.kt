@@ -1,6 +1,7 @@
 package app.vercors.launcher.app
 
 import app.vercors.launcher.account.AccountModule
+import app.vercors.launcher.app.generated.resources.Res
 import app.vercors.launcher.core.CoreModule
 import app.vercors.launcher.game.GameModule
 import app.vercors.launcher.home.HomeModule
@@ -21,3 +22,7 @@ import org.koin.core.annotation.Module
 )
 @ComponentScan
 class AppModule
+
+val AppString = Res.string
+val AppDrawable = Res.drawable
+val AppFont = Res.font

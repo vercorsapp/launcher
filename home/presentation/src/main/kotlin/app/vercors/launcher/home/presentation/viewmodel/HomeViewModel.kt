@@ -1,14 +1,14 @@
 package app.vercors.launcher.home.presentation.viewmodel
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.vercors.launcher.core.generated.resources.hard_drive
 import app.vercors.launcher.core.presentation.navigation.AppDestination
 import app.vercors.launcher.core.presentation.navigation.Navigator
 import app.vercors.launcher.home.domain.usecase.ObserveHomeSections
 import app.vercors.launcher.home.generated.resources.jump_back_in
+import app.vercors.launcher.home.presentation.HomeString
 import app.vercors.launcher.home.presentation.action.HomeAction
+import app.vercors.launcher.home.presentation.model.HomeInstanceStatusUi
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
 import app.vercors.launcher.home.presentation.model.HomeSectionUi
 import app.vercors.launcher.home.presentation.state.HomeState
@@ -16,8 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-import app.vercors.launcher.core.generated.resources.Res as CoreRes
-import app.vercors.launcher.home.generated.resources.Res as HomeRes
 
 @KoinViewModel
 class HomeViewModel(
@@ -25,16 +23,14 @@ class HomeViewModel(
     private val observeHomeSections: ObserveHomeSections
 ) : ViewModel() {
     private val _uiState =
-        MutableStateFlow(HomeState(false, listOf(HomeSectionUi(HomeRes.string.jump_back_in, buildList {
+        MutableStateFlow(HomeState(false, listOf(HomeSectionUi(HomeString.jump_back_in, buildList {
             repeat(10) {
                 add(
                     HomeSectionItemUi.Instance(
                         name = "mau $it",
                         loader = "mauloader",
                         gameVersion = "69.420",
-                        status = "meowing",
-                        statusIcon = CoreRes.drawable.hard_drive,
-                        statusColor = Color.Unspecified
+                        status = HomeInstanceStatusUi.Running
                     )
                 )
             }

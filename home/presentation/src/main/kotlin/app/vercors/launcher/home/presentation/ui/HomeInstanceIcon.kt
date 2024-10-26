@@ -24,35 +24,32 @@
 package app.vercors.launcher.home.presentation.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.Res
 import app.vercors.launcher.core.generated.resources.hard_drive
 import app.vercors.launcher.core.generated.resources.play
+import app.vercors.launcher.core.presentation.CoreDrawable
+import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.darker
+import app.vercors.launcher.core.presentation.ui.defaultEnterAnimation
+import app.vercors.launcher.core.presentation.ui.defaultExitAnimation
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-fun InstanceIconContent(
+fun HomeInstanceIcon(
     instance: HomeSectionItemUi.Instance,
     onLaunch: () -> Unit,
     onStop: () -> Unit,
@@ -69,7 +66,7 @@ fun InstanceIconContent(
             //elevation = 1.dp
         ) {
             Icon(
-                imageVector = vectorResource(Res.drawable.hard_drive),
+                imageVector = vectorResource(CoreDrawable.hard_drive),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().padding(10.dp)
             )
@@ -110,8 +107,8 @@ fun InstanceIconContent(
         InstanceIconButton(
             isHovered = isHovered,
             onClick = onLaunch,
-            icon = vectorResource(Res.drawable.play),
-            contentDescription = stringResource(Res.string.play)
+            icon = vectorResource(CoreDrawable.play),
+            contentDescription = stringResource(CoreString.play)
         )
     }
 }
@@ -120,14 +117,12 @@ fun InstanceIconContent(
 private fun InstanceIconButton(
     isHovered: Boolean,
     onClick: () -> Unit,
-    color: Color = MaterialTheme.colorScheme.primary,
-    contentColor: Color = contentColorFor(color),
     icon: ImageVector,
     contentDescription: String?
 ) = AnimatedVisibility(
     visible = isHovered,
-    enter = fadeIn(),
-    exit = fadeOut()
+    enter = defaultEnterAnimation,
+    exit = defaultExitAnimation
 ) {
     Box(
         modifier = Modifier.fillMaxSize().background(darker),
@@ -135,14 +130,13 @@ private fun InstanceIconButton(
     ) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(64.dp).pointerHoverIcon(PointerIcon.Hand)
-                .background(color, CircleShape),
+            colors = IconButtonDefaults.filledIconButtonColors(),
+            modifier = Modifier.size(64.dp),
             content = {
                 Icon(
                     imageVector = icon,
                     contentDescription = contentDescription,
-                    modifier = Modifier.size(32.dp),
-                    tint = contentColor
+                    modifier = Modifier.size(32.dp)
                 )
             }
         )

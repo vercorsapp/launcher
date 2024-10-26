@@ -9,10 +9,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import app.vercors.launcher.app.AppFont
 import app.vercors.launcher.app.generated.resources.InterBold
 import app.vercors.launcher.app.generated.resources.InterMedium
 import app.vercors.launcher.app.generated.resources.InterRegular
-import app.vercors.launcher.app.generated.resources.Res
 import org.jetbrains.compose.resources.Font
 
 @Composable
@@ -30,15 +30,15 @@ fun VercorsTheme(
 private val VercorsTypography: Typography @Composable get() {
     val fontFamily = FontFamily(
         Font(
-            resource = Res.font.InterRegular,
+            resource = AppFont.InterRegular,
             weight = FontWeight.Normal,
         ),
         Font(
-            resource = Res.font.InterMedium,
+            resource = AppFont.InterMedium,
             weight = FontWeight.Medium,
         ),
         Font(
-            resource = Res.font.InterBold,
+            resource = AppFont.InterBold,
             weight = FontWeight.Bold,
         )
     )
@@ -61,10 +61,10 @@ private val VercorsTypography: Typography @Composable get() {
     )
 }
 
-private val DarkColorScheme = VercorsColorScheme(CatppuccinColors.Mocha)
-private val LightColorScheme = VercorsColorScheme(CatppuccinColors.Latte)
+private val DarkColorScheme = createVercorsColorScheme(CatppuccinColors.Mocha)
+private val LightColorScheme = createVercorsColorScheme(CatppuccinColors.Latte)
 
-private fun VercorsColorScheme(colors: CatppuccinColors) = with(colors) {
+private fun createVercorsColorScheme(colors: CatppuccinColors) = with(colors) {
     ColorScheme(
         primary = mauve,
         onPrimary = mantle,
