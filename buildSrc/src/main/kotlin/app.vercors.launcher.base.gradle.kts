@@ -1,5 +1,4 @@
 import org.gradle.accessors.dm.LibrariesForLibs
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     kotlin("jvm")
@@ -35,10 +34,19 @@ dependencies {
     implementation(libs.kotlin.logging.jvm)
 }
 
-tasks.test {
-    useJUnitPlatform()
+val jdkVersion = 17
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(jdkVersion)
+    }
 }
 
-tasks.named<KotlinCompilationTask<*>>("compileKotlin").configure {
+kotlin {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+    jvmToolchain(jdkVersion)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
