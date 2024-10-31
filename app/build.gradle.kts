@@ -2,6 +2,7 @@ import app.vercors.launcher.build.*
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
+    id("app.vercors.launcher.data")
     id("app.vercors.launcher.presentation")
 }
 

@@ -1,9 +1,6 @@
 package app.vercors.launcher.home.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import app.vercors.launcher.core.presentation.navigation.AppDestination
-import app.vercors.launcher.core.presentation.navigation.Navigator
 import app.vercors.launcher.home.domain.usecase.ObserveHomeSections
 import app.vercors.launcher.home.generated.resources.jump_back_in
 import app.vercors.launcher.home.presentation.HomeString
@@ -14,12 +11,10 @@ import app.vercors.launcher.home.presentation.model.HomeSectionUi
 import app.vercors.launcher.home.presentation.state.HomeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class HomeViewModel(
-    private val navigator: Navigator,
     private val observeHomeSections: ObserveHomeSections
 ) : ViewModel() {
     private val _uiState =
@@ -42,15 +37,7 @@ class HomeViewModel(
 
     fun onAction(action: HomeAction) {
         when (action) {
-            is HomeAction.InstallProject -> TODO()
-            is HomeAction.LaunchInstance -> TODO()
-            is HomeAction.ShowInstance -> viewModelScope.launch {
-                navigator.navigateTo(AppDestination.InstanceDetails(action.instanceId))
-            }
-
-            is HomeAction.ShowProject -> viewModelScope.launch {
-                navigator.navigateTo(AppDestination.ProjectDetails(action.provider, action.projectId))
-            }
+            is HomeAction.Nav -> {}
         }
     }
 }

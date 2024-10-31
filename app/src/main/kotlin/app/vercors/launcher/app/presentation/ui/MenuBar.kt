@@ -32,7 +32,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun WindowScope.MenuBar(
     screenName: String,
-    searchQuery: String,
+    hasWindowControls: Boolean,
     isMaximized: Boolean,
     onAction: (MenuBarAction) -> Unit
 ) {
@@ -69,47 +69,25 @@ fun WindowScope.MenuBar(
                         )
                     }
                 }
-                /*Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Spacer(Modifier.width(50.dp))
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { onAction(MenuBarAction.SearchQueryChange(it)) },
-                            modifier = Modifier.padding(5.dp).width(600.dp).widthIn(min = 150.dp),
-                            singleLine = true,
-                            placeholder = {
-                                Text(
-                                    text = stringResource(Res.string.search_bar),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
+                if (hasWindowControls) {
+                    Row {
+                        WindowButton(
+                            imageVector = vectorResource(Res.drawable.minus),
+                            contentDescription = null,
+                            onClick = { onAction(MenuBarAction.Minimize) }
+                        )
+                        WindowButton(
+                            imageVector = vectorResource(if (isMaximized) Res.drawable.minimize else Res.drawable.maximize),
+                            contentDescription = null,
+                            onClick = { onAction(MenuBarAction.Maximize) }
+                        )
+                        WindowButton(
+                            imageVector = vectorResource(Res.drawable.x),
+                            contentDescription = null,
+                            onClick = { onAction(MenuBarAction.Close) },
+                            isClose = true
                         )
                     }
-                    Spacer(Modifier.width(50.dp))
-                }*/
-                Row {
-                    WindowButton(
-                        imageVector = vectorResource(Res.drawable.minus),
-                        contentDescription = null,
-                        onClick = { onAction(MenuBarAction.Minimize) }
-                    )
-                    WindowButton(
-                        imageVector = vectorResource(if (isMaximized) Res.drawable.minimize else Res.drawable.maximize),
-                        contentDescription = null,
-                        onClick = { onAction(MenuBarAction.Maximize) }
-                    )
-                    WindowButton(
-                        imageVector = vectorResource(Res.drawable.x),
-                        contentDescription = null,
-                        onClick = { onAction(MenuBarAction.Close) },
-                        isClose = true
-                    )
                 }
             }
         }

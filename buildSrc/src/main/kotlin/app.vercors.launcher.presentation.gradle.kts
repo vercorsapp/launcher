@@ -12,6 +12,10 @@ dependencies {
     implementation(compose.components.resources)
     implementation(libs.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
+    implementation(libs.coil.network.cache.control)
+    implementation(libs.filekit.compose)
     // DI
     implementation(libs.koin.compose)
     implementation(libs.koin.compose.viewmodel)

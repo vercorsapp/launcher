@@ -1,6 +1,6 @@
 package app.vercors.launcher.app.logging
 
-import app.vercors.launcher.core.data.Storage
+import app.vercors.launcher.core.data.storage.Storage
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
@@ -15,11 +15,17 @@ import ch.qos.logback.core.rolling.RollingFileAppender
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
 import ch.qos.logback.core.spi.ContextAwareBase
 import kotlinx.io.files.Path
+import org.slf4j.LoggerFactory
+
 
 class AppLogbackConfigurator : ContextAwareBase(), Configurator {
+    init {
+        instance = this
+    }
+
     override fun configure(context: LoggerContext): ExecutionStatus {
         addInfo("Setting up custom configuration.")
-        val logsPath = Path(Storage.path, "logs")
+        val logsPath = Path(Storage.state.value.path, "logs")
 
         val layout = TTLLLayout().apply {
             this.context = context
@@ -90,5 +96,16 @@ class AppLogbackConfigurator : ContextAwareBase(), Configurator {
 
         addInfo("Custom logger is set up")
         return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY
+    }
+
+    fun reload() {
+        addInfo("Reloading custom logger.")
+        val context = LoggerFactory.getILoggerFactory() as LoggerContext
+        context.reset()
+        instance.configure(context)
+    }
+
+    companion object {
+        lateinit var instance: AppLogbackConfigurator
     }
 }

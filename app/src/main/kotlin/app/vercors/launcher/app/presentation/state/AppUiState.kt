@@ -4,5 +4,6 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class AppUiState(
-    val searchQuery: String = ""
+    val undecorated: Boolean = true,
+    val currentDialog: AppDialog? = null,
 )

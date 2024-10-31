@@ -7,12 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.vercors.launcher.app.presentation.action.MenuBarAction
+import app.vercors.launcher.app.presentation.state.AppDialog
 import app.vercors.launcher.app.presentation.theme.VercorsTheme
 import app.vercors.launcher.app.presentation.util.currentTab
 import app.vercors.launcher.app.presentation.util.defaultDestination
@@ -22,21 +23,19 @@ import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
+import org.koin.compose.koinInject
 import java.awt.Dimension
 
 @Composable
-fun ApplicationScope.App() {
-    val windowState = rememberWindowState()
+fun ApplicationScope.AppWindow(windowState: WindowState = rememberWindowState()) {
+    val viewModel = koinInject<AppViewModel>()
+    val uiState by viewModel.uiState.collectAsState()
 
-    Window(
+    WindowDecorationHandler(
         state = windowState,
-        undecorated = true,
-        onCloseRequest = ::exitApplication
+        undecorated = uiState.undecorated
     ) {
         window.minimumSize = Dimension(800, 600)
-        val viewModel = koinViewModel<AppViewModel>()
-        val uiState by viewModel.uiState.collectAsState()
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         val screenType by remember { derivedStateOf { currentBackStackEntry?.destination?.screenType } }
@@ -48,7 +47,7 @@ fun ApplicationScope.App() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     MenuBar(
                         screenName = stringResource(screenName),
-                        searchQuery = uiState.searchQuery,
+                        hasWindowControls = uiState.undecorated,
                         isMaximized = windowState.placement == WindowPlacement.Maximized,
                         onAction = {
                             when (it) {
@@ -57,7 +56,6 @@ fun ApplicationScope.App() {
                                     if (windowState.placement == WindowPlacement.Maximized) WindowPlacement.Floating else WindowPlacement.Maximized
 
                                 MenuBarAction.Minimize -> windowState.isMinimized = true
-                                else -> viewModel.onAction(it)
                             }
                         },
                     )
@@ -71,11 +69,20 @@ fun ApplicationScope.App() {
                                 color = MaterialTheme.colorScheme.background,
                                 modifier = Modifier.fillMaxSize()
                             ) {
-                                MainContent(navController = navController)
+                                AppNavHost(
+                                    navController = navController,
+                                    onAction = viewModel::onAction
+                                )
                             }
                         }
                     }
                 }
+            }
+
+            when (uiState.currentDialog) {
+                AppDialog.AddAccount -> TODO()
+                AppDialog.CreateInstance -> TODO()
+                null -> {}
             }
         }
     }

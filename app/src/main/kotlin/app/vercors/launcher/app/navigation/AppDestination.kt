@@ -1,8 +1,8 @@
-package app.vercors.launcher.core.presentation.navigation
+package app.vercors.launcher.app.navigation
 
-import kotlinx.serialization.Contextual
+import app.vercors.launcher.instance.domain.model.InstanceId
+import app.vercors.launcher.project.domain.model.ProjectId
 import kotlinx.serialization.Serializable
-import kotlin.uuid.Uuid
 
 sealed interface AppDestination {
     @Serializable
@@ -18,11 +18,11 @@ sealed interface AppDestination {
     data object InstanceList : AppDestination
 
     @Serializable
-    data class InstanceDetails(@Contextual val instanceId: Uuid) : AppDestination
+    data class InstanceDetails(val instanceId: InstanceId) : AppDestination
 
     @Serializable
     data object ProjectList : AppDestination
 
     @Serializable
-    data class ProjectDetails(val provider: String, val projectId: String) : AppDestination
+    data class ProjectDetails(val projectId: ProjectId) : AppDestination
 }

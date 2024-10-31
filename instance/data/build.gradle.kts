@@ -11,4 +11,5 @@ dependencies {
     moduleImpl(Core.data)
     moduleImpl(Instance.domain)
     moduleImpl(Game.data)
+    moduleImpl(Game.domain)
 }

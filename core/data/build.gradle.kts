@@ -7,4 +7,5 @@ plugins {
 
 dependencies {
     moduleImpl(Core.domain)
+    implementation(libs.ktor.client.cio)
 }

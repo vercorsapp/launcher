@@ -1,0 +1,5 @@
+<resources>
+    <string name="welcome">Welcome to Vercors</string>
+    <string name="welcome_path">Please select an installation path (where your game instances will be stored).</string>
+    <string name="start_app">Start Vercors</string>
+</resources>
