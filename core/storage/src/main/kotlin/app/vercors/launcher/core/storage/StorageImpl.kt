@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import java.util.prefs.Preferences
 
-@Single
+@Single(createdAtStart = true)
 class StorageImpl : Storage {
     private val preferences = Preferences.userNodeForPackage(DummyClass::class.java)
     private val _state = MutableStateFlow(StorageState(strPath = preferences.get(PREF_KEY, Storage.DEFAULT_PATH)))

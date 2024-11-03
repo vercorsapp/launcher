@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.vercors.launcher.core.domain.APP_NAME
 import app.vercors.launcher.core.presentation.theme.VercorsTheme
 import app.vercors.launcher.setup.presentation.viewmodel.SetupViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -16,7 +17,10 @@ import org.koin.core.parameter.parametersOf
 fun ApplicationScope.SetupWindow(
     onLaunch: () -> Unit,
 ) {
-    Window(onCloseRequest = ::exitApplication) {
+    Window(
+        title = APP_NAME,
+        onCloseRequest = ::exitApplication
+    ) {
         VercorsTheme(darkTheme = true) {
             Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
                 val viewModel = koinViewModel<SetupViewModel> { parametersOf(onLaunch) }

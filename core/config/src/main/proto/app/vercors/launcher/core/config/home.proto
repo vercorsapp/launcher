@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_package = "app.vercors.launcher.core.config.proto";
+option java_multiple_files = true;
+
+message Home {
+  repeated HomeSection sections = 1;
+  HomeProvider provider = 2;
+}
+
+enum HomeSection {
+  JUMP_BACK_IN = 0;
+  POPULAR_MODS = 1;
+  POPULAR_MODPACKS = 2;
+  POPULAR_RESOURCE_PACKS = 3;
+  POPULAR_SHADER_PACKS = 4;
+}
+
+enum HomeProvider {
+  MODRINTH = 0;
+  CURSEFORGE = 1;
+}

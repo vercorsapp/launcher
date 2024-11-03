@@ -24,6 +24,8 @@ koin-annotations = "2.0.0-Beta1"
 # Logging
 kotlin-logging = "7.0.0"
 logback = "1.5.11"
+protobuf = "4.28.3"
+protobuf-plugin = "0.9.4"
 
 [libraries]
 # Kotlin
@@ -52,6 +54,8 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 appdirs = { group = "ca.gosyer", name = "kotlin-multiplatform-appdirs", version.ref = "appdirs" }
+protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
+protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 # DI
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
@@ -70,3 +74,6 @@ kotlin-plugin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-s
 kotlin-plugin-compose = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 ksp = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+
+[plugins]
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }

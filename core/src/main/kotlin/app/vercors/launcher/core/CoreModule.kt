@@ -8,5 +8,14 @@ import app.vercors.launcher.core.serialization.CoreSerializationModule
 import app.vercors.launcher.core.storage.CoreStorageModule
 import org.koin.core.annotation.Module
 
-@Module(includes = [CoreConfigModule::class, CoreDomainModule::class, CoreNetworkModule::class, CorePresentationModule::class, CoreSerializationModule::class, CoreStorageModule::class])
+@Module(
+    includes = [
+        CoreConfigModule::class,
+        CoreDomainModule::class,
+        CoreNetworkModule::class,
+        CorePresentationModule::class,
+        CoreSerializationModule::class,
+        CoreStorageModule::class
+    ]
+)
 class CoreModule

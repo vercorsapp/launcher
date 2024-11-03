@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "app/vercors/launcher/core/config/general.proto";
+import "app/vercors/launcher/core/config/home.proto";
+
+option java_package = "app.vercors.launcher.core.config.proto";
+option java_multiple_files = true;
+
+message Config {
+  General general = 1;
+  Home home = 2;
+}
+

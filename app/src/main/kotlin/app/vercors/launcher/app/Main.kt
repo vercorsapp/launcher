@@ -23,8 +23,8 @@ private val logger = KotlinLogging.logger {}
 
 fun main() {
     logger.info { "Hello World!" }
-    val externalScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    val koin = externalScope.async(Dispatchers.Default) {
+    val externalScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val koin = externalScope.async {
         startKoin { setupKoin(externalScope) }.koin
     }
     application(exitProcessOnExit = false) {
