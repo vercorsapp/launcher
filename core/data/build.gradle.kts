@@ -1,11 +1,10 @@
-import app.vercors.launcher.build.Core
-import app.vercors.launcher.build.moduleImpl
+import app.vercors.launcher.build.*
 
 plugins {
     id("app.vercors.launcher.data")
 }
 
 dependencies {
-    moduleImpl(Core.domain)
+    implementation(projects.core.domain)
     implementation(libs.ktor.client.cio)
 }

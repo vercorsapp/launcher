@@ -14,7 +14,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.vercors.launcher.app.presentation.action.MenuBarAction
 import app.vercors.launcher.app.presentation.state.AppDialog
-import app.vercors.launcher.app.presentation.theme.VercorsTheme
 import app.vercors.launcher.app.presentation.util.currentTab
 import app.vercors.launcher.app.presentation.util.defaultDestination
 import app.vercors.launcher.app.presentation.util.screenName
@@ -22,6 +21,7 @@ import app.vercors.launcher.app.presentation.util.screenType
 import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
+import app.vercors.launcher.core.presentation.theme.VercorsTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.awt.Dimension

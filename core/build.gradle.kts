@@ -1,10 +1,12 @@
-import app.vercors.launcher.build.Core
-import app.vercors.launcher.build.moduleApi
-
 plugins {
     id("app.vercors.launcher.base")
 }
 
 dependencies {
-    moduleApi(Core)
+    api(projects.core.config)
+    api(projects.core.domain)
+    api(projects.core.network)
+    api(projects.core.presentation)
+    api(projects.core.serialization)
+    api(projects.core.storage)
 }

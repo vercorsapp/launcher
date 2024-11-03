@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ConfigData(
-    val general: GeneralConfigData,
+    val app: AppConfigData,
     val home: HomeConfigData,
 )

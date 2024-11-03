@@ -7,7 +7,7 @@ import androidx.room.TypeConverters
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.vercors.launcher.account.data.dao.AccountDao
 import app.vercors.launcher.account.data.model.AccountEntity
-import app.vercors.launcher.core.data.storage.Storage
+import app.vercors.launcher.core.storage.Storage
 import app.vercors.launcher.instance.data.dao.InstanceDao
 import app.vercors.launcher.instance.data.model.InstanceEntity
 import app.vercors.launcher.project.data.local.dao.ProjectDao
@@ -27,8 +27,8 @@ abstract class AppDatabase : RoomDatabase() {
 }
 
 @Single
-fun provideAppDatabase(): AppDatabase = Room
-    .databaseBuilder<AppDatabase>(Path(Storage.state.value.path, "launcher.db").toString())
+fun provideAppDatabase(storage: Storage): AppDatabase = Room
+    .databaseBuilder<AppDatabase>(Path(storage.state.value.path, "launcher.db").toString())
     .setDriver(BundledSQLiteDriver())
     .build()
 

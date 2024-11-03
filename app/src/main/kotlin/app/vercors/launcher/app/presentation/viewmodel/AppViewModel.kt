@@ -19,6 +19,4 @@ class AppViewModel : ViewModel() {
             is AppAction.OpenDialog -> _uiState.update { it.copy(currentDialog = action.dialog) }
         }
     }
-
-    fun toggle() = _uiState.update { it.copy(undecorated = !it.undecorated) }
 }

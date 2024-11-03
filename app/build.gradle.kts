@@ -1,4 +1,3 @@
-import app.vercors.launcher.build.*
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -22,12 +21,41 @@ dependencies {
     // Logging
     implementation(libs.logback.classic)
     // Modules
-    moduleImpl(Account.parent)
-    moduleImpl(Core.parent)
-    moduleImpl(Game.parent)
-    moduleImpl(Home.parent)
-    moduleImpl(Instance.parent)
-    moduleImpl(Project.parent)
+    implementation(projects.account)
+    implementation(projects.account.data)
+    implementation(projects.account.domain)
+    implementation(projects.account.presentation)
+    implementation(projects.core)
+    implementation(projects.core.config)
+    implementation(projects.core.domain)
+    implementation(projects.core.network)
+    implementation(projects.core.presentation)
+    implementation(projects.core.serialization)
+    implementation(projects.core.storage)
+    implementation(projects.game)
+    implementation(projects.game.data)
+    implementation(projects.game.domain)
+    implementation(projects.game.presentation)
+    implementation(projects.home)
+    implementation(projects.home.data)
+    implementation(projects.home.domain)
+    implementation(projects.home.presentation)
+    implementation(projects.instance)
+    implementation(projects.instance.data)
+    implementation(projects.instance.domain)
+    implementation(projects.instance.presentation)
+    implementation(projects.project)
+    implementation(projects.project.data)
+    implementation(projects.project.domain)
+    implementation(projects.project.presentation)
+    implementation(projects.settings)
+    implementation(projects.settings.data)
+    implementation(projects.settings.domain)
+    implementation(projects.settings.presentation)
+    implementation(projects.setup)
+    implementation(projects.setup.data)
+    implementation(projects.setup.domain)
+    implementation(projects.setup.presentation)
 }
 
 compose {

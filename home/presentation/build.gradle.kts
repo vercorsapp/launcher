@@ -1,14 +1,12 @@
-import app.vercors.launcher.build.*
-
 plugins {
     id("app.vercors.launcher.presentation")
 }
 
 dependencies {
-    moduleImpl(Core.presentation)
-    moduleImpl(Home.domain)
-    moduleImpl(Instance.presentation)
-    moduleImpl(Instance.domain)
-    moduleImpl(Project.presentation)
-    moduleImpl(Project.domain)
+    implementation(projects.core.presentation)
+    implementation(projects.home.domain)
+    implementation(projects.instance.presentation)
+    implementation(projects.instance.domain)
+    implementation(projects.project.presentation)
+    implementation(projects.project.domain)
 }

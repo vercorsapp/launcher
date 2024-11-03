@@ -10,3 +10,4 @@ class CorePresentationModule
 
 val CoreString = Res.string
 val CoreDrawable = Res.drawable
+val CoreFont = Res.font

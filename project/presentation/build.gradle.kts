@@ -1,14 +1,9 @@
-import app.vercors.launcher.build.Core
-import app.vercors.launcher.build.Game
-import app.vercors.launcher.build.Project
-import app.vercors.launcher.build.moduleImpl
-
 plugins {
     id("app.vercors.launcher.presentation")
 }
 
 dependencies {
-    moduleImpl(Core.presentation)
-    moduleImpl(Project.domain)
-    moduleImpl(Game.presentation)
+    implementation(projects.core.presentation)
+    implementation(projects.project.domain)
+    implementation(projects.game.presentation)
 }
