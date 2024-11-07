@@ -1,10 +1,13 @@
 package app.vercors.launcher.core.presentation.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.annotation.ColorInt
+import androidx.annotation.Size
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontFamily
@@ -17,14 +20,58 @@ import org.jetbrains.compose.resources.Font
 
 @Composable
 fun VercorsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    theme: String,
+    accent: String,
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        typography = VercorsTypography,
-        content = content
-    )
+    val colors = when (theme) {
+        "catppuccin-latte" -> CatppuccinColors.Latte
+        "catppuccin-frappe" -> CatppuccinColors.Frappe
+        "catppuccin-macchiato" -> CatppuccinColors.Macchiato
+        "catppuccin-mocha" -> CatppuccinColors.Mocha
+        else -> throw IllegalArgumentException("Unknown theme $theme")
+    }
+    val accentProvider: CatppuccinColors.() -> Color = when (accent) {
+        "rosewater" -> CatppuccinColors::rosewater
+        "flamingo" -> CatppuccinColors::flamingo
+        "pink" -> CatppuccinColors::pink
+        "mauve" -> CatppuccinColors::mauve
+        "red" -> CatppuccinColors::red
+        "maroon" -> CatppuccinColors::maroon
+        "peach" -> CatppuccinColors::peach
+        "yellow" -> CatppuccinColors::yellow
+        "green" -> CatppuccinColors::green
+        "teal" -> CatppuccinColors::teal
+        "sky" -> CatppuccinColors::sky
+        "sapphire" -> CatppuccinColors::sapphire
+        "blue" -> CatppuccinColors::blue
+        "lavender" -> CatppuccinColors::lavender
+        else -> {
+            { parseColor(accent) }
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalCatppuccinColors provides colors,
+    ) {
+        MaterialTheme(
+            colorScheme = createVercorsColorScheme(colors, accentProvider),
+            typography = VercorsTypography,
+            content = content
+        )
+    }
+}
+
+@ColorInt
+fun parseColor(@Size(min = 1) colorString: String): Color {
+    if (colorString[0] == '#') { // Use a long to avoid rollovers on #ffXXXXXX
+        var color = colorString.substring(1).toLong(16)
+        if (colorString.length == 7) { // Set the alpha value
+            color = color or -0x1000000
+        } else require(colorString.length == 9) { "Unknown color" }
+        return Color(color.toInt())
+    }
+    throw IllegalArgumentException("Unknown color")
 }
 
 private val VercorsTypography: Typography @Composable get() {
@@ -61,19 +108,18 @@ private val VercorsTypography: Typography @Composable get() {
     )
 }
 
-private val DarkColorScheme = createVercorsColorScheme(CatppuccinColors.Mocha)
-private val LightColorScheme = createVercorsColorScheme(CatppuccinColors.Latte)
-
-private fun createVercorsColorScheme(colors: CatppuccinColors) = with(colors) {
+@Stable
+private fun createVercorsColorScheme(colors: CatppuccinColors, accentProvider: CatppuccinColors.() -> Color) =
+    with(colors) {
     ColorScheme(
-        primary = mauve,
+        primary = colors.accentProvider(),
         onPrimary = mantle,
-        primaryContainer = lerp(base, mauve, 0.2f),
+        primaryContainer = lerp(base, colors.accentProvider(), 0.2f),
         onPrimaryContainer = text,
-        inversePrimary = lerp(text, mauve, 0.2f),
-        secondary = mauve,
+        inversePrimary = lerp(text, colors.accentProvider(), 0.2f),
+        secondary = colors.accentProvider(),
         onSecondary = mantle,
-        secondaryContainer = lerp(base, mauve, 0.2f),
+        secondaryContainer = lerp(base, colors.accentProvider(), 0.2f),
         onSecondaryContainer = text,
         tertiary = green,
         onTertiary = mantle,

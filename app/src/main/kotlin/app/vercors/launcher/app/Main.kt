@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.application
 import app.vercors.launcher.app.logging.AppLogbackConfigurator
 import app.vercors.launcher.app.presentation.ui.AppWindow
+import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
 import app.vercors.launcher.core.storage.Storage
 import app.vercors.launcher.setup.presentation.screen.SetupWindow
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -33,8 +34,12 @@ fun main() {
             val storageState by storage.state.collectAsState()
 
             if (storageState.isSetup) {
-                logger.info { "Application path is setup: ${storageState.strPath}" }
-                AppWindow()
+                val viewModel = koinInject<AppViewModel>()
+                val uiState by viewModel.uiState.collectAsState()
+
+                AppWindow(
+                    uiState = uiState
+                )
             } else {
                 logger.info { "Application path is not setup - showing setup window" }
                 SetupWindow(

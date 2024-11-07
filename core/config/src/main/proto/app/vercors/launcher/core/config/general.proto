@@ -3,15 +3,15 @@ syntax = "proto3";
 option java_package = "app.vercors.launcher.core.config.proto";
 option java_multiple_files = true;
 
-message General {
+message GeneralProto {
   string theme = 1;
   string accent = 2;
   bool decorated = 3;
   bool animations = 4;
-  Tab default_tab = 5;
+  TabProto default_tab = 5;
 }
 
-enum Tab {
+enum TabProto {
   HOME = 0;
   INSTANCES = 1;
   PROJECTS = 2;

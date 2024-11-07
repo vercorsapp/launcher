@@ -11,12 +11,12 @@ import java.util.prefs.Preferences
 @Single(createdAtStart = true)
 class StorageImpl : Storage {
     private val preferences = Preferences.userNodeForPackage(DummyClass::class.java)
-    private val _state = MutableStateFlow(StorageState(strPath = preferences.get(PREF_KEY, Storage.DEFAULT_PATH)))
+    private val _state = MutableStateFlow(StorageState(path = preferences[PREF_KEY, Storage.DEFAULT_PATH]))
     override val state: StateFlow<StorageState> = _state.asStateFlow()
 
     override fun updatePath(path: String) {
         preferences.put(PREF_KEY, path)
-        _state.update { it.copy(strPath = path) }
+        _state.update { it.copy(path = path) }
     }
 
     companion object {

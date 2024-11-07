@@ -1,9 +1,9 @@
 package app.vercors.launcher.core.config.repository
 
 import app.vercors.launcher.core.config.model.AppConfig
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 interface ConfigRepository {
-    val configState: StateFlow<AppConfig>
-    suspend fun updateConfig(update: (AppConfig) -> AppConfig)
+    fun observeConfig(): Flow<AppConfig>
+    suspend fun <T> updateConfig(update: ConfigUpdate<T>, value: T)
 }

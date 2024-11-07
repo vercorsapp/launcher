@@ -11,28 +11,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.home.presentation.action.HomeAction
+import app.vercors.launcher.core.presentation.ui.SectionTitle
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
 import app.vercors.launcher.home.presentation.model.HomeSectionUi
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeSection(
-    section: HomeSectionUi,
-    onAction: (HomeAction) -> Unit
+    section: HomeSectionUi
 ) {
     val lazyListState = rememberLazyListState()
 
     Column {
-        Text(
-            text = stringResource(section.title),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(20.dp)
-        )
+        SectionTitle(text = stringResource(section.title))
         LazyRow(
             state = lazyListState,
             modifier = Modifier.fillMaxWidth(),

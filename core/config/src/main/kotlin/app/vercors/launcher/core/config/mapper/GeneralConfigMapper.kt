@@ -1,27 +1,21 @@
 package app.vercors.launcher.core.config.mapper
 
 import app.vercors.launcher.core.config.model.GeneralConfig
-import app.vercors.launcher.core.config.proto.General
-import app.vercors.launcher.core.config.proto.general
-import org.koin.core.annotation.Single
+import app.vercors.launcher.core.config.proto.GeneralProto
+import app.vercors.launcher.core.config.proto.generalProto
 
-@Single
-class GeneralConfigMapper(
-    private val tabConfigMapper: TabConfigMapper
-) {
-    fun fromProto(general: General): GeneralConfig = GeneralConfig(
-        theme = general.theme,
-        accent = general.accent,
-        decorated = general.decorated,
-        animations = general.animations,
-        defaultTab = tabConfigMapper.fromProto(general.defaultTab)
-    )
+fun GeneralProto.toConfig(): GeneralConfig = GeneralConfig(
+    theme = theme,
+    accent = accent,
+    decorated = decorated,
+    animations = animations,
+    defaultTab = defaultTab.toConfig()
+)
 
-    fun toProto(generalConfig: GeneralConfig): General = general {
-        theme = generalConfig.theme
-        accent = generalConfig.accent
-        decorated = generalConfig.decorated
-        animations = generalConfig.animations
-        defaultTab = tabConfigMapper.toProto(generalConfig.defaultTab)
-    }
+fun GeneralConfig.toProto(): GeneralProto = generalProto {
+    theme = this@toProto.theme
+    accent = this@toProto.accent
+    decorated = this@toProto.decorated
+    animations = this@toProto.animations
+    defaultTab = this@toProto.defaultTab.toProto()
 }

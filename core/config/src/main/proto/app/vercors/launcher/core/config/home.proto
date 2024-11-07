@@ -3,12 +3,12 @@ syntax = "proto3";
 option java_package = "app.vercors.launcher.core.config.proto";
 option java_multiple_files = true;
 
-message Home {
-  repeated HomeSection sections = 1;
-  HomeProvider provider = 2;
+message HomeProto {
+  repeated HomeSectionProto sections = 1;
+  HomeProviderProto provider = 2;
 }
 
-enum HomeSection {
+enum HomeSectionProto {
   JUMP_BACK_IN = 0;
   POPULAR_MODS = 1;
   POPULAR_MODPACKS = 2;
@@ -16,7 +16,7 @@ enum HomeSection {
   POPULAR_SHADER_PACKS = 4;
 }
 
-enum HomeProvider {
+enum HomeProviderProto {
   MODRINTH = 0;
   CURSEFORGE = 1;
 }

@@ -7,13 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.home.presentation.action.HomeAction
 import app.vercors.launcher.home.presentation.state.HomeState
 
 @Composable
 fun HomeScreen(
-    state: HomeState,
-    onAction: (HomeAction) -> Unit
+    state: HomeState
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -21,8 +19,7 @@ fun HomeScreen(
     ) {
         items(state.sections) { section ->
             HomeSection(
-                section = section,
-                onAction = onAction
+                section = section
             )
         }
     }

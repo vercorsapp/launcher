@@ -2,7 +2,7 @@ package app.vercors.launcher.core.config
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import app.vercors.launcher.core.config.proto.Config
+import app.vercors.launcher.core.config.proto.ConfigProto
 import app.vercors.launcher.core.config.serializer.ConfigSerializer
 import app.vercors.launcher.core.storage.Storage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,8 +23,8 @@ fun provideConfigDataStore(
     serializer: ConfigSerializer,
     @Named("externalScope") externalScope: CoroutineScope,
     @Named("ioDispatcher") ioDispatcher: CoroutineDispatcher,
-): DataStore<Config> = DataStoreFactory.create(
+): DataStore<ConfigProto> = DataStoreFactory.create(
     serializer = serializer,
-    produceFile = { File(storage.state.value.strPath, "config.pb") },
+    produceFile = { File(storage.state.value.path, "config.pb") },
     scope = CoroutineScope(externalScope.coroutineContext + ioDispatcher)
 )

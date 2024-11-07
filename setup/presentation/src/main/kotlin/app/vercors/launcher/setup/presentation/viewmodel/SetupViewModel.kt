@@ -25,6 +25,7 @@ class SetupViewModel(
     val uiState: StateFlow<SetupUiState> = _uiState.asStateFlow()
 
     fun onAction(action: SetupAction) {
+        logger.debug { "Action triggered in SetupViewModel: $action" }
         when (action) {
             is SetupAction.PickDirectory -> pickDirectory(action.path)
             is SetupAction.UpdatePath -> updatePath(action.path)
@@ -42,8 +43,8 @@ class SetupViewModel(
 
     private fun launchApp() {
         val path = uiState.value.path
-        logger.info { "User selected directory: $path" }
         setupRepository.updatePath(path)
+        logger.info { "User selected directory: $path - now launching application" }
         onLaunch()
     }
 }

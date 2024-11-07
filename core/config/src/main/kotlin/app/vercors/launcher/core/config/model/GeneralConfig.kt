@@ -6,4 +6,14 @@ data class GeneralConfig(
     val decorated: Boolean,
     val animations: Boolean,
     val defaultTab: TabConfig
-)
+) {
+    companion object {
+        val DEFAULT = GeneralConfig(
+            theme = "catppuccin-mocha",
+            accent = "mauve",
+            decorated = false,
+            animations = true,
+            defaultTab = TabConfig.Home
+        )
+    }
+}

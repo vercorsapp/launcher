@@ -1,19 +1,15 @@
 package app.vercors.launcher.core.config.mapper
 
 import app.vercors.launcher.core.config.model.HomeProviderConfig
-import app.vercors.launcher.core.config.proto.HomeProvider
-import org.koin.core.annotation.Single
+import app.vercors.launcher.core.config.proto.HomeProviderProto
 
-@Single
-class HomeProviderConfigMapper {
-    fun fromProto(provider: HomeProvider): HomeProviderConfig = when (provider) {
-        HomeProvider.MODRINTH -> HomeProviderConfig.Modrinth
-        HomeProvider.CURSEFORGE -> HomeProviderConfig.Curseforge
-        HomeProvider.UNRECOGNIZED -> HomeProviderConfig.entries.first()
-    }
+fun HomeProviderProto.toConfig(): HomeProviderConfig = when (this) {
+    HomeProviderProto.MODRINTH -> HomeProviderConfig.Modrinth
+    HomeProviderProto.CURSEFORGE -> HomeProviderConfig.Curseforge
+    HomeProviderProto.UNRECOGNIZED -> HomeProviderConfig.entries.first()
+}
 
-    fun toProto(homeProviderConfig: HomeProviderConfig): HomeProvider = when (homeProviderConfig) {
-        HomeProviderConfig.Modrinth -> HomeProvider.MODRINTH
-        HomeProviderConfig.Curseforge -> HomeProvider.CURSEFORGE
-    }
+fun HomeProviderConfig.toProto(): HomeProviderProto = when (this) {
+    HomeProviderConfig.Modrinth -> HomeProviderProto.MODRINTH
+    HomeProviderConfig.Curseforge -> HomeProviderProto.CURSEFORGE
 }

@@ -1,10 +1,10 @@
 package app.vercors.launcher.core.storage
 
-import kotlinx.io.files.Path
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class StorageState(
-    val strPath: String,
+    val path: String,
 ) {
-    val path: Path = Path(strPath)
-    val isSetup: Boolean = strPath != Storage.DEFAULT_PATH
+    val isSetup: Boolean = path != Storage.DEFAULT_PATH
 }

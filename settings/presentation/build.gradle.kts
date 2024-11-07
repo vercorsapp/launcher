@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     implementation(projects.core.presentation)
-    implementation(projects.settings.domain)
+    implementation(projects.core.config)
 }

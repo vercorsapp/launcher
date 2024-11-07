@@ -1,22 +1,15 @@
 package app.vercors.launcher.core.config.mapper
 
 import app.vercors.launcher.core.config.model.HomeConfig
-import app.vercors.launcher.core.config.proto.Home
-import app.vercors.launcher.core.config.proto.home
-import org.koin.core.annotation.Single
+import app.vercors.launcher.core.config.proto.HomeProto
+import app.vercors.launcher.core.config.proto.homeProto
 
-@Single
-class HomeConfigMapper(
-    private val homeSectionConfigMapper: HomeSectionConfigMapper,
-    private val homeProviderConfigMapper: HomeProviderConfigMapper
-) {
-    fun fromProto(home: Home): HomeConfig = HomeConfig(
-        sections = home.sectionsList.map { homeSectionConfigMapper.fromProto(it) },
-        provider = homeProviderConfigMapper.fromProto(home.provider)
-    )
+fun HomeProto.toConfig(): HomeConfig = HomeConfig(
+    sections = sectionsList.map { it.toConfig() },
+    provider = provider.toConfig()
+)
 
-    fun toProto(homeConfig: HomeConfig): Home = home {
-        sections += homeConfig.sections.map { homeSectionConfigMapper.toProto(it) }
-        provider = homeProviderConfigMapper.toProto(homeConfig.provider)
-    }
+fun HomeConfig.toProto(): HomeProto = homeProto {
+    sections += this@toProto.sections.map { it.toProto() }
+    provider = this@toProto.provider.toProto()
 }

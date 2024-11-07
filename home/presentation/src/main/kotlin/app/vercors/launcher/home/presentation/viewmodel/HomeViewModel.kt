@@ -9,9 +9,12 @@ import app.vercors.launcher.home.presentation.model.HomeInstanceStatusUi
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
 import app.vercors.launcher.home.presentation.model.HomeSectionUi
 import app.vercors.launcher.home.presentation.state.HomeState
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.android.annotation.KoinViewModel
+
+private val logger = KotlinLogging.logger {}
 
 @KoinViewModel
 class HomeViewModel(
@@ -31,13 +34,8 @@ class HomeViewModel(
             }
         }))))
     val uiState = _uiState.asStateFlow()
-    /*val uiState = observeHomeSections()
-        .map { sections -> HomeState(isLoading = false, sections = sections.map { it.toUi() }) }
-        .stateIn(viewModelScope, SharingStarted.Lazily, HomeState(isLoading = true))*/
 
     fun onAction(action: HomeAction) {
-        when (action) {
-            is HomeAction.Nav -> {}
-        }
+        logger.debug { "Action triggered in HomeViewModel: $action" }
     }
 }

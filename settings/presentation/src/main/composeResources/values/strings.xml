@@ -1,0 +1,13 @@
+<resources>
+    <string name="general">General</string>
+    <string name="theme">Theme</string>
+    <string name="theme_description">The theme of the application</string>
+    <string name="accent">Accent</string>
+    <string name="accent_description">The accent color of the application</string>
+    <string name="decorated">Use system window frame</string>
+    <string name="decorated_description">Whether to use the system window frame instead of the custom window frame (only applied after restarting the application)</string>
+    <string name="animations">Enable animations</string>
+    <string name="animations_description">Whether to enable animations (fade-in &amp; out) within the app</string>
+    <string name="default_tab">Default tab</string>
+    <string name="default_tab_description">The active tab when the application is opened</string>
+</resources>

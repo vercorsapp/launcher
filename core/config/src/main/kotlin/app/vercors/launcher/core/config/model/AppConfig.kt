@@ -6,17 +6,8 @@ data class AppConfig(
 ) {
     companion object {
         val DEFAULT = AppConfig(
-            general = GeneralConfig(
-                theme = "mocha",
-                accent = "mauve",
-                decorated = false,
-                animations = true,
-                defaultTab = TabConfig.Home
-            ),
-            home = HomeConfig(
-                sections = HomeSectionConfig.entries.toList(),
-                provider = HomeProviderConfig.Modrinth
-            )
+            general = GeneralConfig.DEFAULT,
+            home = HomeConfig.DEFAULT
         )
     }
 }
