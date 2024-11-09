@@ -1,10 +1,10 @@
-package app.vercors.launcher.app.presentation.viewmodel
+package app.vercors.launcher.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.vercors.launcher.app.presentation.action.AppAction
-import app.vercors.launcher.app.presentation.state.AppUiState
-import app.vercors.launcher.app.presentation.state.GeneralConfigState
+import app.vercors.launcher.app.action.AppAction
+import app.vercors.launcher.app.state.AppUiState
+import app.vercors.launcher.app.state.GeneralConfigState
 import app.vercors.launcher.core.config.model.GeneralConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
 import io.github.oshai.kotlinlogging.KotlinLogging

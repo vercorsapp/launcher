@@ -1,7 +1,7 @@
 <resources>
     <string name="open_folder">Open folder...</string>
     <string name="app_title">Vercors</string>
-    <string name="search_bar">Search instances or projects...</string>
+    <string name="back">Back</string>
     <string name="home">Home</string>
     <string name="instances">Instances</string>
     <string name="projects">Projects</string>

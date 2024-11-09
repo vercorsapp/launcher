@@ -4,8 +4,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.application
 import app.vercors.launcher.app.logging.AppLogbackConfigurator
-import app.vercors.launcher.app.presentation.ui.AppWindow
-import app.vercors.launcher.app.presentation.viewmodel.AppViewModel
+import app.vercors.launcher.app.ui.AppWindow
+import app.vercors.launcher.app.viewmodel.AppViewModel
 import app.vercors.launcher.core.storage.Storage
 import app.vercors.launcher.setup.presentation.screen.SetupWindow
 import io.github.oshai.kotlinlogging.KotlinLogging

@@ -1,4 +1,4 @@
-package app.vercors.launcher.app.presentation.ui
+package app.vercors.launcher.app.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -9,9 +9,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.rememberNavController
-import app.vercors.launcher.app.presentation.state.AppDialog
-import app.vercors.launcher.app.presentation.state.AppUiState
-import app.vercors.launcher.app.presentation.state.GeneralConfigState
+import app.vercors.launcher.app.state.AppDialog
+import app.vercors.launcher.app.state.AppUiState
+import app.vercors.launcher.app.state.GeneralConfigState
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.theme.VercorsTheme

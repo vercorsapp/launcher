@@ -20,8 +20,8 @@ import org.jetbrains.compose.resources.Font
 
 @Composable
 fun VercorsTheme(
-    theme: String,
-    accent: String,
+    theme: String = "catppuccin-mocha",
+    accent: String = "mauve",
     content: @Composable () -> Unit
 ) {
     val colors = when (theme) {
@@ -74,79 +74,80 @@ fun parseColor(@Size(min = 1) colorString: String): Color {
     throw IllegalArgumentException("Unknown color")
 }
 
-private val VercorsTypography: Typography @Composable get() {
-    val fontFamily = FontFamily(
-        Font(
-            resource = CoreFont.InterRegular,
-            weight = FontWeight.Normal,
-        ),
-        Font(
-            resource = CoreFont.InterMedium,
-            weight = FontWeight.Medium,
-        ),
-        Font(
-            resource = CoreFont.InterBold,
-            weight = FontWeight.Bold,
+private val VercorsTypography: Typography
+    @Composable get() {
+        val fontFamily = FontFamily(
+            Font(
+                resource = CoreFont.InterRegular,
+                weight = FontWeight.Normal,
+            ),
+            Font(
+                resource = CoreFont.InterMedium,
+                weight = FontWeight.Medium,
+            ),
+            Font(
+                resource = CoreFont.InterBold,
+                weight = FontWeight.Bold,
+            )
         )
-    )
-    return Typography(
-        displayLarge = MaterialTheme.typography.displayLarge.copy(fontFamily = fontFamily),
-        displayMedium = MaterialTheme.typography.displayMedium.copy(fontFamily = fontFamily),
-        displaySmall = MaterialTheme.typography.displaySmall.copy(fontFamily = fontFamily),
-        headlineLarge = MaterialTheme.typography.headlineLarge.copy(fontFamily = fontFamily),
-        headlineMedium = MaterialTheme.typography.headlineMedium.copy(fontFamily = fontFamily),
-        headlineSmall = MaterialTheme.typography.headlineSmall.copy(fontFamily = fontFamily),
-        titleLarge = MaterialTheme.typography.titleLarge.copy(fontFamily = fontFamily),
-        titleMedium = MaterialTheme.typography.titleMedium.copy(fontFamily = fontFamily),
-        titleSmall = MaterialTheme.typography.titleSmall.copy(fontFamily = fontFamily),
-        bodyLarge = MaterialTheme.typography.bodyLarge.copy(fontFamily = fontFamily),
-        bodyMedium = MaterialTheme.typography.bodyMedium.copy(fontFamily = fontFamily),
-        bodySmall = MaterialTheme.typography.bodySmall.copy(fontFamily = fontFamily),
-        labelLarge = MaterialTheme.typography.labelLarge.copy(fontFamily = fontFamily),
-        labelMedium = MaterialTheme.typography.labelMedium.copy(fontFamily = fontFamily),
-        labelSmall = MaterialTheme.typography.labelSmall.copy(fontFamily = fontFamily),
-    )
-}
+        return Typography(
+            displayLarge = MaterialTheme.typography.displayLarge.copy(fontFamily = fontFamily),
+            displayMedium = MaterialTheme.typography.displayMedium.copy(fontFamily = fontFamily),
+            displaySmall = MaterialTheme.typography.displaySmall.copy(fontFamily = fontFamily),
+            headlineLarge = MaterialTheme.typography.headlineLarge.copy(fontFamily = fontFamily),
+            headlineMedium = MaterialTheme.typography.headlineMedium.copy(fontFamily = fontFamily),
+            headlineSmall = MaterialTheme.typography.headlineSmall.copy(fontFamily = fontFamily),
+            titleLarge = MaterialTheme.typography.titleLarge.copy(fontFamily = fontFamily),
+            titleMedium = MaterialTheme.typography.titleMedium.copy(fontFamily = fontFamily),
+            titleSmall = MaterialTheme.typography.titleSmall.copy(fontFamily = fontFamily),
+            bodyLarge = MaterialTheme.typography.bodyLarge.copy(fontFamily = fontFamily),
+            bodyMedium = MaterialTheme.typography.bodyMedium.copy(fontFamily = fontFamily),
+            bodySmall = MaterialTheme.typography.bodySmall.copy(fontFamily = fontFamily),
+            labelLarge = MaterialTheme.typography.labelLarge.copy(fontFamily = fontFamily),
+            labelMedium = MaterialTheme.typography.labelMedium.copy(fontFamily = fontFamily),
+            labelSmall = MaterialTheme.typography.labelSmall.copy(fontFamily = fontFamily),
+        )
+    }
 
 @Stable
 private fun createVercorsColorScheme(colors: CatppuccinColors, accentProvider: CatppuccinColors.() -> Color) =
     with(colors) {
-    ColorScheme(
-        primary = colors.accentProvider(),
-        onPrimary = mantle,
-        primaryContainer = lerp(base, colors.accentProvider(), 0.2f),
-        onPrimaryContainer = text,
-        inversePrimary = lerp(text, colors.accentProvider(), 0.2f),
-        secondary = colors.accentProvider(),
-        onSecondary = mantle,
-        secondaryContainer = lerp(base, colors.accentProvider(), 0.2f),
-        onSecondaryContainer = text,
-        tertiary = green,
-        onTertiary = mantle,
-        tertiaryContainer = lerp(base, green, 0.2f),
-        onTertiaryContainer = text,
-        background = base,
-        onBackground = text,
-        surface = surface0,
-        onSurface = text,
-        surfaceVariant = surface1,
-        onSurfaceVariant = subtext0,
-        surfaceTint = surface2,
-        inverseSurface = subtext1,
-        inverseOnSurface = crust,
-        error = red,
-        onError = mantle,
-        errorContainer = lerp(base, red, 0.2f),
-        onErrorContainer = text,
-        outline = overlay2,
-        outlineVariant = overlay1,
-        scrim = Color.Black,
-        surfaceBright = surface1,
-        surfaceDim = surface0,
-        surfaceContainer = base,
-        surfaceContainerHigh = surface0,
-        surfaceContainerHighest = surface1,
-        surfaceContainerLow = mantle,
-        surfaceContainerLowest = crust
-    )
-}
+        ColorScheme(
+            primary = colors.accentProvider(),
+            onPrimary = mantle,
+            primaryContainer = lerp(base, colors.accentProvider(), 0.2f),
+            onPrimaryContainer = text,
+            inversePrimary = lerp(text, colors.accentProvider(), 0.2f),
+            secondary = colors.accentProvider(),
+            onSecondary = mantle,
+            secondaryContainer = lerp(base, colors.accentProvider(), 0.2f),
+            onSecondaryContainer = text,
+            tertiary = green,
+            onTertiary = mantle,
+            tertiaryContainer = lerp(base, green, 0.2f),
+            onTertiaryContainer = text,
+            background = base,
+            onBackground = text,
+            surface = surface0,
+            onSurface = text,
+            surfaceVariant = surface1,
+            onSurfaceVariant = subtext0,
+            surfaceTint = surface2,
+            inverseSurface = subtext1,
+            inverseOnSurface = crust,
+            error = red,
+            onError = mantle,
+            errorContainer = lerp(base, red, 0.2f),
+            onErrorContainer = text,
+            outline = overlay2,
+            outlineVariant = overlay1,
+            scrim = Color.Black,
+            surfaceBright = surface1,
+            surfaceDim = surface0,
+            surfaceContainer = base,
+            surfaceContainerHigh = surface0,
+            surfaceContainerHighest = surface1,
+            surfaceContainerLow = mantle,
+            surfaceContainerLowest = crust
+        )
+    }

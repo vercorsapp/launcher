@@ -1,4 +1,4 @@
-package app.vercors.launcher.app.presentation.ui
+package app.vercors.launcher.app.ui
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition

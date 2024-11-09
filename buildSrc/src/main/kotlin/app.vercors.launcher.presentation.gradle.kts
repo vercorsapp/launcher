@@ -9,9 +9,10 @@ val Project.libs get() = the<LibrariesForLibs>()
 dependencies {
     // Presentation
     implementation(compose.material3)
+    implementation(compose.material3AdaptiveNavigationSuite)
     implementation(compose.components.resources)
-    implementation(libs.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.navigation.compose)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
     implementation(libs.coil.network.cache.control)

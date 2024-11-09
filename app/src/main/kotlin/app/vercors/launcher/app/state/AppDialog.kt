@@ -1,4 +1,4 @@
-package app.vercors.launcher.app.presentation.state
+package app.vercors.launcher.app.state
 
 sealed interface AppDialog {
     data object CreateInstance : AppDialog

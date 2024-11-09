@@ -1,4 +1,4 @@
-package app.vercors.launcher.app.presentation.state
+package app.vercors.launcher.app.state
 
 import androidx.compose.runtime.Immutable
 import app.vercors.launcher.core.config.model.TabConfig
