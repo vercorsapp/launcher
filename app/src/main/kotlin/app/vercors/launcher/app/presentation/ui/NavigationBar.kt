@@ -1,6 +1,5 @@
 package app.vercors.launcher.app.presentation.ui
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import app.vercors.launcher.app.presentation.state.NavigationTab
 import app.vercors.launcher.core.generated.resources.*
+import app.vercors.launcher.core.presentation.ui.appAnimateColorAsState
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -58,11 +58,11 @@ fun NavigationBarButton(
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    val containerColor by animateColorAsState(
+    val containerColor by appAnimateColorAsState(
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.background
     )
-    val contentColor by animateColorAsState(
+    val contentColor by appAnimateColorAsState(
         if (selected) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.onBackground
     )

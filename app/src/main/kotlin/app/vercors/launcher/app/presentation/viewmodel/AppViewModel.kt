@@ -47,14 +47,16 @@ class AppViewModel(
     ): GeneralConfigState = when (previousState) {
         is GeneralConfigState.Loaded -> previousState.copy(
             theme = config.theme,
-            accent = config.accent
+            accent = config.accent,
+            animations = config.animations
         )
 
         GeneralConfigState.Loading -> GeneralConfigState.Loaded(
             theme = config.theme,
             accent = config.accent,
-            defaultTab = config.defaultTab,
-            decorated = config.decorated
+            decorated = config.decorated,
+            animations = config.animations,
+            defaultTab = config.defaultTab
         )
     }
 }

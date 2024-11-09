@@ -1,6 +1,5 @@
 package app.vercors.launcher.app.presentation.ui
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -24,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
 import app.vercors.launcher.app.presentation.action.MenuBarAction
 import app.vercors.launcher.core.generated.resources.*
+import app.vercors.launcher.core.presentation.ui.AppAnimatedContent
 import app.vercors.launcher.core.presentation.ui.applyIf
-import app.vercors.launcher.core.presentation.ui.defaultAnimation
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
@@ -58,10 +57,7 @@ fun WindowScope.MenuBar(
                         tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = stringResource(Res.string.app_title),
                     )
-                    AnimatedContent(
-                        targetState = screenName,
-                        transitionSpec = { defaultAnimation }
-                    ) {
+                    AppAnimatedContent(targetState = screenName) {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.titleLarge,

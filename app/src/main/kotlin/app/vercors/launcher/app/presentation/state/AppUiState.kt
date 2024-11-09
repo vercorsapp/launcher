@@ -14,7 +14,8 @@ sealed interface GeneralConfigState {
     data class Loaded(
         val theme: String,
         val accent: String,
-        val defaultTab: TabConfig,
-        val decorated: Boolean
+        val decorated: Boolean,
+        val animations: Boolean,
+        val defaultTab: TabConfig
     ) : GeneralConfigState
 }

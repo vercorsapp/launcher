@@ -23,7 +23,6 @@
 
 package app.vercors.launcher.home.presentation.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,9 +40,8 @@ import app.vercors.launcher.core.generated.resources.hard_drive
 import app.vercors.launcher.core.generated.resources.play
 import app.vercors.launcher.core.presentation.CoreDrawable
 import app.vercors.launcher.core.presentation.CoreString
+import app.vercors.launcher.core.presentation.ui.AppAnimatedVisibility
 import app.vercors.launcher.core.presentation.ui.darker
-import app.vercors.launcher.core.presentation.ui.defaultEnterAnimation
-import app.vercors.launcher.core.presentation.ui.defaultExitAnimation
 import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -119,26 +117,24 @@ private fun InstanceIconButton(
     onClick: () -> Unit,
     icon: ImageVector,
     contentDescription: String?
-) = AnimatedVisibility(
-    visible = isHovered,
-    enter = defaultEnterAnimation,
-    exit = defaultExitAnimation
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize().background(darker),
-        contentAlignment = Alignment.Center
-    ) {
-        IconButton(
-            onClick = onClick,
-            colors = IconButtonDefaults.filledIconButtonColors(),
-            modifier = Modifier.size(64.dp),
-            content = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        )
+    AppAnimatedVisibility(visible = isHovered) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(darker),
+            contentAlignment = Alignment.Center
+        ) {
+            IconButton(
+                onClick = onClick,
+                colors = IconButtonDefaults.filledIconButtonColors(),
+                modifier = Modifier.size(64.dp),
+                content = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = contentDescription,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            )
+        }
     }
 }

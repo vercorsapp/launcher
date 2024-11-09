@@ -3,6 +3,7 @@ package app.vercors.launcher.app.presentation.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
@@ -14,6 +15,7 @@ import app.vercors.launcher.app.presentation.state.GeneralConfigState
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.theme.VercorsTheme
+import app.vercors.launcher.core.presentation.ui.AppAnimations
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
@@ -39,19 +41,23 @@ fun ApplicationScope.AppWindow(
                 theme = uiState.generalConfig.theme,
                 accent = uiState.generalConfig.accent
             ) {
-                Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
-                    AppContent(
-                        navController = navController,
-                        windowState = windowState,
-                        generalConfig = uiState.generalConfig,
-                        onClose = ::exitApplication
-                    )
-                }
+                CompositionLocalProvider(
+                    AppAnimations provides uiState.generalConfig.animations,
+                ) {
+                    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
+                        AppContent(
+                            navController = navController,
+                            windowState = windowState,
+                            generalConfig = uiState.generalConfig,
+                            onClose = ::exitApplication
+                        )
+                    }
 
-                if (uiState.currentDialog != null) {
-                    when (uiState.currentDialog) {
-                        AppDialog.AddAccount -> TODO()
-                        AppDialog.CreateInstance -> TODO()
+                    if (uiState.currentDialog != null) {
+                        when (uiState.currentDialog) {
+                            AppDialog.AddAccount -> TODO()
+                            AppDialog.CreateInstance -> TODO()
+                        }
                     }
                 }
             }
