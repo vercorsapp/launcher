@@ -3,7 +3,7 @@
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.27"
 coroutines = "1.9.0"
-serialization = "1.7.2"
+serialization = "1.7.3"
 datetime = "0.6.1"
 io = "0.5.4"
 # Presentation
