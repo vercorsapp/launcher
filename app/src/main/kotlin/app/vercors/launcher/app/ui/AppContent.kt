@@ -19,12 +19,11 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import app.vercors.launcher.app.action.MenuBarAction
 import app.vercors.launcher.app.navigation.AppDestination
 import app.vercors.launcher.app.navigation.TopLevelDestination
-import app.vercors.launcher.app.state.GeneralConfigState
 import app.vercors.launcher.app.util.screenName
 import app.vercors.launcher.app.util.screenType
+import app.vercors.launcher.app.viewmodel.GeneralConfigState
 import app.vercors.launcher.core.config.model.TabConfig
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
@@ -56,7 +55,7 @@ fun WindowScope.AppContent(
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        MenuBar(
+        AppMenuBar(
             screenName = stringResource(screenName),
             hasWindowControls = !generalConfig.decorated,
             canGoBack = canGoBack,
@@ -127,8 +126,10 @@ fun WindowScope.AppContent(
             navigationSuiteColors = NavigationSuiteDefaults.colors(
                 navigationRailContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
             ),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
-            ContentBackground {
+            ContentBackground(gradient = generalConfig.gradient) {
                 AppNavHost(
                     navController = navController,
                     startDestination = generalConfig.defaultTab.toDestination()

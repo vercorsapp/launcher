@@ -6,22 +6,23 @@ import app.vercors.launcher.core.config.model.HomeSectionConfig
 import app.vercors.launcher.core.config.model.TabConfig
 import app.vercors.launcher.core.config.proto.*
 
-typealias ConfigUpdate<T> = ConfigProto.(T) -> ConfigProto
+sealed class ConfigUpdate<T>(updater: ConfigProtoKt.Dsl.(T) -> Unit) {
+    val updater: ConfigProto.(T) -> ConfigProto = { copy { updater(it) } }
 
-private fun <T> configUpdate(updater: ConfigProtoKt.Dsl.(T) -> Unit): ConfigUpdate<T> = { copy { updater(it) } }
+    sealed class General<T>(updater: GeneralProtoKt.Dsl.(T) -> Unit) :
+        ConfigUpdate<T>({ general = general.copy { updater(it) } }) {
+        data object Theme : General<String>({ theme = it })
+        data object Accent : General<String>({ accent = it })
+        data object Gradient : General<Boolean>({ gradient = it })
+        data object Decorated : General<Boolean>({ decorated = it })
+        data object Animations : General<Boolean>({ animations = it })
+        data object DefaultTab : General<TabConfig>({ defaultTab = it.toProto() })
+    }
 
-val ThemeConfigUpdate: ConfigUpdate<String> = generalConfigUpdate { theme = it }
-val AccentConfigUpdate: ConfigUpdate<String> = generalConfigUpdate { accent = it }
-val DecoratedConfigUpdate: ConfigUpdate<Boolean> = generalConfigUpdate { decorated = it }
-val AnimationsConfigUpdate: ConfigUpdate<Boolean> = generalConfigUpdate { animations = it }
-val DefaultTabConfigUpdate: ConfigUpdate<TabConfig> = generalConfigUpdate { defaultTab = it.toProto() }
+    sealed class Home<T>(updater: HomeProtoKt.Dsl.(T) -> Unit) : ConfigUpdate<T>({ home = home.copy { updater(it) } }) {
+        data object Sections :
+            Home<List<HomeSectionConfig>>({ new -> sections.clear(); sections += new.map { it.toProto() } })
 
-private fun <T> generalConfigUpdate(updater: GeneralProtoKt.Dsl.(T) -> Unit): ConfigUpdate<T> =
-    configUpdate { general = general.copy { updater(it) } }
-
-val HomeSectionConfigUpdate: ConfigUpdate<List<HomeSectionConfig>> =
-    homeConfigUpdate { new -> sections.clear(); sections += new.map { it.toProto() } }
-val HomeProviderConfigUpdate: ConfigUpdate<HomeProviderConfig> = homeConfigUpdate { provider = it.toProto() }
-
-private fun <T> homeConfigUpdate(updater: HomeProtoKt.Dsl.(T) -> Unit): ConfigUpdate<T> =
-    configUpdate { home = home.copy { updater(it) } }
+        data object Provider : Home<HomeProviderConfig>({ provider = it.toProto() })
+    }
+}

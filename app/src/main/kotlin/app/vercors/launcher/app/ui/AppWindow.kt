@@ -9,9 +9,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.rememberNavController
-import app.vercors.launcher.app.state.AppDialog
-import app.vercors.launcher.app.state.AppUiState
-import app.vercors.launcher.app.state.GeneralConfigState
+import app.vercors.launcher.app.viewmodel.AppDialog
+import app.vercors.launcher.app.viewmodel.AppUiState
+import app.vercors.launcher.app.viewmodel.GeneralConfigState
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.theme.VercorsTheme

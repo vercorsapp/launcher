@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProjectId(
-    val provider: String,
+    val provider: ProjectProvider,
     val id: String
 )

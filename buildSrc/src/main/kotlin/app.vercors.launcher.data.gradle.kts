@@ -2,6 +2,7 @@ import org.gradle.accessors.dm.LibrariesForLibs
 
 plugins {
     id("app.vercors.launcher.base")
+    id("de.jensklingenberg.ktorfit")
     id("androidx.room")
 }
 
@@ -13,6 +14,8 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktorfit.lib.light)
+    implementation(libs.ktorfit.converters.flow)
     implementation(libs.datastore)
     implementation(libs.datastore.preferences)
     ksp(libs.room.compiler)

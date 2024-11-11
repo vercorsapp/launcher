@@ -1,39 +1,54 @@
 package app.vercors.launcher.settings.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.vercors.launcher.core.config.repository.*
-import app.vercors.launcher.settings.presentation.action.SettingsAction
-import app.vercors.launcher.settings.presentation.state.SettingsUiState
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import app.vercors.launcher.core.config.model.HomeSectionConfig
+import app.vercors.launcher.core.config.repository.ConfigRepository
+import app.vercors.launcher.core.config.repository.ConfigUpdate
+import app.vercors.launcher.core.presentation.viewmodel.MviViewModel
+import app.vercors.launcher.core.presentation.viewmodel.StateResult
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-
-private val logger = KotlinLogging.logger {}
 
 @KoinViewModel
 class SettingsViewModel(
     private val configRepository: ConfigRepository
-) : ViewModel() {
-    val uiState: StateFlow<SettingsUiState> = configRepository.observeConfig()
-        .map { SettingsUiState.Loaded(config = it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(3000), SettingsUiState.Loading)
-
-    fun onAction(action: SettingsAction) {
-        logger.debug { "Action triggered in SettingsViewModel: $action" }
-        when (action) {
-            is SettingsAction.SelectAccent -> updateConfig(AccentConfigUpdate, action.value)
-            is SettingsAction.SelectTheme -> updateConfig(ThemeConfigUpdate, action.value)
-            is SettingsAction.ToggleAnimations -> updateConfig(AnimationsConfigUpdate, action.value)
-            is SettingsAction.ToggleDecorated -> updateConfig(DecoratedConfigUpdate, action.value)
-            is SettingsAction.SelectDefaultTab -> updateConfig(DefaultTabConfigUpdate, action.value)
+) : MviViewModel<SettingsUiState, SettingsUiEvent, Nothing>(SettingsUiState.Loading) {
+    override fun init() {
+        viewModelScope.launch {
+            configRepository.observeConfig().collect {
+                onEvent(SettingsUiEvent.ConfigUpdated(it))
+            }
         }
     }
 
-    private fun <T> updateConfig(update: ConfigUpdate<T>, value: T) =
+    override fun reduce(state: SettingsUiState, event: SettingsUiEvent): StateResult<SettingsUiState, Nothing> =
+        when (event) {
+            is SettingsUiIntent.SelectAccent -> updateConfig(ConfigUpdate.General.Accent, event.value)
+            is SettingsUiIntent.SelectTheme -> updateConfig(ConfigUpdate.General.Theme, event.value)
+            is SettingsUiIntent.ToggleGradient -> updateConfig(ConfigUpdate.General.Gradient, event.value)
+            is SettingsUiIntent.ToggleAnimations -> updateConfig(ConfigUpdate.General.Animations, event.value)
+            is SettingsUiIntent.ToggleDecorated -> updateConfig(ConfigUpdate.General.Decorated, event.value)
+            is SettingsUiIntent.SelectDefaultTab -> updateConfig(ConfigUpdate.General.DefaultTab, event.value)
+            is SettingsUiEvent.UpdateSections -> updateConfig(ConfigUpdate.Home.Sections, event.value)
+            is SettingsUiIntent.SelectProvider -> updateConfig(ConfigUpdate.Home.Provider, event.value)
+            is SettingsUiEvent.ConfigUpdated -> StateResult.Changed(SettingsUiState.Loaded(config = event.config))
+            is SettingsUiIntent.ToggleSection -> toggleSection(state, event.value)
+        }
+
+    private fun toggleSection(
+        state: SettingsUiState,
+        section: HomeSectionConfig
+    ): StateResult<SettingsUiState, Nothing> =
+        if (state is SettingsUiState.Loaded)
+            updateConfig(
+                ConfigUpdate.Home.Sections,
+                if (section in state.config.home.sections) state.config.home.sections - section
+                else (state.config.home.sections + section).sorted()
+            )
+        else StateResult.Unchanged()
+
+    private fun <T> updateConfig(update: ConfigUpdate<T>, value: T): StateResult<SettingsUiState, Nothing> {
         viewModelScope.launch { configRepository.updateConfig(update, value) }
+        return StateResult.Unchanged()
+    }
 }

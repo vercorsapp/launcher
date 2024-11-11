@@ -7,6 +7,7 @@ import app.vercors.launcher.core.config.proto.generalProto
 fun GeneralProto.toConfig(): GeneralConfig = GeneralConfig(
     theme = theme,
     accent = accent,
+    gradient = gradient,
     decorated = decorated,
     animations = animations,
     defaultTab = defaultTab.toConfig()
@@ -15,6 +16,7 @@ fun GeneralProto.toConfig(): GeneralConfig = GeneralConfig(
 fun GeneralConfig.toProto(): GeneralProto = generalProto {
     theme = this@toProto.theme
     accent = this@toProto.accent
+    gradient = this@toProto.gradient
     decorated = this@toProto.decorated
     animations = this@toProto.animations
     defaultTab = this@toProto.defaultTab.toProto()

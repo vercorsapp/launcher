@@ -58,10 +58,28 @@ dependencies {
     implementation(projects.setup.presentation)
 }
 
+tasks {
+    val appProperties by registering(WriteProperties::class) {
+        fun appProperty(name: String, env: String) =
+            property(name, findProperty(name) as String? ?: System.getenv(env) ?: "")
+
+        destinationFile = layout.buildDirectory.file("koin.properties")
+        encoding = "UTF-8"
+        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
+        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
+        appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
+    }
+
+    processResources {
+        from(appProperties)
+    }
+}
+
 compose {
     desktop {
         application {
             mainClass = "app.vercors.launcher.app.MainKt"
+            jvmArgs += listOf("-Xmx200M")
 
             nativeDistributions {
                 targetFormats(*TargetFormat.values())

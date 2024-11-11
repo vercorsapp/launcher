@@ -7,15 +7,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.presentation.ui.SectionTitle
+import app.vercors.launcher.core.presentation.ui.AppSectionTitle
 
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column {
-        SectionTitle(text = title)
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        AppSectionTitle(text = title)
         Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier.padding(horizontal = 20.dp)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp).fillMaxWidth(),

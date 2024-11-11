@@ -6,17 +6,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import org.koin.compose.koinInject
-import org.koin.core.qualifier.named
 
 @Composable
 fun <T> ObserveAsEvents(
     flow: Flow<T>,
     key1: Any? = null,
     key2: Any? = null,
-    mainDispatcher: CoroutineDispatcher = koinInject(named("mainDispatcher")),
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
     onEvent: (T) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current

@@ -1,25 +1,23 @@
 package app.vercors.launcher.home.presentation.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import app.vercors.launcher.home.presentation.state.HomeState
+import app.vercors.launcher.core.presentation.ui.AppScrollableLazyColumn
+import app.vercors.launcher.home.presentation.viewmodel.HomeUiIntent
+import app.vercors.launcher.home.presentation.viewmodel.HomeUiState
 
 @Composable
 fun HomeScreen(
-    state: HomeState
+    state: HomeUiState,
+    onIntent: (HomeUiIntent) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
+    AppScrollableLazyColumn(modifier = Modifier.fillMaxSize()) {
         items(state.sections) { section ->
             HomeSection(
-                section = section
+                section = section,
+                onAction = onIntent
             )
         }
     }

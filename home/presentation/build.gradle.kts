@@ -9,4 +9,5 @@ dependencies {
     implementation(projects.instance.domain)
     implementation(projects.project.presentation)
     implementation(projects.project.domain)
+    implementation(projects.game.domain)
 }

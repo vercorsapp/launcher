@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.core.network)
+    implementation(projects.core.config)
     implementation(projects.home.domain)
+    implementation(projects.project.domain)
+    implementation(projects.instance.domain)
 }

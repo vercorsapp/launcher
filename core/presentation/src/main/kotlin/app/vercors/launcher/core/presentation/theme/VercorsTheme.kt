@@ -2,6 +2,8 @@ package app.vercors.launcher.core.presentation.theme
 
 import androidx.annotation.ColorInt
 import androidx.annotation.Size
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.defaultScrollbarStyle
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -51,12 +53,16 @@ fun VercorsTheme(
         }
     }
 
-    CompositionLocalProvider(
-        LocalCatppuccinColors provides colors,
+    MaterialTheme(
+        colorScheme = createVercorsColorScheme(colors, accentProvider),
+        typography = VercorsTypography
     ) {
-        MaterialTheme(
-            colorScheme = createVercorsColorScheme(colors, accentProvider),
-            typography = VercorsTypography,
+        CompositionLocalProvider(
+            LocalCatppuccinColors provides colors,
+            LocalScrollbarStyle provides defaultScrollbarStyle().copy(
+                unhoverColor = MaterialTheme.colorScheme.surface,
+                hoverColor = MaterialTheme.colorScheme.surfaceBright
+            ),
             content = content
         )
     }

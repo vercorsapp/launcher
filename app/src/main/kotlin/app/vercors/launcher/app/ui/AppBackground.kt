@@ -12,14 +12,28 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
+import app.vercors.launcher.core.presentation.ui.runComposable
 
 @Composable
-fun ContentBackground(content: @Composable () -> Unit) {
-    val background0 = MaterialTheme.colorScheme.background
-    val background1 = lerp(background0, MaterialTheme.colorScheme.primaryContainer, 0.5f)
+fun ContentBackground(
+    gradient: Boolean,
+    content: @Composable () -> Unit
+) {
+    val background = MaterialTheme.colorScheme.background
+    val modifier: @Composable Modifier.() -> Modifier = if (gradient) {
+        {
+            background(
+                largeRadialGradient(
+                    background,
+                    lerp(background, MaterialTheme.colorScheme.primaryContainer, 0.5f)
+                )
+            )
+        }
+    } else {
+        { background(background) }
+    }
 
-    Box(modifier = Modifier.padding(bottom = 5.dp, end = 5.dp)) {
-        Box(modifier = Modifier.fillMaxSize().background(largeRadialGradient(background0, background1)))
+    Box(modifier = Modifier.padding(bottom = 5.dp, end = 5.dp).fillMaxSize().runComposable(modifier)) {
         content()
     }
 }

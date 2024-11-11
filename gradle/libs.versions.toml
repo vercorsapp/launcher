@@ -1,7 +1,7 @@
 [versions]
 # Kotlin
-kotlin = "2.1.0-RC"
-ksp = "2.1.0-RC-1.0.26"
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.27"
 coroutines = "1.9.0"
 serialization = "1.7.2"
 datetime = "0.6.1"
@@ -10,10 +10,12 @@ io = "0.5.4"
 compose = "1.7.0"
 lifecycle = "2.8.3"
 navigation = "2.8.0-alpha10"
-coil = "3.0.1"
+coil = "3.0.2"
 filekit = "0.8.7"
+prettytime = "5.0.9.Final"
 # Data
 ktor = "3.0.1"
+ktorfit = "2.2.0"
 datastore = "1.1.1"
 room = "2.7.0-alpha10"
 sqlite = "2.5.0-alpha10"
@@ -42,12 +44,15 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 coil-network-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
 coil-network-cache-control = { group = "io.coil-kt.coil3", name = "coil-network-cache-control", version.ref = "coil" }
 filekit-compose = { group = "io.github.vinceglb", name = "filekit-compose", version.ref = "filekit" }
+prettytime = { group = "org.ocpsoft.prettytime", name = "prettytime", version.ref = "prettytime" }
 # Data
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktorfit-lib-light = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib-light", version.ref = "ktorfit" }
+ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit" }
 datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -73,6 +78,7 @@ compose = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", ver
 kotlin-plugin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
 kotlin-plugin-compose = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 ksp = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+ktorfit = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-gradle-plugin", version.ref = "ktorfit" }
 room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 
 [plugins]

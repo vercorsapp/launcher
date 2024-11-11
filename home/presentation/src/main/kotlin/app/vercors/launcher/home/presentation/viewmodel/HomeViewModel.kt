@@ -1,41 +1,34 @@
 package app.vercors.launcher.home.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
-import app.vercors.launcher.home.domain.usecase.ObserveHomeSections
-import app.vercors.launcher.home.generated.resources.jump_back_in
-import app.vercors.launcher.home.presentation.HomeString
-import app.vercors.launcher.home.presentation.action.HomeAction
-import app.vercors.launcher.home.presentation.model.HomeInstanceStatusUi
-import app.vercors.launcher.home.presentation.model.HomeSectionItemUi
-import app.vercors.launcher.home.presentation.model.HomeSectionUi
-import app.vercors.launcher.home.presentation.state.HomeState
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import app.vercors.launcher.core.presentation.viewmodel.MviViewModel
+import app.vercors.launcher.core.presentation.viewmodel.StateResult
+import app.vercors.launcher.home.domain.repository.HomeRepository
+import app.vercors.launcher.home.presentation.mapper.toUi
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-
-private val logger = KotlinLogging.logger {}
 
 @KoinViewModel
 class HomeViewModel(
-    private val observeHomeSections: ObserveHomeSections
-) : ViewModel() {
-    private val _uiState =
-        MutableStateFlow(HomeState(false, listOf(HomeSectionUi(HomeString.jump_back_in, buildList {
-            repeat(10) {
-                add(
-                    HomeSectionItemUi.Instance(
-                        name = "mau $it",
-                        loader = "mauloader",
-                        gameVersion = "69.420",
-                        status = HomeInstanceStatusUi.Running
-                    )
-                )
+    private val homeRepository: HomeRepository,
+) : MviViewModel<HomeUiState, HomeUiEvent, HomeUiEffect>(HomeUiState()) {
+    override fun init() {
+        viewModelScope.launch {
+            homeRepository.sectionsState.collect {
+                logger.info { "Collecting changes: $it" }
+                onEvent(HomeUiEvent.UpdateSections(it))
             }
-        }))))
-    val uiState = _uiState.asStateFlow()
-
-    fun onAction(action: HomeAction) {
-        logger.debug { "Action triggered in HomeViewModel: $action" }
+        }
+        viewModelScope.launch { homeRepository.loadSections() }
     }
+
+    override fun reduce(state: HomeUiState, event: HomeUiEvent): StateResult<HomeUiState, HomeUiEffect> =
+        when (event) {
+            HomeUiIntent.CreateInstance -> StateResult.Unchanged(HomeUiEffect.OpenCreateInstanceDialog)
+            is HomeUiIntent.InstallProject -> StateResult.Unchanged()
+            is HomeUiIntent.LaunchOrStopInstance -> StateResult.Unchanged()
+            is HomeUiIntent.ShowInstance -> StateResult.Unchanged(HomeUiEffect.NavigateToInstance(event.instanceId))
+            is HomeUiIntent.ShowProject -> StateResult.Unchanged(HomeUiEffect.NavigateToProject(event.projectId))
+            is HomeUiEvent.UpdateSections -> StateResult.Changed(HomeUiState(event.sections.map { it.toUi() }))
+        }
 }

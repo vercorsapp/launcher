@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import app.vercors.launcher.app.navigation.AppDestination
 import app.vercors.launcher.app.navigation.destination.HomeDestination
+import app.vercors.launcher.app.navigation.destination.InstanceListDestination
 import app.vercors.launcher.app.navigation.destination.SettingsDestination
 import app.vercors.launcher.core.presentation.ui.AppAnimations
 import app.vercors.launcher.core.presentation.ui.defaultEnterAnimation
@@ -27,11 +28,19 @@ fun AppNavHost(
         exitTransition = { if (animations) defaultExitAnimation else ExitTransition.None },
     ) {
         composable<AppDestination.Home> {
-            HomeDestination()
+            HomeDestination {
+                // TODO handle navigation events
+            }
         }
-        composable<AppDestination.InstanceList> { }
-        composable<AppDestination.ProjectList> { }
-        composable<AppDestination.Accounts> { }
+        composable<AppDestination.InstanceList> {
+            InstanceListDestination()
+        }
+        composable<AppDestination.ProjectList> {
+
+        }
+        composable<AppDestination.Accounts> {
+
+        }
         composable<AppDestination.Settings> {
             SettingsDestination()
         }

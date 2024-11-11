@@ -6,9 +6,10 @@ option java_multiple_files = true;
 message GeneralProto {
   string theme = 1;
   string accent = 2;
-  bool decorated = 3;
-  bool animations = 4;
-  TabProto default_tab = 5;
+  bool gradient = 3;
+  bool decorated = 4;
+  bool animations = 5;
+  TabProto default_tab = 6;
 }
 
 enum TabProto {

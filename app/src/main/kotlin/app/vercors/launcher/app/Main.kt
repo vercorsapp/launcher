@@ -1,15 +1,21 @@
 package app.vercors.launcher.app
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.application
 import app.vercors.launcher.app.logging.AppLogbackConfigurator
 import app.vercors.launcher.app.ui.AppWindow
 import app.vercors.launcher.app.viewmodel.AppViewModel
+import app.vercors.launcher.core.presentation.ui.LocalImageLoader
 import app.vercors.launcher.core.storage.Storage
 import app.vercors.launcher.setup.presentation.screen.SetupWindow
+import coil3.ImageLoader
+import coil3.compose.LocalPlatformContext
+import coil3.disk.DiskCache
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import okio.Path.Companion.toPath
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import org.koin.core.KoinApplication
@@ -17,6 +23,7 @@ import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.fileProperties
 import org.koin.ksp.generated.module
 import org.koin.logger.SLF4JLogger
 
@@ -26,7 +33,10 @@ fun main() {
     logger.info { "Hello World!" }
     val externalScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val koin = externalScope.async {
-        startKoin { setupKoin(externalScope) }.koin
+        startKoin {
+            fileProperties()
+            setupKoin(externalScope)
+        }.koin
     }
     application(exitProcessOnExit = false) {
         KoinContext(context = runBlocking { koin.await() }) {
@@ -37,9 +47,19 @@ fun main() {
                 val viewModel = koinInject<AppViewModel>()
                 val uiState by viewModel.uiState.collectAsState()
 
-                AppWindow(
-                    uiState = uiState
-                )
+                CompositionLocalProvider(
+                    LocalImageLoader provides ImageLoader.Builder(LocalPlatformContext.current)
+                        .diskCache {
+                            DiskCache.Builder()
+                                .directory(storageState.path.toPath().resolve("cache"))
+                                .build()
+                        }
+                        .build()
+                ) {
+                    AppWindow(
+                        uiState = uiState
+                    )
+                }
             } else {
                 logger.info { "Application path is not setup - showing setup window" }
                 SetupWindow(

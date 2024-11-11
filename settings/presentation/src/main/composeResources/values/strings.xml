@@ -4,10 +4,16 @@
     <string name="theme_description">The theme of the application</string>
     <string name="accent">Accent</string>
     <string name="accent_description">The accent color of the application</string>
+    <string name="gradient">Gradient</string>
+    <string name="gradient_description">Use a gradient color in the background</string>
     <string name="decorated">Use system window frame</string>
     <string name="decorated_description">Use the system window frame instead of the built-in one (only applied after restart)</string>
     <string name="animations">Enable animations</string>
     <string name="animations_description">Enable animations (fade-in &amp; out) within the application</string>
     <string name="default_tab">Default tab</string>
     <string name="default_tab_description">The active tab when the application is opened</string>
+    <string name="sections">Sections</string>
+    <string name="sections_description">The sections shown in the home tab</string>
+    <string name="provider">Home project provider</string>
+    <string name="provider_description">The service used to fetch popular projects</string>
 </resources>

@@ -1,8 +1,9 @@
 package app.vercors.launcher.home.domain.repository
 
 import app.vercors.launcher.home.domain.model.HomeSection
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface HomeRepository {
-    fun observeSections(): Flow<List<HomeSection>>
+    val sectionsState: StateFlow<List<HomeSection>>
+    suspend fun loadSections()
 }

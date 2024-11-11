@@ -1,12 +1,13 @@
 package app.vercors.launcher.project.data.local.model
 
+import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.PrimaryKey
+import app.vercors.launcher.project.domain.model.ProjectId
 
-@Entity(
-    tableName = "project",
-    primaryKeys = ["provider", "id"]
-)
+@Entity
 data class ProjectEntity(
-    val provider: String,
-    val id: String,
+    @PrimaryKey
+    @Embedded
+    val id: ProjectId
 )
