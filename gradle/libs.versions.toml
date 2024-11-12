@@ -17,7 +17,7 @@ prettytime = "5.0.9.Final"
 ktor = "3.0.1"
 ktorfit = "2.2.0"
 datastore = "1.1.1"
-room = "2.7.0-alpha10"
+room = "2.7.0-alpha11"
 sqlite = "2.5.0-alpha11"
 appdirs = "1.2.0"
 # DI
