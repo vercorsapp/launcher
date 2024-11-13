@@ -4,5 +4,5 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun Modifier.applyIf(condition: Boolean, modifier: @Composable Modifier.() -> Modifier): Modifier =
+fun Modifier.thenIf(condition: Boolean, modifier: @Composable Modifier.() -> Modifier): Modifier =
     if (condition) modifier() else this

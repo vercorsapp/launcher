@@ -18,7 +18,7 @@ import org.koin.core.annotation.Single
 @Single
 fun provideHttpClient(json: Json) = HttpClient(CIO) {
     install(Logging) {
-        sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        sanitizeHeader { header -> header in listOf(HttpHeaders.Authorization, "x-api-key") }
     }
     install(ContentNegotiation) {
         json(json)

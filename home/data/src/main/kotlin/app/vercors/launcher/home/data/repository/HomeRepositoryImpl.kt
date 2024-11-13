@@ -89,7 +89,7 @@ class HomeRepositoryImpl(
         logger.debug { "Updating section: $section" }
         _sectionsState.update { sections ->
             if (sections.any { it.type == section.type }) sections.map { if (it.type == section.type) section else it }
-            else sections + section
+            else (sections + section).sortedBy { it.type }
         }
     }
 

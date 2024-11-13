@@ -1,7 +1,9 @@
 package app.vercors.launcher.core.presentation.ui
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
@@ -58,6 +60,27 @@ fun AppAnimatedVisibility(
         }
     } else if (visible) {
         content()
+    }
+}
+
+@Composable
+fun <T> AppCrossfade(
+    targetState: T,
+    modifier: Modifier = Modifier,
+    animationSpec: FiniteAnimationSpec<Float> = tween(),
+    content: @Composable (T) -> Unit
+) {
+    if (AppAnimations.current) {
+        Crossfade(
+            targetState = targetState,
+            modifier = modifier,
+            animationSpec = animationSpec,
+            content = content
+        )
+    } else {
+        Box(modifier) {
+            content(targetState)
+        }
     }
 }
 

@@ -86,7 +86,7 @@ fun <T> AppDropdownMenuBox(
                         onValueChange(it)
                     },
                     contentPadding = PaddingValues(horizontal = 10.dp),
-                    modifier = Modifier.applyIf(it == value) { background(colors.primary) },
+                    modifier = Modifier.thenIf(it == value) { background(colors.primary) },
                     text = {
                         CompositionLocalProvider(
                             LocalContentColor provides if (it == value) colors.onPrimary else colors.onSurface

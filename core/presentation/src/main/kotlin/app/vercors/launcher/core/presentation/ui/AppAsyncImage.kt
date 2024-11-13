@@ -11,10 +11,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.AsyncImagePainter.State
 import coil3.compose.LocalPlatformContext
+import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 
 /**
@@ -26,7 +28,7 @@ import coil3.request.ImageRequest
 fun AppAsyncImage(
     model: Any?,
     contentDescription: String?,
-    imageLoader: ImageLoader = LocalImageLoader.current,
+    imageLoader: ImageLoader = SingletonImageLoader.get(LocalPlatformContext.current),
     modifier: Modifier = Modifier,
     placeholder: Painter? = null,
     error: Painter? = null,
@@ -68,7 +70,7 @@ fun AppAsyncImage(
 fun AppAsyncImage(
     model: Any?,
     contentDescription: String?,
-    imageLoader: ImageLoader = LocalImageLoader.current,
+    imageLoader: ImageLoader = SingletonImageLoader.get(LocalPlatformContext.current),
     modifier: Modifier = Modifier,
     transform: (State) -> State = AsyncImagePainter.DefaultTransform,
     onState: ((State) -> Unit)? = null,
@@ -94,9 +96,14 @@ fun AppAsyncImage(
 )
 
 @Composable
-fun appImageRequest(key: String, url: String): ImageRequest =
-    ImageRequest.Builder(LocalPlatformContext.current)
+fun appImageRequest(key: String, url: String): ImageRequest {
+    return ImageRequest.Builder(LocalPlatformContext.current)
         .data(url)
         .memoryCacheKey(key)
         .diskCacheKey(key)
         .build()
+}
+
+@Composable
+fun rememberAppAsyncImagePainter(key: String, url: String): Painter =
+    rememberAsyncImagePainter(appImageRequest(key, url))

@@ -20,7 +20,7 @@ import app.vercors.launcher.settings.generated.resources.sections
 import app.vercors.launcher.settings.generated.resources.sections_description
 import app.vercors.launcher.settings.presentation.SettingsString
 import app.vercors.launcher.settings.presentation.ui.entry.ComboboxSettingsEntry
-import app.vercors.launcher.settings.presentation.ui.entry.OrderableListSettingsEntry
+import app.vercors.launcher.settings.presentation.ui.entry.ListSettingsEntry
 import app.vercors.launcher.settings.presentation.viewmodel.SettingsUiIntent
 import app.vercors.launcher.settings.presentation.viewmodel.SettingsUiState
 import org.jetbrains.compose.resources.stringResource
@@ -60,7 +60,7 @@ fun HomeSettingsSection(
                 Text(text = it.displayName)
             }
         }
-        OrderableListSettingsEntry(
+        ListSettingsEntry(
             title = stringResource(SettingsString.sections),
             description = stringResource(SettingsString.sections_description),
             entries = HomeSectionConfig.entries,
@@ -69,7 +69,7 @@ fun HomeSettingsSection(
             AppFilterChip(
                 selected = selected,
                 onClick = { onIntent(SettingsUiIntent.ToggleSection(item)) },
-                label = { Text(text = item.displayName) },
+                label = { Text(text = item.displayName) }
             )
         }
     }

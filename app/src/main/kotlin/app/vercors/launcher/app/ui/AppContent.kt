@@ -23,6 +23,7 @@ import app.vercors.launcher.app.navigation.AppDestination
 import app.vercors.launcher.app.navigation.TopLevelDestination
 import app.vercors.launcher.app.util.screenName
 import app.vercors.launcher.app.util.screenType
+import app.vercors.launcher.app.viewmodel.AppUiIntent
 import app.vercors.launcher.app.viewmodel.GeneralConfigState
 import app.vercors.launcher.core.config.model.TabConfig
 import app.vercors.launcher.core.generated.resources.app_title
@@ -30,8 +31,11 @@ import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.PopupAlignment
 import app.vercors.launcher.core.presentation.ui.handPointer
 import app.vercors.launcher.core.presentation.ui.rememberPopupPositionProvider
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+
+private val logger = KotlinLogging.logger {}
 
 @Composable
 fun WindowScope.AppContent(
@@ -39,6 +43,7 @@ fun WindowScope.AppContent(
     windowState: WindowState,
     generalConfig: GeneralConfigState.Loaded,
     onClose: () -> Unit,
+    onIntent: (AppUiIntent) -> Unit,
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStackEntry?.destination
@@ -111,11 +116,12 @@ fun WindowScope.AppContent(
                         },
                         colors = navItemColors,
                         onClick = {
+                            logger.info { "Navigating to $topLevelRoute tab" }
                             navController.navigate(route = topLevelRoute.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
-                        launchSingleTop = true
+                                launchSingleTop = true
                                 restoreState = true
                             }
                         }
@@ -132,7 +138,8 @@ fun WindowScope.AppContent(
             ContentBackground(gradient = generalConfig.gradient) {
                 AppNavHost(
                     navController = navController,
-                    startDestination = generalConfig.defaultTab.toDestination()
+                    startDestination = generalConfig.defaultTab.toDestination(),
+                    onIntent = onIntent
                 )
             }
         }

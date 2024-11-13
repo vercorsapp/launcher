@@ -1,50 +1,33 @@
 package app.vercors.launcher.setup.presentation.viewmodel
 
-import androidx.lifecycle.ViewModel
 import app.vercors.launcher.core.domain.APP_NAME
+import app.vercors.launcher.core.presentation.viewmodel.MviViewModel
+import app.vercors.launcher.core.presentation.viewmodel.StateResult
 import app.vercors.launcher.setup.domain.repository.SetupRepository
-import app.vercors.launcher.setup.presentation.action.SetupAction
-import app.vercors.launcher.setup.presentation.state.SetupUiState
-import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.io.files.Path
 import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.Provided
-
-private val logger = KotlinLogging.logger {}
 
 @KoinViewModel
 class SetupViewModel(
-    private val setupRepository: SetupRepository,
-    @Provided private val onLaunch: () -> Unit
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(SetupUiState(setupRepository.defaultPath))
-    val uiState: StateFlow<SetupUiState> = _uiState.asStateFlow()
-
-    fun onAction(action: SetupAction) {
-        logger.debug { "Action triggered in SetupViewModel: $action" }
-        when (action) {
-            is SetupAction.PickDirectory -> pickDirectory(action.path)
-            is SetupAction.UpdatePath -> updatePath(action.path)
-            SetupAction.StartApp -> launchApp()
-        }
+    private val setupRepository: SetupRepository
+) : MviViewModel<SetupUiState, SetupUiEvent, SetupUiEffect>(SetupUiState(setupRepository.defaultPath)) {
+    override fun reduce(state: SetupUiState, event: SetupUiEvent): StateResult<SetupUiState, SetupUiEffect> =
+        when (event) {
+            is SetupUiEvent.PickDirectory -> pickDirectory(event.path)
+            is SetupUiEvent.UpdatePath -> updatePath(event.path)
+            SetupUiEvent.StartApp -> launchApp()
     }
 
-    private fun updatePath(path: String) {
-        _uiState.update { it.copy(path = path) }
-    }
-
-    private fun pickDirectory(path: String) {
+    private fun pickDirectory(path: String): StateResult<SetupUiState, SetupUiEffect> =
         updatePath(if (path.endsWith(APP_NAME)) path else Path(path, APP_NAME).toString())
-    }
 
-    private fun launchApp() {
+    private fun updatePath(path: String): StateResult<SetupUiState, SetupUiEffect> =
+        StateResult.Changed(SetupUiState(path))
+
+    private fun launchApp(): StateResult<SetupUiState, SetupUiEffect> {
         val path = uiState.value.path
         setupRepository.updatePath(path)
         logger.info { "User selected directory: $path - now launching application" }
-        onLaunch()
+        return StateResult.Unchanged(SetupUiEffect.Launch)
     }
 }

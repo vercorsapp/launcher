@@ -33,6 +33,12 @@ compose.resources {
         "app.vercors.launcher.${if (project.name == "app") "app" else project.parent?.name ?: project.name}.generated.resources"
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
+}
+
 kotlin {
     compilerOptions.freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
 }

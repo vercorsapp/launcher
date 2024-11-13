@@ -91,7 +91,7 @@ private fun RowScope.AppWindowTitle(
         ) {
             Icon(
                 modifier = Modifier.size(32.dp)
-                    .applyIf(canGoBack) { clickableIcon { onAction(MenuBarAction.Back) } },
+                    .thenIf(canGoBack) { clickableIcon { onAction(MenuBarAction.Back) } },
                 imageVector = vectorResource(CoreDrawable.chevron_left),
                 tint = backButtonColor,
                 contentDescription = stringResource(CoreString.back),
@@ -127,7 +127,7 @@ private fun AppWindowButtons(
             imageVector = vectorResource(CoreDrawable.x),
             contentDescription = null,
             onClick = { onAction(MenuBarAction.Close) },
-            isClose = true
+            isCloseButton = true
         )
     }
 }
@@ -138,21 +138,21 @@ private fun WindowButton(
     imageVector: ImageVector,
     contentDescription: String?,
     onClick: () -> Unit,
-    isClose: Boolean = false
+    isCloseButton: Boolean = false
 ) {
     val mutableInteractionSource = remember { MutableInteractionSource() }
-    val isHovered by mutableInteractionSource.collectIsHoveredAsState()
+    val isCloseButtonHovered by mutableInteractionSource.collectIsHoveredAsState()
 
     Box(
         modifier = Modifier.clickableButton(onClick = onClick).fillMaxHeight().aspectRatio(1f)
-            .applyIf(isClose) { hoverable(mutableInteractionSource) }
-            .applyIf(isHovered) { background(MaterialTheme.colorScheme.error) },
+            .thenIf(isCloseButton) { hoverable(mutableInteractionSource) }
+            .thenIf(isCloseButtonHovered) { background(MaterialTheme.colorScheme.error) },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             modifier = Modifier.size(32.dp),
             imageVector = imageVector,
-            tint = if (isClose && isHovered) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurface,
+            tint = if (isCloseButtonHovered) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurface,
             contentDescription = contentDescription,
         )
     }

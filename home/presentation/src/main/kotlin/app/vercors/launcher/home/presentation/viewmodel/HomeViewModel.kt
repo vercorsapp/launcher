@@ -15,7 +15,6 @@ class HomeViewModel(
     override fun init() {
         viewModelScope.launch {
             homeRepository.sectionsState.collect {
-                logger.info { "Collecting changes: $it" }
                 onEvent(HomeUiEvent.UpdateSections(it))
             }
         }

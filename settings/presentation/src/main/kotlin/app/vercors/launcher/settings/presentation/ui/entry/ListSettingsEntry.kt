@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun <T> OrderableListSettingsEntry(
+fun <T> ListSettingsEntry(
     title: String,
     description: String,
     entries: List<T>,

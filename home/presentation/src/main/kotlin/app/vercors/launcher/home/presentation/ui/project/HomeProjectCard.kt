@@ -84,7 +84,7 @@ fun RowScope.HomeProjectCard(
             Column(
                 modifier = Modifier.background(MaterialTheme.colorScheme.surface).align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .animateContentSize().applyIf(isHovered) { fillMaxHeight() }
+                    .animateContentSize().thenIf(isHovered) { fillMaxHeight() }
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(80.dp).padding(15.dp),

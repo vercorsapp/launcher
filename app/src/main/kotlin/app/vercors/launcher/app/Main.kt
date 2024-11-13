@@ -1,17 +1,16 @@
 package app.vercors.launcher.app
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.window.application
 import app.vercors.launcher.app.logging.AppLogbackConfigurator
 import app.vercors.launcher.app.ui.AppWindow
-import app.vercors.launcher.app.viewmodel.AppViewModel
-import app.vercors.launcher.core.presentation.ui.LocalImageLoader
+import app.vercors.launcher.core.domain.APP_NAME
+import app.vercors.launcher.core.domain.APP_VERSION
 import app.vercors.launcher.core.storage.Storage
 import app.vercors.launcher.setup.presentation.screen.SetupWindow
 import coil3.ImageLoader
-import coil3.compose.LocalPlatformContext
+import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
@@ -31,6 +30,7 @@ private val logger = KotlinLogging.logger {}
 
 fun main() {
     logger.info { "Hello World!" }
+    logger.info { "Launching $APP_NAME v$APP_VERSION" }
     val externalScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val koin = externalScope.async {
         startKoin {
@@ -43,23 +43,19 @@ fun main() {
             val storage = koinInject<Storage>()
             val storageState by storage.state.collectAsState()
 
-            if (storageState.isSetup) {
-                val viewModel = koinInject<AppViewModel>()
-                val uiState by viewModel.uiState.collectAsState()
+            setSingletonImageLoaderFactory { context ->
+                ImageLoader.Builder(context)
+                    .diskCache {
+                        DiskCache.Builder()
+                            .directory(storageState.path.toPath().resolve("cache"))
+                            .build()
+                    }
+                    .build()
+            }
 
-                CompositionLocalProvider(
-                    LocalImageLoader provides ImageLoader.Builder(LocalPlatformContext.current)
-                        .diskCache {
-                            DiskCache.Builder()
-                                .directory(storageState.path.toPath().resolve("cache"))
-                                .build()
-                        }
-                        .build()
-                ) {
-                    AppWindow(
-                        uiState = uiState
-                    )
-                }
+            if (storageState.isSetup) {
+                logger.info { "Application path is setup - showing launcher window" }
+                AppWindow()
             } else {
                 logger.info { "Application path is not setup - showing setup window" }
                 SetupWindow(
@@ -69,7 +65,7 @@ fun main() {
         }
     }
     externalScope.cancel()
-    logger.info { "Goodbye World!" }
+    logger.info { "Application stopped" }
 }
 
 private fun KoinApplication.setupKoin(externalScope: CoroutineScope) {

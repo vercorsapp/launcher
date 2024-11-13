@@ -19,8 +19,8 @@ import app.vercors.launcher.setup.generated.resources.start_app
 import app.vercors.launcher.setup.generated.resources.welcome
 import app.vercors.launcher.setup.generated.resources.welcome_path
 import app.vercors.launcher.setup.presentation.SetupString
-import app.vercors.launcher.setup.presentation.action.SetupAction
-import app.vercors.launcher.setup.presentation.state.SetupUiState
+import app.vercors.launcher.setup.presentation.viewmodel.SetupUiEvent
+import app.vercors.launcher.setup.presentation.viewmodel.SetupUiState
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -28,10 +28,10 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun SetupContent(
     uiState: SetupUiState,
-    onAction: (SetupAction) -> Unit
+    onIntent: (SetupUiEvent) -> Unit
 ) {
     val filePicker = rememberDirectoryPickerLauncher(initialDirectory = uiState.parentPath) { directory ->
-        directory?.path?.let { onAction(SetupAction.PickDirectory(it)) }
+        directory?.path?.let { onIntent(SetupUiEvent.PickDirectory(it)) }
     }
 
     Column(
@@ -51,7 +51,7 @@ fun SetupContent(
         ) {
             OutlinedTextField(
                 value = uiState.path,
-                onValueChange = { onAction(SetupAction.UpdatePath(it)) },
+                onValueChange = { onIntent(SetupUiEvent.UpdatePath(it)) },
                 modifier = Modifier.width(450.dp)
             )
             AppIconButton(
@@ -66,7 +66,7 @@ fun SetupContent(
         }
         Spacer(Modifier.height(20.dp))
         AppIconButton(
-            onClick = { onAction(SetupAction.StartApp) },
+            onClick = { onIntent(SetupUiEvent.StartApp) },
             icon = vectorResource(CoreDrawable.play),
             text = stringResource(SetupString.start_app)
         )

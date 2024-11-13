@@ -10,14 +10,18 @@ import app.vercors.launcher.app.navigation.AppDestination
 import app.vercors.launcher.app.navigation.destination.HomeDestination
 import app.vercors.launcher.app.navigation.destination.InstanceListDestination
 import app.vercors.launcher.app.navigation.destination.SettingsDestination
+import app.vercors.launcher.app.viewmodel.AppDialog
+import app.vercors.launcher.app.viewmodel.AppUiIntent
 import app.vercors.launcher.core.presentation.ui.AppAnimations
 import app.vercors.launcher.core.presentation.ui.defaultEnterAnimation
 import app.vercors.launcher.core.presentation.ui.defaultExitAnimation
+import app.vercors.launcher.home.presentation.viewmodel.HomeUiEffect
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    startDestination: AppDestination
+    startDestination: AppDestination,
+    onIntent: (AppUiIntent) -> Unit
 ) {
     val animations = AppAnimations.current
 
@@ -29,7 +33,11 @@ fun AppNavHost(
     ) {
         composable<AppDestination.Home> {
             HomeDestination {
-                // TODO handle navigation events
+                when (it) {
+                    is HomeUiEffect.NavigateToInstance -> {}
+                    is HomeUiEffect.NavigateToProject -> {}
+                    HomeUiEffect.OpenCreateInstanceDialog -> onIntent(AppUiIntent.OpenDialog(AppDialog.CreateInstance))
+                }
             }
         }
         composable<AppDestination.InstanceList> {
