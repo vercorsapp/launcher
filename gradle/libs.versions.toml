@@ -7,7 +7,7 @@ serialization = "1.7.3"
 datetime = "0.6.1"
 io = "0.5.4"
 # Presentation
-compose = "1.7.1"
+compose = "1.8.0+check"
 lifecycle = "2.8.4"
 navigation = "2.8.0-alpha10"
 coil = "3.0.2"
