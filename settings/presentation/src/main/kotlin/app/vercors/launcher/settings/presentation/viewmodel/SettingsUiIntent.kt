@@ -4,7 +4,7 @@ import app.vercors.launcher.core.config.model.HomeProviderConfig
 import app.vercors.launcher.core.config.model.HomeSectionConfig
 import app.vercors.launcher.core.config.model.TabConfig
 
-sealed interface SettingsUiIntent : SettingsUiEvent {
+sealed interface SettingsUiIntent {
     @JvmInline
     value class SelectTheme(val value: String) : SettingsUiIntent
 

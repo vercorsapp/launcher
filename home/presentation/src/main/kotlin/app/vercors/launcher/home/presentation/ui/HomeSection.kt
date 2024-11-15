@@ -17,7 +17,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeSection(
     section: HomeSectionUi,
-    onAction: (HomeUiIntent) -> Unit,
+    onIntent: (HomeUiIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -28,15 +28,15 @@ fun HomeSection(
         when (section) {
             is HomeSectionUi.Instances -> HomeInstancesSectionContent(
                 data = section.data,
-                onInstanceClick = { onAction(HomeUiIntent.ShowInstance(it.id)) },
-                onInstanceAction = { onAction(HomeUiIntent.LaunchOrStopInstance(it.id)) },
-                onCreateInstance = { onAction(HomeUiIntent.CreateInstance) }
+                onInstanceClick = { onIntent(HomeUiIntent.ShowInstance(it.id)) },
+                onInstanceAction = { onIntent(HomeUiIntent.LaunchOrStopInstance(it.id)) },
+                onCreateInstance = { onIntent(HomeUiIntent.CreateInstance) }
             )
 
             is HomeSectionUi.Projects -> HomeProjectsSectionContent(
                 data = section.data,
-                onProjectClick = { onAction(HomeUiIntent.ShowProject(it.id)) },
-                onProjectAction = { onAction(HomeUiIntent.InstallProject(it.id)) }
+                onProjectClick = { onIntent(HomeUiIntent.ShowProject(it.id)) },
+                onProjectAction = { onIntent(HomeUiIntent.InstallProject(it.id)) }
             )
         }
     }

@@ -2,7 +2,6 @@ package app.vercors.launcher.setup.presentation.viewmodel
 
 import app.vercors.launcher.core.domain.APP_NAME
 import app.vercors.launcher.core.presentation.viewmodel.MviViewModel
-import app.vercors.launcher.core.presentation.viewmodel.StateResult
 import app.vercors.launcher.setup.domain.repository.SetupRepository
 import kotlinx.io.files.Path
 import org.koin.android.annotation.KoinViewModel
@@ -11,23 +10,22 @@ import org.koin.android.annotation.KoinViewModel
 class SetupViewModel(
     private val setupRepository: SetupRepository
 ) : MviViewModel<SetupUiState, SetupUiEvent, SetupUiEffect>(SetupUiState(setupRepository.defaultPath)) {
-    override fun reduce(state: SetupUiState, event: SetupUiEvent): StateResult<SetupUiState, SetupUiEffect> =
-        when (event) {
-            is SetupUiEvent.PickDirectory -> pickDirectory(event.path)
-            is SetupUiEvent.UpdatePath -> updatePath(event.path)
+    override fun SetupUiState.reduce(intent: SetupUiEvent): SetupUiState =
+        when (intent) {
+            is SetupUiEvent.PickDirectory -> pickDirectory(intent.path)
+            is SetupUiEvent.UpdatePath -> updatePath(intent.path)
             SetupUiEvent.StartApp -> launchApp()
     }
 
-    private fun pickDirectory(path: String): StateResult<SetupUiState, SetupUiEffect> =
+    private fun SetupUiState.pickDirectory(path: String): SetupUiState =
         updatePath(if (path.endsWith(APP_NAME)) path else Path(path, APP_NAME).toString())
 
-    private fun updatePath(path: String): StateResult<SetupUiState, SetupUiEffect> =
-        StateResult.Changed(SetupUiState(path))
+    private fun SetupUiState.updatePath(path: String): SetupUiState = SetupUiState(path)
 
-    private fun launchApp(): StateResult<SetupUiState, SetupUiEffect> {
-        val path = uiState.value.path
+    private fun SetupUiState.launchApp(): SetupUiState {
+        val path = state.value.path
         setupRepository.updatePath(path)
         logger.info { "User selected directory: $path - now launching application" }
-        return StateResult.Unchanged(SetupUiEffect.Launch)
+        return withEffect(SetupUiEffect.Launch)
     }
 }

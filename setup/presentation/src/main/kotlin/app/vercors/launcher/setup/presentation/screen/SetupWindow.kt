@@ -8,7 +8,7 @@ import androidx.compose.ui.window.Window
 import app.vercors.launcher.core.config.model.GeneralConfig
 import app.vercors.launcher.core.domain.APP_NAME
 import app.vercors.launcher.core.presentation.theme.VercorsTheme
-import app.vercors.launcher.core.presentation.viewmodel.ViewModelContainer
+import app.vercors.launcher.core.presentation.viewmodel.MviContainer
 import app.vercors.launcher.setup.presentation.viewmodel.SetupUiEffect
 import app.vercors.launcher.setup.presentation.viewmodel.SetupViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -26,7 +26,7 @@ fun ApplicationScope.SetupWindow(
             accent = GeneralConfig.DEFAULT.accent,
         ) {
             Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
-                ViewModelContainer(
+                MviContainer(
                     viewModel = koinViewModel<SetupViewModel>(),
                     onEffect = {
                         when (it) {

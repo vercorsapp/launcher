@@ -4,7 +4,7 @@ import app.vercors.launcher.instance.domain.model.InstanceId
 import app.vercors.launcher.project.domain.model.ProjectId
 
 sealed interface HomeUiEffect {
-    data object OpenCreateInstanceDialog : HomeUiEffect
+    data object CreateInstance : HomeUiEffect
 
     @JvmInline
     value class NavigateToInstance(val instanceId: InstanceId) : HomeUiEffect

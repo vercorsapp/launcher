@@ -5,21 +5,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.currentBackStackEntryAsState
-import app.vercors.launcher.app.navigation.AppDestination
 import app.vercors.launcher.app.navigation.TopLevelDestination
 import app.vercors.launcher.app.util.screenName
 import app.vercors.launcher.app.util.screenType
@@ -50,7 +49,12 @@ fun WindowScope.AppContent(
     val screenType = currentBackStackEntry?.destination?.screenType
     val screenName = screenType.screenName ?: CoreString.app_title
     val currentBackStack by navController.currentBackStack.collectAsState()
-    val canGoBack by remember { derivedStateOf { currentBackStack.size > 2 } }
+    val canGoBack by remember {
+        derivedStateOf {
+            // TODO maybe find a better way to handle that
+            currentBackStack.filter { it.destination is ComposeNavigator.Destination }.size > 1
+        }
+    }
     val navItemColors = NavigationSuiteDefaults.itemColors(
         navigationRailItemColors = NavigationRailItemDefaults.colors(
             indicatorColor = MaterialTheme.colorScheme.primary,
@@ -60,7 +64,7 @@ fun WindowScope.AppContent(
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppMenuBar(
+        AppTopBar(
             screenName = stringResource(screenName),
             hasWindowControls = !generalConfig.decorated,
             canGoBack = canGoBack,
@@ -88,43 +92,11 @@ fun WindowScope.AppContent(
                             onClick = {}
                         )
                     }
-                    item(
-                        modifier = Modifier.padding(vertical = 16.dp).size(32.dp).handPointer(),
-                        selected = currentDestination?.hierarchy?.any { it.hasRoute(route = topLevelRoute.route::class) } == true,
-                        icon = {
-                            TooltipBox(
-                                state = rememberTooltipState(),
-                                positionProvider = rememberPopupPositionProvider(alignment = PopupAlignment.CenterRight),
-                                tooltip = {
-                                    PlainTooltip(
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        contentColor = MaterialTheme.colorScheme.onSurface,
-                                    ) {
-                                        Text(
-                                            text = stringResource(topLevelRoute.title),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                        )
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    modifier = Modifier.fillMaxSize(),
-                                    imageVector = vectorResource(topLevelRoute.icon),
-                                    contentDescription = stringResource(topLevelRoute.title)
-                                )
-                            }
-                        },
-                        colors = navItemColors,
-                        onClick = {
-                            logger.info { "Navigating to $topLevelRoute tab" }
-                            navController.navigate(route = topLevelRoute.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
+                    AppNavButton(
+                        topLevelRoute = topLevelRoute,
+                        currentDestination = currentDestination,
+                        navItemColors = navItemColors,
+                        navController = navController,
                     )
                 }
             },
@@ -146,11 +118,63 @@ fun WindowScope.AppContent(
     }
 }
 
-@Stable
-private fun TabConfig.toDestination(): AppDestination = when (this) {
-    TabConfig.Home -> AppDestination.Home
-    TabConfig.Instances -> AppDestination.InstanceList
-    TabConfig.Projects -> AppDestination.ProjectList
-    TabConfig.Accounts -> AppDestination.Accounts
-    TabConfig.Settings -> AppDestination.Settings
+private fun NavigationSuiteScope.AppNavButton(
+    topLevelRoute: TopLevelDestination,
+    currentDestination: NavDestination?,
+    navItemColors: NavigationSuiteItemColors,
+    navController: NavHostController
+) {
+    item(
+        modifier = Modifier.then(
+            if (topLevelRoute === TopLevelDestination.entries.last()) Modifier.padding(
+                top = 16.dp,
+                bottom = 21.dp
+            )
+            else Modifier.padding(vertical = 16.dp)
+        ).size(32.dp).handPointer(),
+        selected = currentDestination?.hierarchy?.any { it.hasRoute(route = topLevelRoute.route::class) } == true,
+        icon = {
+            TooltipBox(
+                state = rememberTooltipState(),
+                positionProvider = rememberPopupPositionProvider(alignment = PopupAlignment.CenterRight),
+                tooltip = {
+                    PlainTooltip(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ) {
+                        Text(
+                            text = stringResource(topLevelRoute.title),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            ) {
+                Icon(
+                    modifier = Modifier.fillMaxSize(),
+                    imageVector = vectorResource(topLevelRoute.icon),
+                    contentDescription = stringResource(topLevelRoute.title)
+                )
+            }
+        },
+        colors = navItemColors,
+        onClick = {
+            logger.info { "Navigating to $topLevelRoute tab" }
+            navController.navigate(route = topLevelRoute.route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    )
 }
+
+@Stable
+private fun TabConfig.toDestination(): Any = when (this) {
+    TabConfig.Home -> TopLevelDestination.Home
+    TabConfig.Instances -> TopLevelDestination.Instances
+    TabConfig.Projects -> TopLevelDestination.Projects
+    TabConfig.Accounts -> TopLevelDestination.Accounts
+    TabConfig.Settings -> TopLevelDestination.Settings
+}.route

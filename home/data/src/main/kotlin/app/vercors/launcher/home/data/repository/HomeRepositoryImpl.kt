@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger {}
 class HomeRepositoryImpl(
     private val configRepository: ConfigRepository,
     private val instanceRepository: InstanceRepository,
-    private val projectRepository: ProjectRepository,
+    private val projectRepository: ProjectRepository
 ) : HomeRepository {
     private val sectionCache: MutableMap<HomeSectionCacheKey, HomeSection> = mutableMapOf()
 
@@ -36,48 +36,51 @@ class HomeRepositoryImpl(
                 logger.debug { "Processing home config changes: $sectionConfigs, $providerConfig" }
                 val sectionTypes = sectionConfigs.map { it.toType() }
                 _sectionsState.update { sections -> sections.filter { it.type in sectionTypes } }
-                sectionTypes.map { sectionType ->
-                    launch {
-                        val providerType = providerConfig.toType()
-                        val cacheKey = HomeSectionCacheKey(sectionType, providerConfig)
-                        val section = sectionCache.getOrPut(cacheKey) {
-                            logger.debug { "Home section cache miss for key $cacheKey" }
-                            updateSection(createLoadingSection(sectionType))
-                            when (sectionType) {
-                                HomeSectionType.JumpBackIn -> instanceRepository.observeAll().first()
-                                    .sortedByDescending { it.lastPlayedAt }
-                                    .let { HomeSection.Instances(sectionType, HomeSectionData.Loaded(it)) }
-
-                                HomeSectionType.PopularMods -> projectRepository.findProjects(
-                                    providerType,
-                                    ProjectType.Mod
-                                ).first()
-                                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
-
-                                HomeSectionType.PopularModpacks -> projectRepository.findProjects(
-                                    providerType,
-                                    ProjectType.Modpack
-                                ).first()
-                                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
-
-                                HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
-                                    providerType,
-                                    ProjectType.ResourcePack
-                                ).first()
-                                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
-
-                                HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
-                                    providerType,
-                                    ProjectType.ShaderPack
-                                ).first()
-                                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
-                            }
-                        }
-                        updateSection(section)
-                    }
-                }.joinAll()
+                sectionTypes.map { sectionType -> launch { loadSection(providerConfig, sectionType) } }.joinAll()
                 logger.debug { "Finished processing home config changes" }
             }
+    }
+
+    private suspend fun loadSection(
+        providerConfig: HomeProviderConfig,
+        sectionType: HomeSectionType
+    ) {
+        val providerType = providerConfig.toType()
+        val cacheKey = HomeSectionCacheKey(sectionType, providerConfig)
+        val section = sectionCache.getOrPut(cacheKey) {
+            logger.debug { "Home section cache miss for key $cacheKey" }
+            updateSection(createLoadingSection(sectionType))
+            when (sectionType) {
+                HomeSectionType.JumpBackIn -> instanceRepository.observeAll().first()
+                    .sortedByDescending { it.lastPlayedAt }
+                    .let { HomeSection.Instances(sectionType, HomeSectionData.Loaded(it)) }
+
+                HomeSectionType.PopularMods -> projectRepository.findProjects(
+                    providerType,
+                    ProjectType.Mod
+                ).first()
+                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+
+                HomeSectionType.PopularModpacks -> projectRepository.findProjects(
+                    providerType,
+                    ProjectType.Modpack
+                ).first()
+                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+
+                HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
+                    providerType,
+                    ProjectType.ResourcePack
+                ).first()
+                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+
+                HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
+                    providerType,
+                    ProjectType.ShaderPack
+                ).first()
+                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+            }
+        }
+        updateSection(section)
     }
 
     private fun createLoadingSection(type: HomeSectionType): HomeSection = when (type) {

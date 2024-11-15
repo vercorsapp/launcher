@@ -1,4 +1,4 @@
-package app.vercors.launcher.home.presentation.mapper
+package app.vercors.launcher.home.presentation.viewmodel
 
 import app.vercors.launcher.core.presentation.ui.countToString
 import app.vercors.launcher.home.domain.model.HomeSection
@@ -6,10 +6,6 @@ import app.vercors.launcher.home.domain.model.HomeSectionData
 import app.vercors.launcher.home.domain.model.HomeSectionType
 import app.vercors.launcher.home.generated.resources.*
 import app.vercors.launcher.home.presentation.HomeString
-import app.vercors.launcher.home.presentation.viewmodel.HomeInstanceStatusUi
-import app.vercors.launcher.home.presentation.viewmodel.HomeSectionDataUi
-import app.vercors.launcher.home.presentation.viewmodel.HomeSectionItemUi
-import app.vercors.launcher.home.presentation.viewmodel.HomeSectionUi
 import app.vercors.launcher.instance.domain.model.Instance
 import app.vercors.launcher.project.domain.model.Project
 import kotlinx.datetime.toJavaInstant

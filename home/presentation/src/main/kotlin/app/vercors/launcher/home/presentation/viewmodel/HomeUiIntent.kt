@@ -3,7 +3,7 @@ package app.vercors.launcher.home.presentation.viewmodel
 import app.vercors.launcher.instance.domain.model.InstanceId
 import app.vercors.launcher.project.domain.model.ProjectId
 
-sealed interface HomeUiIntent : HomeUiEvent {
+sealed interface HomeUiIntent {
     @JvmInline
     value class ShowInstance(val instanceId: InstanceId) : HomeUiIntent
 

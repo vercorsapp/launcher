@@ -1,4 +1,4 @@
-package app.vercors.launcher.instance.presentation.state
+package app.vercors.launcher.instance.presentation.viewmodel
 
 import androidx.compose.runtime.Immutable
 

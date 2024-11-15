@@ -28,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-fun WindowScope.AppMenuBar(
+fun WindowScope.AppTopBar(
     screenName: String,
     hasWindowControls: Boolean,
     canGoBack: Boolean,
@@ -90,8 +90,7 @@ private fun RowScope.AppWindowTitle(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                modifier = Modifier.size(32.dp)
-                    .thenIf(canGoBack) { clickableIcon { onAction(MenuBarAction.Back) } },
+                modifier = Modifier.size(32.dp).thenIf(canGoBack) { clickableIcon { onAction(MenuBarAction.Back) } },
                 imageVector = vectorResource(CoreDrawable.chevron_left),
                 tint = backButtonColor,
                 contentDescription = stringResource(CoreString.back),

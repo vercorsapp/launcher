@@ -18,7 +18,7 @@ import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.theme.VercorsTheme
 import app.vercors.launcher.core.presentation.ui.AppAnimations
 import app.vercors.launcher.core.presentation.ui.AppCrossfade
-import app.vercors.launcher.core.presentation.viewmodel.ViewModelContainer
+import app.vercors.launcher.core.presentation.viewmodel.MviContainer
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.awt.Dimension
@@ -27,7 +27,7 @@ import java.awt.Dimension
 fun ApplicationScope.AppWindow(
     windowState: WindowState = rememberWindowState()
 ) {
-    ViewModelContainer(
+    MviContainer(
         viewModel = koinInject<AppViewModel>(),
         minActiveState = null
     ) { state, onIntent ->
