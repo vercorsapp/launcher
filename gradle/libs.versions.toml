@@ -10,7 +10,7 @@ io = "0.5.4"
 compose = "1.7.1"
 lifecycle = "2.8.4"
 navigation = "2.8.0-alpha10"
-coil = "3.0.2"
+coil = "3.0.3"
 filekit = "0.8.7"
 prettytime = "5.0.9.Final"
 # Data
