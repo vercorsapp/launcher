@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import app.vercors.launcher.core.config.model.AppConfig
 import app.vercors.launcher.core.config.model.GeneralConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
-import app.vercors.launcher.core.presentation.viewmodel.MviViewModel
+import app.vercors.launcher.core.presentation.mvi.MviViewModel
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 

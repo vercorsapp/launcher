@@ -21,10 +21,6 @@ dependencies {
     // Logging
     implementation(libs.logback.classic)
     // Modules
-    implementation(projects.account)
-    implementation(projects.account.data)
-    implementation(projects.account.domain)
-    implementation(projects.account.presentation)
     implementation(projects.core)
     implementation(projects.core.config)
     implementation(projects.core.domain)
@@ -32,30 +28,34 @@ dependencies {
     implementation(projects.core.presentation)
     implementation(projects.core.serialization)
     implementation(projects.core.storage)
-    implementation(projects.game)
-    implementation(projects.game.data)
-    implementation(projects.game.domain)
-    implementation(projects.game.presentation)
-    implementation(projects.home)
-    implementation(projects.home.data)
-    implementation(projects.home.domain)
-    implementation(projects.home.presentation)
-    implementation(projects.instance)
-    implementation(projects.instance.data)
-    implementation(projects.instance.domain)
-    implementation(projects.instance.presentation)
-    implementation(projects.project)
-    implementation(projects.project.data)
-    implementation(projects.project.domain)
-    implementation(projects.project.presentation)
-    implementation(projects.settings)
-    implementation(projects.settings.data)
-    implementation(projects.settings.domain)
-    implementation(projects.settings.presentation)
-    implementation(projects.setup)
-    implementation(projects.setup.data)
-    implementation(projects.setup.domain)
-    implementation(projects.setup.presentation)
+    implementation(projects.feature.account)
+    implementation(projects.feature.account.data)
+    implementation(projects.feature.account.domain)
+    implementation(projects.feature.account.presentation)
+    implementation(projects.feature.game)
+    implementation(projects.feature.game.data)
+    implementation(projects.feature.game.domain)
+    implementation(projects.feature.game.presentation)
+    implementation(projects.feature.home)
+    implementation(projects.feature.home.data)
+    implementation(projects.feature.home.domain)
+    implementation(projects.feature.home.presentation)
+    implementation(projects.feature.instance)
+    implementation(projects.feature.instance.data)
+    implementation(projects.feature.instance.domain)
+    implementation(projects.feature.instance.presentation)
+    implementation(projects.feature.project)
+    implementation(projects.feature.project.data)
+    implementation(projects.feature.project.domain)
+    implementation(projects.feature.project.presentation)
+    implementation(projects.feature.settings)
+    implementation(projects.feature.settings.data)
+    implementation(projects.feature.settings.domain)
+    implementation(projects.feature.settings.presentation)
+    implementation(projects.feature.setup)
+    implementation(projects.feature.setup.data)
+    implementation(projects.feature.setup.domain)
+    implementation(projects.feature.setup.presentation)
 }
 
 tasks {
@@ -82,9 +82,15 @@ compose {
             jvmArgs += listOf("-Xmx200M")
 
             nativeDistributions {
-                targetFormats(*TargetFormat.values())
-                packageName = "launcher"
+                targetFormats(TargetFormat.AppImage)
+                modules("java.instrument", "java.management", "java.prefs", "jdk.security.auth", "jdk.unsupported")
+                packageName = "vercors-launcher"
                 packageVersion = rootProject.version as String
+
+                buildTypes.release.proguard {
+                    configurationFiles.from(file("proguard-rules.pro"))
+                    isEnabled = true
+                }
             }
         }
     }

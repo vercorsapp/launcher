@@ -1,8 +1,7 @@
 package app.vercors.launcher.core.presentation.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -10,6 +9,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntSize
 
 val defaultEnterAnimation = fadeIn(animationSpec = tween(200))
 val defaultExitAnimation = fadeOut(animationSpec = tween(200))
@@ -89,3 +89,15 @@ fun appAnimateColorAsState(
     targetValue: Color
 ): State<Color> =
     if (AppAnimations.current) animateColorAsState(targetValue = targetValue) else immutableStateOf(targetValue)
+
+@Composable
+fun Modifier.appAnimateContentSize(
+    animationSpec: FiniteAnimationSpec<IntSize> = spring(
+        stiffness = Spring.StiffnessMediumLow,
+        visibilityThreshold = IntSize.VisibilityThreshold
+    ),
+    finishedListener: ((initialValue: IntSize, targetValue: IntSize) -> Unit)? = null
+): Modifier = if (AppAnimations.current) animateContentSize(
+    animationSpec = animationSpec,
+    finishedListener = finishedListener
+) else this

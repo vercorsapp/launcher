@@ -27,8 +27,8 @@ import app.vercors.launcher.app.viewmodel.GeneralConfigState
 import app.vercors.launcher.core.config.model.TabConfig
 import app.vercors.launcher.core.generated.resources.app_title
 import app.vercors.launcher.core.presentation.CoreString
+import app.vercors.launcher.core.presentation.modifier.handPointer
 import app.vercors.launcher.core.presentation.ui.PopupAlignment
-import app.vercors.launcher.core.presentation.ui.handPointer
 import app.vercors.launcher.core.presentation.ui.rememberPopupPositionProvider
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.compose.resources.stringResource
