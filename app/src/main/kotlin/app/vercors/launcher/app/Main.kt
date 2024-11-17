@@ -8,7 +8,7 @@ import app.vercors.launcher.app.ui.AppWindow
 import app.vercors.launcher.core.domain.APP_NAME
 import app.vercors.launcher.core.domain.APP_VERSION
 import app.vercors.launcher.core.storage.Storage
-import app.vercors.launcher.setup.presentation.screen.SetupWindow
+import app.vercors.launcher.setup.presentation.SetupWindow
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache

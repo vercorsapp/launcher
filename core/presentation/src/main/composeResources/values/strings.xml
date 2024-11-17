@@ -15,4 +15,5 @@
     <string name="modpacks">Modpacks</string>
     <string name="resource_packs">Resource Packs</string>
     <string name="shader_packs">Shader Packs</string>
+    <string name="close">Close</string>
 </resources>

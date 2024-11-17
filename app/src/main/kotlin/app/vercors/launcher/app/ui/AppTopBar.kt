@@ -23,7 +23,11 @@ import androidx.compose.ui.window.WindowScope
 import app.vercors.launcher.core.generated.resources.*
 import app.vercors.launcher.core.presentation.CoreDrawable
 import app.vercors.launcher.core.presentation.CoreString
-import app.vercors.launcher.core.presentation.ui.*
+import app.vercors.launcher.core.presentation.modifier.clickableButton
+import app.vercors.launcher.core.presentation.modifier.clickableIcon
+import app.vercors.launcher.core.presentation.ui.AppAnimatedContent
+import app.vercors.launcher.core.presentation.ui.appAnimateColorAsState
+import app.vercors.launcher.core.presentation.ui.thenIf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 

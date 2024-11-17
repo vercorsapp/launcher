@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import app.vercors.launcher.core.presentation.modifier.handPointer
 
 @Composable
 @Suppress("kotlin:S107")
@@ -28,7 +29,44 @@ fun AppIconButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.handPointer(),
+        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = interactionSource
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text
+        )
+        Text(
+            text = text,
+            modifier = Modifier.padding(start = 10.dp)
+        )
+    }
+}
+
+@Composable
+@Suppress("kotlin:S107")
+fun AppIconTextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.textShape,
+    colors: ButtonColors = ButtonDefaults.textButtonColors(),
+    elevation: ButtonElevation? = null,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    icon: ImageVector,
+    text: String,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier.handPointer(),
         enabled = enabled,
         shape = shape,
         colors = colors,

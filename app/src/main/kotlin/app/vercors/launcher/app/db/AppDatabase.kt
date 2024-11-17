@@ -5,13 +5,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import app.vercors.launcher.account.data.dao.AccountDao
-import app.vercors.launcher.account.data.model.AccountEntity
+import app.vercors.launcher.account.data.AccountDao
+import app.vercors.launcher.account.data.AccountEntity
 import app.vercors.launcher.core.storage.Storage
-import app.vercors.launcher.instance.data.dao.InstanceDao
-import app.vercors.launcher.instance.data.model.InstanceEntity
-import app.vercors.launcher.project.data.local.dao.ProjectDao
-import app.vercors.launcher.project.data.local.model.ProjectEntity
+import app.vercors.launcher.instance.data.InstanceDao
+import app.vercors.launcher.instance.data.InstanceEntity
+import app.vercors.launcher.project.data.local.ProjectDao
+import app.vercors.launcher.project.data.local.ProjectEntity
 import kotlinx.io.files.Path
 import org.koin.core.annotation.Single
 
