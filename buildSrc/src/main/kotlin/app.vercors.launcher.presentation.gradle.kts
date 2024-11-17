@@ -27,12 +27,6 @@ ksp {
     arg("KOIN_USE_COMPOSE_VIEWMODEL", "true")
 }
 
-compose.resources {
-    publicResClass = true
-    packageOfResClass =
-        "app.vercors.launcher.${if (project.name == "app") "app" else project.parent?.name ?: project.name}.generated.resources"
-}
-
 composeCompiler {
     reportsDestination = layout.buildDirectory.dir("compose_compiler")
     metricsDestination = layout.buildDirectory.dir("compose_compiler")

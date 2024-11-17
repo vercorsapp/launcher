@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(projects.core.presentation)
+    implementation(projects.core.resources)
     implementation(projects.feature.home.domain)
     implementation(projects.feature.instance.presentation)
     implementation(projects.feature.instance.domain)

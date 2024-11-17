@@ -14,10 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import app.vercors.launcher.core.generated.resources.InterBold
-import app.vercors.launcher.core.generated.resources.InterMedium
-import app.vercors.launcher.core.generated.resources.InterRegular
-import app.vercors.launcher.core.presentation.CoreFont
+import app.vercors.launcher.core.resources.*
 import org.jetbrains.compose.resources.Font
 
 @Composable
@@ -84,15 +81,15 @@ private val VercorsTypography: Typography
     @Composable get() {
         val fontFamily = FontFamily(
             Font(
-                resource = CoreFont.InterRegular,
+                resource = appFont { InterRegular },
                 weight = FontWeight.Normal,
             ),
             Font(
-                resource = CoreFont.InterMedium,
+                resource = appFont { InterMedium },
                 weight = FontWeight.Medium,
             ),
             Font(
-                resource = CoreFont.InterBold,
+                resource = appFont { InterBold },
                 weight = FontWeight.Bold,
             )
         )

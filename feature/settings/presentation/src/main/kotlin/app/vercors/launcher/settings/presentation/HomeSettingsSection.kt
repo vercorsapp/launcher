@@ -12,28 +12,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import app.vercors.launcher.core.config.model.HomeProviderConfig
 import app.vercors.launcher.core.config.model.HomeSectionConfig
-import app.vercors.launcher.core.generated.resources.*
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.AppFilterChip
-import app.vercors.launcher.settings.generated.resources.provider
-import app.vercors.launcher.settings.generated.resources.provider_description
-import app.vercors.launcher.settings.generated.resources.sections
-import app.vercors.launcher.settings.generated.resources.sections_description
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.settings.presentation.entry.ComboboxSettingsEntry
 import app.vercors.launcher.settings.presentation.entry.ListSettingsEntry
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun HomeSettingsSection(
     config: HomeConfigUi,
     onIntent: (SettingsUiIntent) -> Unit
 ) {
-    SettingsSection(title = stringResource(CoreString.home)) {
+    SettingsSection(title = appStringResource { home }) {
         ComboboxSettingsEntry(
-            title = stringResource(SettingsString.provider),
-            description = stringResource(SettingsString.provider_description),
+            title = appStringResource { provider },
+            description = appStringResource { provider_description },
             options = HomeProviderConfig.entries,
             value = config.provider,
             textConverter = { it.displayName },
@@ -59,8 +51,8 @@ fun HomeSettingsSection(
             }
         }
         ListSettingsEntry(
-            title = stringResource(SettingsString.sections),
-            description = stringResource(SettingsString.sections_description),
+            title = appStringResource { sections },
+            description = appStringResource { sections_description },
             entries = HomeSectionConfig.entries,
             selectedItems = config.sections
         ) { item, selected ->
@@ -74,28 +66,28 @@ fun HomeSettingsSection(
 }
 
 private val HomeProviderConfig.displayName: String
-    @Composable get() = stringResource(
-        when (this) {
-            HomeProviderConfig.Modrinth -> CoreString.modrinth
-            HomeProviderConfig.Curseforge -> CoreString.curseforge
+    @Composable get() = appStringResource {
+        when (this@displayName) {
+            HomeProviderConfig.Modrinth -> modrinth
+            HomeProviderConfig.Curseforge -> curseforge
         }
-    )
+    }
 
 private val HomeProviderConfig.icon: ImageVector
-    @Composable get() = vectorResource(
-        when (this) {
-            HomeProviderConfig.Modrinth -> CoreDrawable.modrinth
-            HomeProviderConfig.Curseforge -> CoreDrawable.curseforge
+    @Composable get() = appVectorResource {
+        when (this@icon) {
+            HomeProviderConfig.Modrinth -> modrinth
+            HomeProviderConfig.Curseforge -> curseforge
         }
-    )
+    }
 
 private val HomeSectionConfig.displayName: String
-    @Composable get() = stringResource(
-        when (this) {
-            HomeSectionConfig.JumpBackIn -> CoreString.instances
-            HomeSectionConfig.PopularMods -> CoreString.mods
-            HomeSectionConfig.PopularModpacks -> CoreString.modpacks
-            HomeSectionConfig.PopularResourcePacks -> CoreString.resource_packs
-            HomeSectionConfig.PopularShaderPacks -> CoreString.shader_packs
+    @Composable get() = appStringResource {
+        when (this@displayName) {
+            HomeSectionConfig.JumpBackIn -> instances
+            HomeSectionConfig.PopularMods -> mods
+            HomeSectionConfig.PopularModpacks -> modpacks
+            HomeSectionConfig.PopularResourcePacks -> resource_packs
+            HomeSectionConfig.PopularShaderPacks -> shader_packs
         }
-    )
+    }

@@ -36,15 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.hard_drive
-import app.vercors.launcher.core.generated.resources.play
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.AppAnimatedVisibility
 import app.vercors.launcher.core.presentation.ui.darker
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.home.presentation.HomeSectionItemUi
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun HomeInstanceIcon(
@@ -63,7 +58,7 @@ fun HomeInstanceIcon(
             //elevation = 1.dp
         ) {
             Icon(
-                imageVector = vectorResource(CoreDrawable.hard_drive),
+                imageVector = appVectorResource { hard_drive },
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().padding(10.dp)
             )
@@ -75,7 +70,7 @@ fun HomeInstanceIcon(
                 isHovered = isHovered,
                 onClick = onLaunch,
                 icon = FeatherIcons.Play,
-                contentDescription = stringResource(Res.string.play)
+                contentDescription = appStringResource { play }
             )
 
             is InstanceStatus.RefreshingToken -> Box(
@@ -99,14 +94,14 @@ fun HomeInstanceIcon(
                 onClick = onStop,
                 icon = FeatherIcons.X,
                 color = MaterialTheme.colors.error,
-                contentDescription = stringResource(Res.string.stop)
+                contentDescription = appStringResource { stop }
             )
         }*/
         InstanceIconButton(
             isHovered = isHovered,
             onClick = onAction,
-            icon = vectorResource(CoreDrawable.play),
-            contentDescription = stringResource(CoreString.play)
+            icon = appVectorResource { play },
+            contentDescription = appStringResource { play }
         )
     }
 }

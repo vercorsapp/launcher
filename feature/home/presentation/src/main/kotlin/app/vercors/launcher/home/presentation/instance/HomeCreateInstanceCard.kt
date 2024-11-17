@@ -8,12 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.circle_plus
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.instance.generated.resources.new_instance
-import app.vercors.launcher.instance.presentation.InstanceString
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.launcher.core.resources.*
 
 @Composable
 fun RowScope.HomeCreateInstanceCard(
@@ -30,7 +25,7 @@ fun RowScope.HomeCreateInstanceCard(
             modifier = Modifier.padding(20.dp)
         ) {
             Icon(
-                imageVector = vectorResource(CoreDrawable.circle_plus),
+                imageVector = appVectorResource { circle_plus },
                 contentDescription = null,
                 modifier = Modifier.aspectRatio(1f).fillMaxSize().padding(10.dp)
             )
@@ -39,7 +34,7 @@ fun RowScope.HomeCreateInstanceCard(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = stringResource(InstanceString.new_instance),
+                    text = appStringResource { new_instance },
                     style = MaterialTheme.typography.titleLarge
                 )
             }

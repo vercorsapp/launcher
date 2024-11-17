@@ -26,6 +26,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.network)
     implementation(projects.core.presentation)
+    implementation(projects.core.resources)
     implementation(projects.core.serialization)
     implementation(projects.core.storage)
     implementation(projects.feature.account)

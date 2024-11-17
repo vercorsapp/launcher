@@ -19,12 +19,10 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.rememberNavController
 import app.vercors.launcher.app.viewmodel.AppViewModel
 import app.vercors.launcher.app.viewmodel.GeneralConfigState
-import app.vercors.launcher.core.generated.resources.app_title
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.mvi.MviContainer
 import app.vercors.launcher.core.presentation.theme.VercorsTheme
 import app.vercors.launcher.core.presentation.ui.*
-import org.jetbrains.compose.resources.stringResource
+import app.vercors.launcher.core.resources.*
 import org.koin.compose.koinInject
 import java.awt.Dimension
 
@@ -39,7 +37,7 @@ fun ApplicationScope.AppWindow(
         if (state.generalConfig is GeneralConfigState.Loaded) {
             Window(
                 state = windowState,
-                title = stringResource(CoreString.app_title),
+                title = appStringResource { app_title },
                 undecorated = !state.generalConfig.decorated,
                 onCloseRequest = ::exitApplication,
             ) {

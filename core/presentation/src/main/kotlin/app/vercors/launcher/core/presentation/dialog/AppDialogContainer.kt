@@ -10,15 +10,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.close
-import app.vercors.launcher.core.generated.resources.x
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.modifier.clickableWithoutRipple
 import app.vercors.launcher.core.presentation.ui.AppIconTextButton
 import app.vercors.launcher.core.presentation.ui.AppSectionTitle
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.launcher.core.resources.*
 
 @Composable
 fun AppDialogContainer(
@@ -51,8 +46,8 @@ typealias AppDialogButtonRowScope = RowScope
 fun AppDialogButtonRowScope.AppDialogCloseButton(onClick: () -> Unit) {
     AppIconTextButton(
         onClick = onClick,
-        icon = vectorResource(CoreDrawable.x),
-        text = stringResource(CoreString.close),
+        icon = appVectorResource { x },
+        text = appStringResource { close },
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
     )
 }

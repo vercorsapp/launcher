@@ -15,20 +15,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.vercors.launcher.core.config.model.TabConfig
 import app.vercors.launcher.core.presentation.theme.LocalCatppuccinColors
-import app.vercors.launcher.settings.generated.resources.*
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.settings.presentation.entry.ComboboxSettingsEntry
 import app.vercors.launcher.settings.presentation.entry.SwitchSettingsEntry
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun GeneralSettingsSection(
     config: GeneralConfigUi,
     onIntent: (SettingsUiIntent) -> Unit
 ) {
-    SettingsSection(title = stringResource(SettingsString.general)) {
+    SettingsSection(title = appStringResource { general }) {
         ComboboxSettingsEntry(
-            title = stringResource(SettingsString.theme),
-            description = stringResource(SettingsString.theme_description),
+            title = appStringResource { theme },
+            description = appStringResource { theme_description },
             options = config.themes,
             value = config.currentTheme,
             textConverter = { it.name },
@@ -37,8 +36,8 @@ fun GeneralSettingsSection(
             Text(text = it.name)
         }
         ComboboxSettingsEntry(
-            title = stringResource(SettingsString.accent),
-            description = stringResource(SettingsString.accent_description),
+            title = appStringResource { accent },
+            description = appStringResource { accent_description },
             options = config.accentColors,
             value = config.currentAccentColor,
             textConverter = { it.name },
@@ -54,26 +53,26 @@ fun GeneralSettingsSection(
             }
         }
         SwitchSettingsEntry(
-            title = stringResource(SettingsString.gradient),
-            description = stringResource(SettingsString.gradient_description),
+            title = appStringResource { gradient },
+            description = appStringResource { gradient_description },
             checked = config.gradient,
             onCheckedChange = { onIntent(SettingsUiIntent.ToggleGradient(it)) }
         )
         SwitchSettingsEntry(
-            title = stringResource(SettingsString.decorated),
-            description = stringResource(SettingsString.decorated_description),
+            title = appStringResource { decorated },
+            description = appStringResource { decorated_description },
             checked = config.decorated,
             onCheckedChange = { onIntent(SettingsUiIntent.ToggleDecorated(it)) }
         )
         SwitchSettingsEntry(
-            title = stringResource(SettingsString.animations),
-            description = stringResource(SettingsString.animations_description),
+            title = appStringResource { animations },
+            description = appStringResource { animations_description },
             checked = config.animations,
             onCheckedChange = { onIntent(SettingsUiIntent.ToggleAnimations(it)) }
         )
         ComboboxSettingsEntry(
-            title = stringResource(SettingsString.default_tab),
-            description = stringResource(SettingsString.default_tab_description),
+            title = appStringResource { default_tab },
+            description = appStringResource { default_tab_description },
             options = TabConfig.entries,
             value = config.defaultTab,
             textConverter = { it.displayName },

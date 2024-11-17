@@ -6,17 +6,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.plus
-import app.vercors.launcher.core.presentation.CoreDrawable
 import app.vercors.launcher.core.presentation.dialog.AppDialogCloseButton
 import app.vercors.launcher.core.presentation.dialog.AppDialogContainer
 import app.vercors.launcher.core.presentation.mvi.MviContainer
 import app.vercors.launcher.core.presentation.ui.AppIconButton
-import app.vercors.launcher.instance.generated.resources.create
-import app.vercors.launcher.instance.generated.resources.create_new_instance
-import app.vercors.launcher.instance.presentation.InstanceString
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.launcher.core.resources.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -44,12 +38,12 @@ internal fun CreateInstanceDialog(
     onIntent: (CreateInstanceUiIntent) -> Unit,
 ) {
     AppDialogContainer(
-        title = stringResource(InstanceString.create_new_instance),
+        title = appStringResource { create_new_instance },
         buttons = {
             AppIconButton(
                 onClick = { onIntent(CreateInstanceUiIntent.CreateInstance) },
-                icon = vectorResource(CoreDrawable.plus),
-                text = stringResource(InstanceString.create)
+                icon = appVectorResource { plus },
+                text = appStringResource { create }
             )
             AppDialogCloseButton { onIntent(CreateInstanceUiIntent.CloseDialog) }
         }

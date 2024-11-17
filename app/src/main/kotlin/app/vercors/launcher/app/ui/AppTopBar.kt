@@ -20,16 +20,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
-import app.vercors.launcher.core.generated.resources.*
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.modifier.clickableButton
 import app.vercors.launcher.core.presentation.modifier.clickableIcon
 import app.vercors.launcher.core.presentation.ui.AppAnimatedContent
 import app.vercors.launcher.core.presentation.ui.appAnimateColorAsState
 import app.vercors.launcher.core.presentation.ui.thenIf
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.launcher.core.resources.*
 
 @Composable
 fun WindowScope.AppTopBar(
@@ -84,9 +80,9 @@ private fun RowScope.AppWindowTitle(
     ) {
         Icon(
             modifier = Modifier.size(width = 40.dp, height = 32.dp),
-            imageVector = vectorResource(CoreDrawable.vercors),
+            imageVector = appVectorResource { vercors },
             tint = MaterialTheme.colorScheme.onSurface,
-            contentDescription = stringResource(CoreString.app_title),
+            contentDescription = appStringResource { app_title },
         )
         Row(
             modifier = Modifier.weight(1f),
@@ -95,9 +91,9 @@ private fun RowScope.AppWindowTitle(
         ) {
             Icon(
                 modifier = Modifier.size(32.dp).thenIf(canGoBack) { clickableIcon { onAction(MenuBarAction.Back) } },
-                imageVector = vectorResource(CoreDrawable.chevron_left),
+                imageVector = appVectorResource { chevron_left },
                 tint = backButtonColor,
-                contentDescription = stringResource(CoreString.back),
+                contentDescription = appStringResource { back },
             )
             AppAnimatedContent(targetState = screenName) {
                 Text(
@@ -117,17 +113,17 @@ private fun AppWindowButtons(
 ) {
     Row {
         WindowButton(
-            imageVector = vectorResource(CoreDrawable.minus),
+            imageVector = appVectorResource { minus },
             contentDescription = null,
             onClick = { onAction(MenuBarAction.Minimize) }
         )
         WindowButton(
-            imageVector = vectorResource(if (isMaximized) CoreDrawable.minimize else CoreDrawable.maximize),
+            imageVector = appVectorResource { maximize },
             contentDescription = null,
             onClick = { onAction(MenuBarAction.Maximize) }
         )
         WindowButton(
-            imageVector = vectorResource(CoreDrawable.x),
+            imageVector = appVectorResource { x },
             contentDescription = null,
             onClick = { onAction(MenuBarAction.Close) },
             isCloseButton = true

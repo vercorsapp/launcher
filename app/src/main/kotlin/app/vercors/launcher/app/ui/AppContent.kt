@@ -25,11 +25,10 @@ import app.vercors.launcher.app.util.screenType
 import app.vercors.launcher.app.viewmodel.AppUiIntent
 import app.vercors.launcher.app.viewmodel.GeneralConfigState
 import app.vercors.launcher.core.config.model.TabConfig
-import app.vercors.launcher.core.generated.resources.app_title
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.modifier.handPointer
 import app.vercors.launcher.core.presentation.ui.PopupAlignment
 import app.vercors.launcher.core.presentation.ui.rememberPopupPositionProvider
+import app.vercors.launcher.core.resources.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -47,7 +46,7 @@ fun WindowScope.AppContent(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStackEntry?.destination
     val screenType = currentBackStackEntry?.destination?.screenType
-    val screenName = screenType.screenName ?: CoreString.app_title
+    val screenName = screenType.screenName ?: appString { app_title }
     val currentBackStack by navController.currentBackStack.collectAsState()
     val canGoBack by remember {
         derivedStateOf {

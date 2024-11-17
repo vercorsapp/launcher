@@ -18,6 +18,7 @@ include(
     "core:config",
     "core:domain",
     "core:presentation",
+    "core:resources",
     "feature:account:data",
     "feature:account:domain",
     "feature:account:presentation",

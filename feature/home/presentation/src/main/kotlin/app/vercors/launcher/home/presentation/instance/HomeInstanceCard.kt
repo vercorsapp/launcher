@@ -10,16 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.play
-import app.vercors.launcher.core.generated.resources.vercors
-import app.vercors.launcher.core.presentation.CoreDrawable
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.home.presentation.HomeInstanceStatusUi
 import app.vercors.launcher.home.presentation.HomeSectionItemUi
-import app.vercors.launcher.instance.generated.resources.last_played
-import app.vercors.launcher.instance.generated.resources.running
-import app.vercors.launcher.instance.presentation.InstanceString
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun RowScope.HomeInstanceCard(
@@ -62,7 +55,7 @@ fun RowScope.HomeInstanceCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = vectorResource(CoreDrawable.vercors),
+                            imageVector = appVectorResource { vercors },
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
@@ -77,14 +70,14 @@ fun RowScope.HomeInstanceCard(
                     ) {
                         val (statusIcon, statusText, statusColor) = when (instance.status) {
                             is HomeInstanceStatusUi.NotRunning -> Triple(
-                                vectorResource(CoreDrawable.play),
-                                stringResource(InstanceString.last_played, instance.status.lastPlayed),
+                                appVectorResource { play },
+                                appStringResource(instance.status.lastPlayed) { last_played },
                                 Color.Unspecified
                             )
 
                             HomeInstanceStatusUi.Running -> Triple(
-                                vectorResource(CoreDrawable.play),
-                                stringResource(InstanceString.running),
+                                appVectorResource { play },
+                                appStringResource { running },
                                 MaterialTheme.colorScheme.tertiary
                             )
                         }

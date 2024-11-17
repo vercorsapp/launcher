@@ -21,18 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.calendar_clock
-import app.vercors.launcher.core.generated.resources.download
-import app.vercors.launcher.core.generated.resources.install
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.*
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.home.presentation.HomeSectionItemUi
-import app.vercors.launcher.project.generated.resources.pack
-import app.vercors.launcher.project.presentation.ProjectDrawable
-import org.jetbrains.compose.resources.imageResource
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun RowScope.HomeProjectCard(
@@ -57,7 +48,7 @@ fun RowScope.HomeProjectCard(
                         contentScale = ContentScale.Crop
                     )
                 } ?: Image(
-                    bitmap = imageResource(ProjectDrawable.pack),
+                    bitmap = appImageResource { pack },
                     contentDescription = "${project.name} image",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -70,12 +61,12 @@ fun RowScope.HomeProjectCard(
                 ) {
                     HomeProjectChip(
                         name = "Downloads",
-                        icon = vectorResource(CoreDrawable.download),
+                        icon = appVectorResource { download },
                         text = project.downloadCount
                     )
                     HomeProjectChip(
                         name = "Last updated",
-                        icon = vectorResource(CoreDrawable.calendar_clock),
+                        icon = appVectorResource { calendar_clock },
                         text = LocalPrettyTime.current.format(project.lastUpdated)
                     )
                 }
@@ -103,7 +94,7 @@ fun RowScope.HomeProjectCard(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } ?: Image(
-                            bitmap = imageResource(ProjectDrawable.pack),
+                            bitmap = appImageResource { pack },
                             contentDescription = "${project.name} logo",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -149,8 +140,8 @@ fun RowScope.HomeProjectCard(
                         ) {
                             AppIconButton(
                                 onClick = { onProjectAction(project) },
-                                icon = vectorResource(CoreDrawable.download),
-                                text = stringResource(CoreString.install)
+                                icon = appVectorResource { download },
+                                text = appStringResource { install }
                             )
                         }
                     }

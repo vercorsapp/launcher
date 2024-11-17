@@ -2,8 +2,7 @@ package app.vercors.launcher.app.util
 
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavDestination
-import app.vercors.launcher.core.generated.resources.*
-import app.vercors.launcher.core.presentation.CoreString
+import app.vercors.launcher.core.resources.*
 import org.jetbrains.compose.resources.StringResource
 
 @Deprecated("Needs to be changed to be more flexible")
@@ -16,10 +15,10 @@ val NavDestination?.screenType: ScreenType?
 @Deprecated("Needs to be changed to be more flexible")
 val ScreenType?.screenName: StringResource?
     @Stable get() = when (this) {
-        "HomeRoute" -> CoreString.home
-        "InstanceListRoute" -> CoreString.instances
-        "ProjectListRoute" -> CoreString.projects
-        "AccountListRoute" -> CoreString.accounts
-        "SettingsRoute" -> CoreString.settings
+        "HomeRoute" -> appString { home }
+        "InstanceListRoute" -> appString { instances }
+        "ProjectListRoute" -> appString { projects }
+        "AccountListRoute" -> appString { accounts }
+        "SettingsRoute" -> appString { settings }
         else -> null
     }

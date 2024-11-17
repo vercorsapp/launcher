@@ -1,10 +1,10 @@
 package app.vercors.launcher.home.presentation
 
 import app.vercors.launcher.core.presentation.ui.countToString
+import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.home.domain.HomeSection
 import app.vercors.launcher.home.domain.HomeSectionData
 import app.vercors.launcher.home.domain.HomeSectionType
-import app.vercors.launcher.home.generated.resources.*
 import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.project.domain.Project
 import kotlinx.datetime.toJavaInstant
@@ -51,9 +51,9 @@ private fun Project.toUi(): HomeSectionItemUi.Project = HomeSectionItemUi.Projec
 )
 
 private fun HomeSectionType.toUi(): StringResource = when (this) {
-    HomeSectionType.JumpBackIn -> HomeString.jump_back_in
-    HomeSectionType.PopularMods -> HomeString.popular_mods
-    HomeSectionType.PopularModpacks -> HomeString.popular_modpacks
-    HomeSectionType.PopularResourcePacks -> HomeString.popular_resource_packs
-    HomeSectionType.PopularShaderPacks -> HomeString.popular_shader_packs
+    HomeSectionType.JumpBackIn -> appString { jump_back_in }
+    HomeSectionType.PopularMods -> appString { popular_mods }
+    HomeSectionType.PopularModpacks -> appString { popular_modpacks }
+    HomeSectionType.PopularResourcePacks -> appString { popular_resource_packs }
+    HomeSectionType.PopularShaderPacks -> appString { popular_shader_packs }
 }

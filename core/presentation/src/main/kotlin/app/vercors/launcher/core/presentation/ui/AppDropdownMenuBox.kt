@@ -34,10 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.chevron_down
-import app.vercors.launcher.core.generated.resources.chevron_up
-import app.vercors.launcher.core.presentation.CoreDrawable
-import org.jetbrains.compose.resources.vectorResource
+import app.vercors.launcher.core.resources.*
 
 @Composable
 fun <T> AppDropdownMenuBox(
@@ -68,7 +65,7 @@ fun <T> AppDropdownMenuBox(
             leadingIcon = leadingIcon,
             trailingIcon = {
                 Icon(
-                    imageVector = vectorResource(if (expanded) CoreDrawable.chevron_up else CoreDrawable.chevron_down),
+                    imageVector = appVectorResource { if (expanded) chevron_up else chevron_down },
                     contentDescription = "Show options"
                 )
             }

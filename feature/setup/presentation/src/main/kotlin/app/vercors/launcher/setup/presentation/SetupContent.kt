@@ -9,18 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.vercors.launcher.core.generated.resources.folder
-import app.vercors.launcher.core.generated.resources.open_folder
-import app.vercors.launcher.core.generated.resources.play
-import app.vercors.launcher.core.presentation.CoreDrawable
-import app.vercors.launcher.core.presentation.CoreString
 import app.vercors.launcher.core.presentation.ui.AppIconButton
-import app.vercors.launcher.setup.generated.resources.start_app
-import app.vercors.launcher.setup.generated.resources.welcome
-import app.vercors.launcher.setup.generated.resources.welcome_path
+import app.vercors.launcher.core.resources.*
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun SetupContent(
@@ -37,11 +28,11 @@ fun SetupContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(SetupString.welcome),
+            text = appStringResource { welcome },
             style = MaterialTheme.typography.displayLarge
         )
         Spacer(Modifier.height(20.dp))
-        Text(text = stringResource(SetupString.welcome_path))
+        Text(text = appStringResource { welcome_path })
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
@@ -57,15 +48,15 @@ fun SetupContent(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 onClick = filePicker::launch,
-                icon = vectorResource(CoreDrawable.folder),
-                text = stringResource(CoreString.open_folder)
+                icon = appVectorResource { folder },
+                text = appStringResource { open_folder }
             )
         }
         Spacer(Modifier.height(20.dp))
         AppIconButton(
             onClick = { onIntent(SetupUiEvent.StartApp) },
-            icon = vectorResource(CoreDrawable.play),
-            text = stringResource(SetupString.start_app)
+            icon = appVectorResource { play },
+            text = appStringResource { start_app }
         )
     }
 }
