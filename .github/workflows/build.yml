@@ -10,11 +10,7 @@ on:
 jobs:
   build:
     name: Build app
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -27,21 +23,9 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Build packages
+      - name: Build app
         id: build
-        run: ./gradlew packageReleaseDistributionForCurrentOS --no-daemon
+        run: ./gradlew build --no-daemon
         env:
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
-        continue-on-error: true
-
-      - name: Check errors
-        if: steps.build.outcome != 'success'
-        run: cat app/build/compose/logs/**/*-err.txt && exit 1
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: packages-${{ matrix.os }}
-          path: app/build/compose/binaries/main-release/**/*

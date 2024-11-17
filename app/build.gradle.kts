@@ -67,7 +67,6 @@ tasks {
         destinationFile = layout.buildDirectory.file("koin.properties")
         encoding = "UTF-8"
         appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
-        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
         appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
     }
 
