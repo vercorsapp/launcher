@@ -5,7 +5,7 @@ ksp = "2.0.21-1.0.28"
 coroutines = "1.9.0"
 serialization = "1.7.3"
 datetime = "0.6.1"
-io = "0.5.4"
+io = "0.6.0"
 # Presentation
 compose = "1.7.1"
 lifecycle = "2.8.4"
