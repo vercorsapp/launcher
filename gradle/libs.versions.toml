@@ -27,7 +27,7 @@ koin-annotations = "2.0.0-Beta2"
 # Logging
 kotlin-logging = "7.0.0"
 logback = "1.5.12"
-protobuf = "4.28.3"
+protobuf = "4.29.2"
 protobuf-plugin = "0.9.4"
 
 [libraries]
