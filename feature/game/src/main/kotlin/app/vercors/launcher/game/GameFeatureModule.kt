@@ -6,4 +6,4 @@ import app.vercors.launcher.game.presentation.GamePresentationModule
 import org.koin.core.annotation.Module
 
 @Module(includes = [GameDataModule::class, GameDomainModule::class, GamePresentationModule::class])
-class GameModule
+class GameFeatureModule

@@ -21,7 +21,7 @@ class CoreConfigModule
 fun provideConfigDataStore(
     storage: Storage,
     serializer: ConfigSerializer,
-    @Named("externalScope") externalScope: CoroutineScope,
+    externalScope: CoroutineScope,
     @Named("ioDispatcher") ioDispatcher: CoroutineDispatcher,
 ): DataStore<ConfigProto> = DataStoreFactory.create(
     serializer = serializer,

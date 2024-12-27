@@ -43,6 +43,7 @@ fun <T> AppDropdownMenuBox(
     textConverter: @Composable (T) -> String,
     onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier.width(IntrinsicSize.Max),
+    label: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     optionContent: @Composable (T) -> Unit
 ) {
@@ -61,6 +62,7 @@ fun <T> AppDropdownMenuBox(
             value = value?.let { textConverter(it) } ?: "",
             onValueChange = {},
             readOnly = true,
+            label = label,
             modifier = Modifier.fillMaxWidth().menuAnchor(type = MenuAnchorType.PrimaryNotEditable),
             leadingIcon = leadingIcon,
             trailingIcon = {

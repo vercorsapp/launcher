@@ -29,7 +29,7 @@ fun AppIconButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.handPointer(),
+        modifier = modifier.handPointer(enabled),
         enabled = enabled,
         shape = shape,
         colors = colors,
@@ -66,7 +66,7 @@ fun AppIconTextButton(
 ) {
     TextButton(
         onClick = onClick,
-        modifier = modifier.handPointer(),
+        modifier = modifier.handPointer(enabled),
         enabled = enabled,
         shape = shape,
         colors = colors,

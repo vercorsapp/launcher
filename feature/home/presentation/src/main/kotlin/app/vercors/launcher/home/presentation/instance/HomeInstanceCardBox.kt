@@ -14,7 +14,7 @@ fun RowScope.HomeInstanceCardBox(
 ) {
     AppElevatedCard(
         onClick = onClick,
-        modifier = modifier.weight(1f).aspectRatio(0.8f)
+        modifier = modifier.weight(1f).aspectRatio(0.7f)
     ) {
         content()
     }
@@ -25,7 +25,7 @@ fun RowScope.HomeInstanceCardBox(
     modifier: Modifier,
     content: @Composable () -> Unit = {}
 ) {
-    AppElevatedCard(modifier = modifier.weight(1f).aspectRatio(0.8f)) {
+    AppElevatedCard(modifier = modifier.weight(1f).aspectRatio(0.7f)) {
         content()
     }
 }

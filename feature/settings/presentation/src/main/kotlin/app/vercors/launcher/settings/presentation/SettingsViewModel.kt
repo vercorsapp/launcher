@@ -1,12 +1,10 @@
 package app.vercors.launcher.settings.presentation
 
-import androidx.lifecycle.viewModelScope
 import app.vercors.launcher.core.config.model.AppConfig
 import app.vercors.launcher.core.config.model.HomeSectionConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
 import app.vercors.launcher.core.config.repository.ConfigUpdate
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
-import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -15,10 +13,8 @@ class SettingsViewModel(
 ) : MviViewModel<SettingsUiState, SettingsUiIntent, Nothing>(SettingsUiState.Loading) {
     override fun onStart() {
         super.onStart()
-        viewModelScope.launch {
-            configRepository.observeConfig().collect {
-                onIntent(ConfigUpdated(it))
-            }
+        collectInScope(configRepository.observeConfig()) {
+            onIntent(ConfigUpdated(it))
         }
     }
 
@@ -48,7 +44,7 @@ class SettingsViewModel(
         else this
 
     private fun <T> SettingsUiState.updateConfig(update: ConfigUpdate<T>, value: T): SettingsUiState {
-        viewModelScope.launch { configRepository.updateConfig(update, value) }
+        runInScope { configRepository.updateConfig(update, value) }
         return this
     }
 

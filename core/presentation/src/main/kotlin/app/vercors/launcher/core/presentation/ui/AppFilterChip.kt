@@ -38,18 +38,20 @@ fun AppFilterChip(
     border: BorderStroke? = FilterChipDefaults.filterChipBorder(enabled, selected),
     interactionSource: MutableInteractionSource? = null
 ) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = label,
-        modifier = modifier.handPointer(),
-        enabled = enabled,
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        shape = shape,
-        colors = colors,
-        elevation = elevation,
-        border = border,
-        interactionSource = interactionSource,
-    )
+    AppAnimatedContent(selected) {
+        FilterChip(
+            selected = it,
+            onClick = onClick,
+            label = label,
+            modifier = modifier.handPointer(enabled),
+            enabled = enabled,
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            shape = shape,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            interactionSource = interactionSource,
+        )
+    }
 }

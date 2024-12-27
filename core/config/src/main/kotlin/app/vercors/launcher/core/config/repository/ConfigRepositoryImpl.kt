@@ -7,7 +7,6 @@ import app.vercors.launcher.core.config.proto.ConfigProto
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 private val logger = KotlinLogging.logger {}
@@ -15,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 @Single
 class ConfigRepositoryImpl(
     private val dataStore: DataStore<ConfigProto>,
-    @Named("externalScope") private val externalScope: CoroutineScope,
+    private val externalScope: CoroutineScope,
 ) : ConfigRepository {
     private val _configSharedFlow = dataStore.data
         .map { it.toConfig() }

@@ -8,15 +8,17 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 
 @Stable
-fun Modifier.handPointer() = pointerHoverIcon(PointerIcon.Hand)
+fun Modifier.handPointer(enabled: Boolean = true) = if (enabled) pointerHoverIcon(PointerIcon.Hand) else this
 
 @Composable
 fun Modifier.clickableIcon(
+    enabled: Boolean = true,
     onClick: () -> Unit,
-) = handPointer().clickableWithoutRipple(onClick = onClick)
+) = handPointer(enabled).clickableWithoutRipple(onClick = onClick)
 
 @Composable
 fun Modifier.clickableButton(
+    enabled: Boolean = true,
     onClick: () -> Unit,
-) = handPointer().clickable(onClick = onClick)
+) = handPointer(enabled).clickable(onClick = onClick)
 

@@ -2,7 +2,6 @@ package app.vercors.launcher.core.presentation.dialog
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -10,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.vercors.launcher.core.presentation.card.AppCard
 import app.vercors.launcher.core.presentation.modifier.clickableWithoutRipple
 import app.vercors.launcher.core.presentation.ui.AppIconTextButton
 import app.vercors.launcher.core.presentation.ui.AppSectionTitle
@@ -21,7 +21,7 @@ fun AppDialogContainer(
     buttons: @Composable AppDialogButtonRowScope.() -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Card(Modifier.clickableWithoutRipple()) {
+    AppCard(Modifier.clickableWithoutRipple()) {
         Column(
             modifier = Modifier.padding(20.dp).width(IntrinsicSize.Max),
             verticalArrangement = Arrangement.spacedBy(20.dp),

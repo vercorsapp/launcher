@@ -32,7 +32,6 @@ fun WindowScope.AppTopBar(
     screenName: String,
     hasWindowControls: Boolean,
     canGoBack: Boolean,
-    isMaximized: Boolean,
     onAction: (MenuBarAction) -> Unit
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
@@ -53,7 +52,6 @@ fun WindowScope.AppTopBar(
                 )
                 if (hasWindowControls) {
                     AppWindowButtons(
-                        isMaximized = isMaximized,
                         onAction = onAction,
                     )
                 }
@@ -108,7 +106,6 @@ private fun RowScope.AppWindowTitle(
 
 @Composable
 private fun AppWindowButtons(
-    isMaximized: Boolean,
     onAction: (MenuBarAction) -> Unit
 ) {
     Row {

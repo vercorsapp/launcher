@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
     implementation(projects.feature.game.domain)
+    implementation(projects.core.meta)
+    implementation(projects.core.domain)
 }

@@ -20,7 +20,6 @@ import org.koin.compose.koinInject
 import org.koin.core.KoinApplication
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.logger.Level
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.fileProperties
 import org.koin.ksp.generated.module
@@ -47,7 +46,7 @@ fun main() {
                 ImageLoader.Builder(context)
                     .diskCache {
                         DiskCache.Builder()
-                            .directory(storageState.path.toPath().resolve("cache"))
+                            .directory(storageState.path.toPath() / "cache" / "image")
                             .build()
                     }
                     .build()
@@ -70,7 +69,7 @@ fun main() {
 
 private fun KoinApplication.setupKoin(externalScope: CoroutineScope) {
     modules(
-        module { single(named("externalScope")) { externalScope } },
+        module { single { externalScope } },
         AppModule().module
     )
     logger(SLF4JLogger(Level.DEBUG))

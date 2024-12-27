@@ -6,4 +6,4 @@ import app.vercors.launcher.account.presentation.AccountPresentationModule
 import org.koin.core.annotation.Module
 
 @Module(includes = [AccountDataModule::class, AccountDomainModule::class, AccountPresentationModule::class])
-class AccountModule
+class AccountFeatureModule

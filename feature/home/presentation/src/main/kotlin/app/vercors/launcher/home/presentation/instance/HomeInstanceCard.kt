@@ -27,7 +27,7 @@ fun RowScope.HomeInstanceCard(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            //verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(20.dp)
         ) {
             HomeInstanceIcon(

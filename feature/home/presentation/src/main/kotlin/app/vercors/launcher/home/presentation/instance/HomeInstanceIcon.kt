@@ -50,7 +50,7 @@ fun HomeInstanceIcon(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    Box(modifier.aspectRatio(1f).hoverable(interactionSource)) {
+    Box(modifier.aspectRatio(1f).padding(10.dp).hoverable(interactionSource)) {
         Surface(
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxSize(),
@@ -97,7 +97,7 @@ fun HomeInstanceIcon(
                 contentDescription = appStringResource { stop }
             )
         }*/
-        InstanceIconButton(
+        HomeInstanceIconButton(
             isHovered = isHovered,
             onClick = onAction,
             icon = appVectorResource { play },
@@ -107,7 +107,7 @@ fun HomeInstanceIcon(
 }
 
 @Composable
-private fun InstanceIconButton(
+private fun HomeInstanceIconButton(
     isHovered: Boolean,
     onClick: () -> Unit,
     icon: ImageVector,

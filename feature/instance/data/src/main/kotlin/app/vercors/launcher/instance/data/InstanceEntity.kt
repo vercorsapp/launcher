@@ -14,6 +14,6 @@ data class InstanceEntity(
     val modLoader: String?,
     val modLoaderVersion: String?,
     val createdAt: Instant,
-    val lastPlayedAt: Instant,
+    val lastPlayedAt: Instant?,
     val playTime: Duration
 )

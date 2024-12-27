@@ -24,11 +24,13 @@ dependencies {
     implementation(projects.core)
     implementation(projects.core.config)
     implementation(projects.core.domain)
+    implementation(projects.core.meta)
     implementation(projects.core.network)
     implementation(projects.core.presentation)
     implementation(projects.core.resources)
     implementation(projects.core.serialization)
     implementation(projects.core.storage)
+    implementation(projects.feature)
     implementation(projects.feature.account)
     implementation(projects.feature.account.data)
     implementation(projects.feature.account.domain)
@@ -68,6 +70,8 @@ tasks {
         encoding = "UTF-8"
         appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
         appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
+        appProperty("vercorsApiKey", "VERCORS_API_KEY")
+        appProperty("vercorsApiUrl", "VERCORS_API_URL")
     }
 
     processResources {

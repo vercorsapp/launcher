@@ -19,6 +19,7 @@ include(
     "core:domain",
     "core:presentation",
     "core:resources",
+    "core:meta",
     "feature:account:data",
     "feature:account:domain",
     "feature:account:presentation",

@@ -4,8 +4,12 @@ import app.vercors.launcher.core.config.model.HomeProviderConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
 import app.vercors.launcher.home.domain.HomeRepository
 import app.vercors.launcher.home.domain.HomeSection
+import app.vercors.launcher.home.domain.HomeSection.Instances
+import app.vercors.launcher.home.domain.HomeSection.Projects
 import app.vercors.launcher.home.domain.HomeSectionData
+import app.vercors.launcher.home.domain.HomeSectionData.Loaded
 import app.vercors.launcher.home.domain.HomeSectionType
+import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.instance.domain.InstanceRepository
 import app.vercors.launcher.project.domain.ProjectRepository
 import app.vercors.launcher.project.domain.ProjectType
@@ -30,65 +34,80 @@ class HomeRepositoryImpl(
     override val sectionsState = _sectionsState.asStateFlow()
 
     override suspend fun loadSections() = coroutineScope {
-        configRepository.observeConfig().map { it.home }.distinctUntilChanged()
-            .collect { (sectionConfigs, providerConfig) ->
+        combine(
+            configRepository.observeConfig().map { it.home },
+            instanceRepository.observeAll()
+        ) { config, instance -> config to instance }
+            .distinctUntilChanged()
+            .collect { (config, instances) ->
+                val (sectionConfigs, providerConfig) = config
                 logger.debug { "Processing home config changes: $sectionConfigs, $providerConfig" }
                 val sectionTypes = sectionConfigs.map { it.toType() }
                 _sectionsState.update { sections -> sections.filter { it.type in sectionTypes } }
-                sectionTypes.map { sectionType -> launch { loadSection(providerConfig, sectionType) } }.joinAll()
+                sectionTypes.map { sectionType -> launch { loadSection(providerConfig, instances, sectionType) } }
+                    .joinAll()
                 logger.debug { "Finished processing home config changes" }
             }
     }
 
     private suspend fun loadSection(
         providerConfig: HomeProviderConfig,
+        instances: List<Instance>,
         sectionType: HomeSectionType
     ) {
-        val providerType = providerConfig.toType()
-        val cacheKey = HomeSectionCacheKey(sectionType, providerConfig)
-        val section = sectionCache.getOrPut(cacheKey) {
-            logger.debug { "Home section cache miss for key $cacheKey" }
-            updateSection(createLoadingSection(sectionType))
-            when (sectionType) {
-                HomeSectionType.JumpBackIn -> instanceRepository.observeAll().first()
+        when (sectionType) {
+            HomeSectionType.JumpBackIn -> updateSection(
+                instances
                     .sortedByDescending { it.lastPlayedAt }
-                    .let { HomeSection.Instances(sectionType, HomeSectionData.Loaded(it)) }
+                    .let { Instances(sectionType, Loaded(it)) })
 
-                HomeSectionType.PopularMods -> projectRepository.findProjects(
-                    providerType,
-                    ProjectType.Mod
-                ).first()
-                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+            else -> {
+                val providerType = providerConfig.toType()
+                val cacheKey = HomeSectionCacheKey(sectionType, providerConfig)
+                val section = sectionCache.getOrPut(cacheKey) {
+                    logger.debug { "Home section cache miss for key $cacheKey" }
+                    updateSection(createLoadingSection(sectionType))
+                    return@getOrPut when (sectionType) {
+                        HomeSectionType.PopularMods -> projectRepository.findProjects(
+                            providerType,
+                            ProjectType.Mod
+                        ).first()
+                            .let { Projects(sectionType, Loaded(it)) }
 
-                HomeSectionType.PopularModpacks -> projectRepository.findProjects(
-                    providerType,
-                    ProjectType.Modpack
-                ).first()
-                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+                        HomeSectionType.PopularModpacks -> projectRepository.findProjects(
+                            providerType,
+                            ProjectType.Modpack
+                        ).first()
+                            .let { Projects(sectionType, Loaded(it)) }
 
-                HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
-                    providerType,
-                    ProjectType.ResourcePack
-                ).first()
-                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+                        HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
+                            providerType,
+                            ProjectType.ResourcePack
+                        ).first()
+                            .let { Projects(sectionType, Loaded(it)) }
 
-                HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
-                    providerType,
-                    ProjectType.ShaderPack
-                ).first()
-                    .let { HomeSection.Projects(sectionType, HomeSectionData.Loaded(it)) }
+                        HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
+                            providerType,
+                            ProjectType.ShaderPack
+                        ).first()
+                            .let { Projects(sectionType, Loaded(it)) }
+
+                        HomeSectionType.JumpBackIn -> throw IllegalStateException("Unreachable")
+                    }
+                }
+                updateSection(section)
             }
         }
-        updateSection(section)
     }
 
     private fun createLoadingSection(type: HomeSectionType): HomeSection = when (type) {
-        HomeSectionType.JumpBackIn -> HomeSection.Instances(HomeSectionType.JumpBackIn, HomeSectionData.Loading())
-        else -> HomeSection.Projects(type, HomeSectionData.Loading())
+        HomeSectionType.JumpBackIn -> Instances(HomeSectionType.JumpBackIn, HomeSectionData.Loading())
+        else -> Projects(type, HomeSectionData.Loading())
     }
 
     private fun updateSection(section: HomeSection) {
-        logger.debug { "Updating section: $section" }
+        logger.debug { "Updating section: ${section.type}" }
+        logger.trace { "Section data: $section" }
         _sectionsState.update { sections ->
             if (sections.any { it.type == section.type }) sections.map { if (it.type == section.type) section else it }
             else (sections + section).sortedBy { it.type }
