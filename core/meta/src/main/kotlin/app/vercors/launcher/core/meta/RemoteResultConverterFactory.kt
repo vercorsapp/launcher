@@ -20,20 +20,19 @@ class RemoteResultConverterFactory() : Converter.Factory {
     override fun suspendResponseConverter(
         typeData: TypeData,
         ktorfit: Ktorfit
-    ): Converter.SuspendResponseConverter<HttpResponse, *>? {
-        return (if (typeData.typeInfo.type == RemoteResult::class) ResponseConverter<Message>(typeData) else null) as Converter.SuspendResponseConverter<HttpResponse, *>?
-    }
+    ): Converter.SuspendResponseConverter<HttpResponse, *>? =
+        if (typeData.typeInfo.type == RemoteResult::class) ResponseConverter<Message>(typeData) else null
 
     private class ResponseConverter<T : Message>(
         private val typeData: TypeData
     ) : Converter.SuspendResponseConverter<HttpResponse, RemoteResult<T>> {
+        @Suppress("unchecked_cast")
         override suspend fun convert(result: KtorfitResult): RemoteResult<T> = when (result) {
             is KtorfitResult.Success -> {
                 try {
                     val response = MetaResponse.parseFrom(result.response.bodyAsBytes())
                     if (response.hasError()) Result.Error(handleError(response.error)) else {
-                        val success =
-                            response.success.unpack(typeData.typeArgs.first().typeInfo.type.java as Class<out T>)
+                        val success = response.success.unpack(typeData.typeArgs.first().typeInfo.type.java as Class<T>)
                         Result.Success(success)
                     }
                 } catch (e: InvalidProtocolBufferException) {
