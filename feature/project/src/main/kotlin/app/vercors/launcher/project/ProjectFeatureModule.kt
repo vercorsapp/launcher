@@ -6,4 +6,4 @@ import app.vercors.launcher.project.presentation.ProjectPresentationModule
 import org.koin.core.annotation.Module
 
 @Module(includes = [ProjectDataModule::class, ProjectDomainModule::class, ProjectPresentationModule::class])
-class ProjectModule
+class ProjectFeatureModule

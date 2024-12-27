@@ -19,7 +19,7 @@ class InstanceRepositoryImpl(
         .map { it.toInstance() }
         .distinctUntilChanged()
 
-    override suspend fun upsert(instance: Instance) = dao.upsert(instance.toEntity())
+    override suspend fun create(instance: Instance) = dao.insert(instance.toEntity())
 
     override suspend fun delete(instance: Instance) = dao.delete(instance.toEntity())
 }

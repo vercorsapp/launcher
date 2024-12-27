@@ -27,7 +27,7 @@ fun RowScope.HomeCreateInstanceCard(
             Icon(
                 imageVector = appVectorResource { circle_plus },
                 contentDescription = null,
-                modifier = Modifier.aspectRatio(1f).fillMaxSize().padding(10.dp)
+                modifier = Modifier.aspectRatio(1f).fillMaxSize().padding(20.dp)
             )
             Column(
                 modifier = Modifier.weight(1f),

@@ -8,7 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.vercors.launcher.core.presentation.ui.ObserveAsEvents
 
 @Composable
-fun <State, Intent, Effect> MviContainer(
+fun <State : Any, Intent : Any, Effect : Any> MviContainer(
     viewModel: MviViewModel<State, Intent, Effect>,
     onEffect: (Effect) -> Unit,
     minActiveState: Lifecycle.State? = Lifecycle.State.STARTED,
@@ -23,7 +23,7 @@ fun <State, Intent, Effect> MviContainer(
 }
 
 @Composable
-fun <State, Intent, Effect> MviContainer(
+fun <State : Any, Intent : Any, Effect : Any> MviContainer(
     viewModel: MviViewModel<State, Intent, Effect>,
     minActiveState: Lifecycle.State? = Lifecycle.State.STARTED,
     content: @Composable (state: State, onIntent: (Intent) -> Unit) -> Unit

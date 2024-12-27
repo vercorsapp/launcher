@@ -63,7 +63,7 @@ fun AppElevatedCard(
 ) =
     ElevatedCard(
         onClick = onClick,
-        modifier = modifier.handPointer(),
+        modifier = modifier.handPointer(enabled),
         enabled = enabled,
         shape = shape,
         colors = colors,

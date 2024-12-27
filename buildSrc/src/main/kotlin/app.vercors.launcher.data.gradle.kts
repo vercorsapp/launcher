@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.serialization.kotlinx.protobuf)
     implementation(libs.ktorfit.lib.light)
     implementation(libs.ktorfit.converters.flow)
     implementation(libs.datastore)
@@ -22,6 +23,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.sqlite.bundled)
     implementation(libs.appdirs)
+    implementation(libs.vercors.meta.libclient)
 }
 
 room {

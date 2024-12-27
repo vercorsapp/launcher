@@ -67,7 +67,6 @@ fun WindowScope.AppContent(
             screenName = stringResource(screenName),
             hasWindowControls = !generalConfig.decorated,
             canGoBack = canGoBack,
-            isMaximized = windowState.placement == WindowPlacement.Maximized,
             onAction = {
                 when (it) {
                     MenuBarAction.Close -> onClose()

@@ -24,7 +24,7 @@ fun AppDialogContent(
         dialog?.let {
             when (it) {
                 AppDialog.AddAccount -> {
-
+                    // TODO
                 }
 
                 AppDialog.CreateInstance -> {

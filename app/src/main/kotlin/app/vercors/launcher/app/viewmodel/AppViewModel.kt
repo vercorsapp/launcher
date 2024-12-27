@@ -1,11 +1,9 @@
 package app.vercors.launcher.app.viewmodel
 
-import androidx.lifecycle.viewModelScope
 import app.vercors.launcher.core.config.model.AppConfig
 import app.vercors.launcher.core.config.model.GeneralConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 
 @Single
@@ -14,10 +12,8 @@ class AppViewModel(
 ) : MviViewModel<AppUiState, AppUiIntent, Nothing>(AppUiState()) {
     override fun onStart() {
         super.onStart()
-        viewModelScope.launch {
-            configRepository.observeConfig().collect {
-                onIntent(ConfigUpdated(it))
-            }
+        collectInScope(configRepository.observeConfig()) {
+            onIntent(ConfigUpdated(it))
         }
     }
 

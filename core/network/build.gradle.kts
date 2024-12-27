@@ -4,5 +4,6 @@ plugins {
 
 dependencies {
     implementation(projects.core.domain)
+    implementation(projects.core.storage)
     implementation(libs.ktor.client.cio)
 }

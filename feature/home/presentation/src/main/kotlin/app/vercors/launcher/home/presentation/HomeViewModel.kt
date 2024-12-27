@@ -1,10 +1,8 @@
 package app.vercors.launcher.home.presentation
 
-import androidx.lifecycle.viewModelScope
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
 import app.vercors.launcher.home.domain.HomeRepository
 import app.vercors.launcher.home.domain.HomeSection
-import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -13,12 +11,10 @@ class HomeViewModel(
 ) : MviViewModel<HomeUiState, HomeUiIntent, HomeUiEffect>(HomeUiState()) {
     override fun onStart() {
         super.onStart()
-        viewModelScope.launch {
-            homeRepository.sectionsState.collect {
-                onIntent(UpdateSections(it))
-            }
+        collectInScope(homeRepository.sectionsState) {
+            onIntent(UpdateSections(it))
         }
-        viewModelScope.launch { homeRepository.loadSections() }
+        runInScope { homeRepository.loadSections() }
     }
 
     override fun HomeUiState.reduce(intent: HomeUiIntent): HomeUiState =

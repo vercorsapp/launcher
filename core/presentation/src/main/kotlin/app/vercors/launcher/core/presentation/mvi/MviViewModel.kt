@@ -2,14 +2,15 @@ package app.vercors.launcher.core.presentation.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.vercors.launcher.core.domain.DefaultFlowTimeout
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-abstract class MviViewModel<State, Intent, Effect>(
-    defaultState: State,
-    started: SharingStarted = SharingStarted.WhileSubscribed(DefaultFlowTimeout)
+abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
+    private val defaultState: State,
+    started: SharingStarted = SharingStarted.WhileSubscribed(3000)
 ) : ViewModel() {
     protected val logger = KotlinLogging.logger(this::class.qualifiedName!!)
 
@@ -24,7 +25,8 @@ abstract class MviViewModel<State, Intent, Effect>(
     val effects: Flow<Effect> = _effects.receiveAsFlow().onEach { onEffect(it) }
 
     fun onIntent(intent: Intent) {
-        logger.debug { "Handling Intent: $intent" }
+        logger.debug { "Handling Intent: ${intent::class.simpleName}" }
+        logger.trace { "Intent data: $intent" }
         updateState(state.value.reduce(intent))
     }
 
@@ -37,11 +39,17 @@ abstract class MviViewModel<State, Intent, Effect>(
     }
 
     protected open fun onStateUpdate(state: State) {
-        logger.debug { "State updated: $state" }
+        logger.debug { "State updated: ${state::class.simpleName}" }
+        logger.trace { "State data: $state" }
     }
 
     protected open fun onEffect(effect: Effect) {
-        logger.debug { "Effect produced: $effect" }
+        logger.debug { "Effect produced: ${effect::class.simpleName}" }
+        logger.trace { "Effect data: $effect" }
+    }
+
+    protected fun resetState() {
+        updateState(defaultState)
     }
 
     protected fun updateState(state: State) {
@@ -51,6 +59,11 @@ abstract class MviViewModel<State, Intent, Effect>(
     protected fun produceEffect(effect: Effect) {
         _effects.trySend(effect)
     }
+
+    protected fun <T> collectInScope(flow: Flow<T>, collector: FlowCollector<T>) =
+        runInScope { flow.collect(collector) }
+
+    protected fun runInScope(block: suspend CoroutineScope.() -> Unit) = viewModelScope.launch { block() }
 
     /**
      * Take the current state and an intent.

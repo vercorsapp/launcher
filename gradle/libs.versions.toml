@@ -20,6 +20,7 @@ datastore = "1.1.1"
 room = "2.7.0-alpha11"
 sqlite = "2.5.0-alpha11"
 appdirs = "1.2.0"
+vercors-meta = "0.1.0-SNAPSHOT"
 # DI
 koin = "4.0.0"
 koin-annotations = "2.0.0-Beta2"
@@ -51,6 +52,7 @@ ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serialization-kotlinx-protobuf = { group = "io.ktor", name = "ktor-serialization-kotlinx-protobuf", version.ref = "ktor" }
 ktorfit-lib-light = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib-light", version.ref = "ktorfit" }
 ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit" }
 datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
@@ -61,6 +63,7 @@ sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.r
 appdirs = { group = "ca.gosyer", name = "kotlin-multiplatform-appdirs", version.ref = "appdirs" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+vercors-meta-libclient = { group = "app.vercors", name = "meta-libclient", version.ref = "vercors-meta" }
 # DI
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }

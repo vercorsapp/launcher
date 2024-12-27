@@ -4,4 +4,4 @@ import app.vercors.launcher.settings.presentation.SettingsPresentationModule
 import org.koin.core.annotation.Module
 
 @Module(includes = [SettingsPresentationModule::class])
-class SettingsModule
+class SettingsFeatureModule

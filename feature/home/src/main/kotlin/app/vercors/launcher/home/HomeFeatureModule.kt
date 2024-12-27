@@ -6,4 +6,4 @@ import app.vercors.launcher.home.presentation.HomePresentationModule
 import org.koin.core.annotation.Module
 
 @Module(includes = [HomeDataModule::class, HomeDomainModule::class, HomePresentationModule::class])
-class HomeModule
+class HomeFeatureModule
