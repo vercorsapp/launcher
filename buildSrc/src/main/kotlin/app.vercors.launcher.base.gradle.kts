@@ -13,6 +13,13 @@ repositories {
     mavenLocal()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
+    maven {
+        url = uri("https://maven.pkg.github.com/vercorsapp/meta")
+        credentials {
+            username = project.findProperty("githubUser") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("githubToken") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 val Project.libs get() = the<LibrariesForLibs>()

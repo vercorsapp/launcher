@@ -20,7 +20,7 @@ datastore = "1.1.1"
 room = "2.7.0-alpha11"
 sqlite = "2.5.0-alpha11"
 appdirs = "1.2.0"
-vercors-meta = "0.1.0-SNAPSHOT"
+vercors-meta = "0.1.0"
 # DI
 koin = "4.0.0"
 koin-annotations = "2.0.0-Beta2"
