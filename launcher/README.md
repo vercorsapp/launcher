@@ -1,0 +1,3 @@
+# vercors-launcher
+
+### Desktop application

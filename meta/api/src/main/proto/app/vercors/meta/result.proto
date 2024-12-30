@@ -1,0 +1,17 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+package app.vercors.meta;
+
+option java_multiple_files = true;
+
+message MetaResponse {
+  oneof result {
+    google.protobuf.Any success = 1;
+    MetaError error = 2;
+  }
+}
+
+message MetaError {
+  int32 code = 1;
+  string message = 2;
+}

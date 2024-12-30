@@ -31,18 +31,17 @@ jobs:
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           VERCORS_API_KEY: ${{ secrets.VERCORS_API_KEY }}
           VERCORS_API_URL: ${{ secrets.VERCORS_API_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Check packaging errors
         if: steps.build.outcome != 'success'
-        run: cat app/build/compose/logs/**/*-err.txt && exit 1
+        run: cat launcher/app/build/compose/logs/**/*-err.txt && exit 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: packages-${{ matrix.os }}
-          path: app/build/compose/binaries/main-release/**/*
+          path: launcher/app/build/compose/binaries/main-release/**/*
 
   release:
     name: Release app

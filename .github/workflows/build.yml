@@ -31,4 +31,3 @@ jobs:
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           VERCORS_API_KEY: ${{ secrets.VERCORS_API_KEY }}
           VERCORS_API_URL: ${{ secrets.VERCORS_API_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
