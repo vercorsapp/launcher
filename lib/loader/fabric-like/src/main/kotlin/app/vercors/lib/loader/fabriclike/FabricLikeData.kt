@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,32 @@
  * SOFTWARE.
  */
 
-package app.vercors.meta.module
+package app.vercors.lib.loader.fabriclike
 
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
+import kotlinx.serialization.Serializable
 
-fun Application.configureTestSecurity() {
-    install(Authentication) {
-        noAuth("api-auth")
-    }
-}
+@Serializable
+data class FabricLikeVersions(
+    val game: List<FabricLikeGameVersion>,
+    val loader: List<FabricLikeLoaderVersion>,
+    val installer: List<FabricLikeInstallerVersion>
+)
 
-private fun AuthenticationConfig.noAuth(
-    name: String,
-    user: String = "testUser"
-) = register(NoAuthenticationProvider(name, user))
+@Serializable
+data class FabricLikeGameVersion(
+    val version: String
+)
 
-private class NoAuthenticationProvider(
-    name: String,
-    private val user: String
-) : AuthenticationProvider(Config(name)) {
-    override suspend fun onAuthenticate(context: AuthenticationContext) {
-        context.principal(user)
-    }
+@Serializable
+data class FabricLikeLoaderVersion(
+    val version: String,
+    val stable: Boolean?
+)
 
-    private class Config(name: String) : AuthenticationProvider.Config(name)
-}
+@Serializable
+data class FabricLikeInstallerVersion(
+    val url: String,
+    val maven: String,
+    val version: String,
+    val stable: Boolean?
+)

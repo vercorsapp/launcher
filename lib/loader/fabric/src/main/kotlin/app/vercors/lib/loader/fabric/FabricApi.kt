@@ -20,30 +20,15 @@
  * SOFTWARE.
  */
 
-package app.vercors.launcher.project.data
+package app.vercors.lib.loader.fabric
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.project.data.local.LocalProjectDataSource
-import app.vercors.launcher.project.data.remote.RemoteProjectDataSource
-import app.vercors.launcher.project.domain.Project
-import app.vercors.launcher.project.domain.ProjectProvider
-import app.vercors.launcher.project.domain.ProjectRepository
-import app.vercors.launcher.project.domain.ProjectType
-import kotlinx.coroutines.flow.Flow
-import org.koin.core.annotation.Single
+import app.vercors.lib.loader.fabriclike.FabricLikeVersions
+import de.jensklingenberg.ktorfit.http.GET
 
-@Single
-class ProjectRepositoryImpl(
-    private val localProjectDataSource: LocalProjectDataSource,
-    private val remoteProjectDataSource: RemoteProjectDataSource
-) : ProjectRepository {
-    override fun findProjects(
-        provider: ProjectProvider,
-        type: ProjectType,
-        query: String?,
-        limit: Int
-    ): Flow<Resource<List<Project>, DomainError>> {
-        return remoteProjectDataSource.findProjects(provider, type, query, limit)
-    }
+const val API_URL = "https://meta.fabricmc.net/"
+
+@Suppress("kotlin:S6517")
+interface FabricApi {
+    @GET("v2/versions")
+    suspend fun getAllVersions(): FabricLikeVersions
 }

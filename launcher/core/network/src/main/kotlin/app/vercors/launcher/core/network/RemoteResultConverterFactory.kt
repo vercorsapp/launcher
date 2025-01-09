@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,20 @@
  * SOFTWARE.
  */
 
-package app.vercors.launcher.core.meta
+package app.vercors.launcher.core.network
 
 import app.vercors.launcher.core.domain.DomainError
 import app.vercors.launcher.core.domain.RemoteResult
 import app.vercors.launcher.core.domain.Result
-import app.vercors.meta.MetaError
-import app.vercors.meta.MetaResponse
-import com.google.protobuf.InvalidProtocolBufferException
-import com.google.protobuf.Message
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.KtorfitResult
 import de.jensklingenberg.ktorfit.converter.TypeData
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.call.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 private val logger = KotlinLogging.logger { }
 
@@ -43,21 +42,18 @@ class RemoteResultConverterFactory() : Converter.Factory {
         typeData: TypeData,
         ktorfit: Ktorfit
     ): Converter.SuspendResponseConverter<HttpResponse, *>? =
-        if (typeData.typeInfo.type == RemoteResult::class) ResponseConverter<Message>(typeData) else null
+        if (typeData.typeInfo.type == RemoteResult::class) ResponseConverter<Any>(typeData) else null
 
-    private class ResponseConverter<T : Message>(
+    private class ResponseConverter<T : Any>(
         private val typeData: TypeData
     ) : Converter.SuspendResponseConverter<HttpResponse, RemoteResult<T>> {
         @Suppress("unchecked_cast")
         override suspend fun convert(result: KtorfitResult): RemoteResult<T> = when (result) {
             is KtorfitResult.Success -> {
                 try {
-                    val response = MetaResponse.parseFrom(result.response.bodyAsBytes())
-                    if (response.hasError()) Result.Error(handleError(response.error)) else {
-                        val success = response.success.unpack(typeData.typeArgs.first().typeInfo.type.java as Class<T>)
-                        Result.Success(success)
-                    }
-                } catch (e: InvalidProtocolBufferException) {
+                    Result.Success(result.response.body(typeData.typeArgs.first().typeInfo))
+                } catch (e: Exception) {
+                    currentCoroutineContext().ensureActive()
                     logger.error(e) { "Error parsing network response" }
                     Result.Error(DomainError.SerializationError)
                 }
@@ -67,11 +63,6 @@ class RemoteResultConverterFactory() : Converter.Factory {
                 logger.error(result.throwable) { "Network error" }
                 Result.Error(DomainError.Remote.NetworkError)
             }
-        }
-
-        private fun handleError(error: MetaError): DomainError.Remote {
-            // TODO improve error handling
-            return DomainError.UnknownError
         }
     }
 }

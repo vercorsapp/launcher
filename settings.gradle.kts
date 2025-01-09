@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,5 +64,13 @@ include(
     "launcher:feature:setup:domain",
     "launcher:feature:setup:presentation",
     "meta:backend",
-    "meta:api"
+    "meta:api",
+    "lib:loader:fabric",
+    "lib:loader:fabric-like",
+    "lib:loader:forge",
+    "lib:loader:neoforge",
+    "lib:loader:quilt",
+    "lib:minecraft",
+    "lib:platform:curseforge",
+    "lib:platform:modrinth",
 )

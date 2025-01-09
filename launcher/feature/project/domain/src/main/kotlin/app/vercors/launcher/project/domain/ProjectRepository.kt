@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
 
 package app.vercors.launcher.project.domain
 
+import app.vercors.launcher.core.domain.DomainError
+import app.vercors.launcher.core.domain.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
@@ -30,5 +32,5 @@ interface ProjectRepository {
         type: ProjectType,
         query: String? = null,
         limit: Int = 20,
-    ): Flow<List<Project>>
+    ): Flow<Resource<List<Project>, DomainError>>
 }

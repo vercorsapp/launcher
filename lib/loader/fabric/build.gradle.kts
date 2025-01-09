@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * SOFTWARE.
  */
 
-package app.vercors.meta
+plugins {
+    id("app.vercors.network")
+}
 
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
-
-fun ApplicationTestBuilder.defaultConfig() {
-    environment {
-        config = ApplicationConfig("application-test.conf")
-    }
+dependencies {
+    implementation(projects.lib.loader.fabricLike)
 }

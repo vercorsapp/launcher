@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,8 @@
  */
 
 plugins {
-    id("app.vercors.backend")
+    id("app.vercors.network")
+    id("app.vercors.di")
     application
 }
 
@@ -31,30 +32,12 @@ application {
 
 dependencies {
     implementation(projects.meta.api)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.auth)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.server.call.logging)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.server.status.pages)
-    implementation(libs.ktor.server.caching.headers)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.serialization.kotlinx.xml)
-    implementation(libs.ktorfit.lib.light)
-    implementation(libs.koin.core)
+    implementation(libs.bundles.ktor.server)
     implementation(libs.koin.ktor3)
     implementation(libs.koin.logger.slf4j)
     implementation(libs.logback.classic)
     implementation(libs.kotlin.logging.jvm)
-    compileOnly(libs.koin.annotations)
-    ksp(libs.koin.ksp.compiler)
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.koin.test)
     testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.ktor.serialization.kotlinx.protobuf)
 }
 
 tasks {

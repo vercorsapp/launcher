@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
 
 package app.vercors.launcher.project.data.remote
 
+import app.vercors.launcher.core.domain.DomainError
+import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.project.data.remote.curseforge.CurseforgeDataSource
 import app.vercors.launcher.project.data.remote.modrinth.ModrinthDataSource
 import app.vercors.launcher.project.domain.Project
@@ -40,7 +42,7 @@ class RemoteProjectDataSource(
         projectType: ProjectType,
         query: String?,
         limit: Int
-    ): Flow<List<Project>> =
+    ): Flow<Resource<List<Project>, DomainError>> =
         provider.getDataSource().findProjects(projectType, query, limit)
 
     private fun ProjectProvider.getDataSource(): ProviderDataSource = when (this) {

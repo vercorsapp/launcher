@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package app.vercors.launcher.home.data
 
 import app.vercors.launcher.core.config.model.HomeProviderConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
+import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.home.domain.HomeRepository
 import app.vercors.launcher.home.domain.HomeSection
 import app.vercors.launcher.home.domain.HomeSection.Instances
@@ -33,6 +34,7 @@ import app.vercors.launcher.home.domain.HomeSectionData.Loaded
 import app.vercors.launcher.home.domain.HomeSectionType
 import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.instance.domain.InstanceRepository
+import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectRepository
 import app.vercors.launcher.project.domain.ProjectType
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -93,26 +95,26 @@ class HomeRepositoryImpl(
                         HomeSectionType.PopularMods -> projectRepository.findProjects(
                             providerType,
                             ProjectType.Mod
-                        ).first()
-                            .let { Projects(sectionType, Loaded(it)) }
+                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
+                            .let { Projects(sectionType, Loaded(it.value)) }
 
                         HomeSectionType.PopularModpacks -> projectRepository.findProjects(
                             providerType,
                             ProjectType.Modpack
-                        ).first()
-                            .let { Projects(sectionType, Loaded(it)) }
+                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
+                            .let { Projects(sectionType, Loaded(it.value)) }
 
                         HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
                             providerType,
                             ProjectType.ResourcePack
-                        ).first()
-                            .let { Projects(sectionType, Loaded(it)) }
+                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
+                            .let { Projects(sectionType, Loaded(it.value)) }
 
                         HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
                             providerType,
                             ProjectType.ShaderPack
-                        ).first()
-                            .let { Projects(sectionType, Loaded(it)) }
+                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
+                            .let { Projects(sectionType, Loaded(it.value)) }
 
                         HomeSectionType.JumpBackIn -> throw IllegalStateException("Unreachable")
                     }

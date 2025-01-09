@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,23 @@
 
 package app.vercors.launcher.project.data.remote.curseforge
 
+import app.vercors.launcher.core.domain.RemoteResult
+import app.vercors.launcher.core.network.RemoteResultConverterFactory
 import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeProjectSearchResponse
 import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeProjectSearchSortField
 import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeProjectSearchSortOrder
 import de.jensklingenberg.ktorfit.Ktorfit
-import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Property
 import org.koin.core.annotation.Single
 
 interface CurseforgeApi {
     @GET("v1/mods/search")
-    fun search(
+    suspend fun search(
         @Query gameId: Int,
         @Query classId: Int? = null,
         @Query categoryId: Int? = null,
@@ -46,7 +46,7 @@ interface CurseforgeApi {
         @Query sortOrder: String? = CurseforgeProjectSearchSortOrder.Desc.value,
         @Query index: Int? = null,
         @Query pageSize: Int? = null
-    ): Flow<CurseforgeProjectSearchResponse>
+    ): RemoteResult<CurseforgeProjectSearchResponse>
 }
 
 @Single
@@ -61,7 +61,7 @@ fun provideCurseforgeApi(
             }
         })
         .baseUrl("https://api.curseforge.com/")
-        .converterFactories(FlowConverterFactory())
+        .converterFactories(RemoteResultConverterFactory())
         .build()
         .createCurseforgeApi()
 }

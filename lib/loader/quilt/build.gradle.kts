@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,9 @@
  */
 
 plugins {
-    id("app.vercors")
-    id("io.ktor.plugin")
-    id("de.jensklingenberg.ktorfit")
+    id("app.vercors.network")
+}
+
+dependencies {
+    implementation(projects.lib.loader.fabricLike)
 }

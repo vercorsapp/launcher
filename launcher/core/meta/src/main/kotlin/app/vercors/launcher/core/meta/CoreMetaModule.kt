@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,6 @@ internal fun provideMetaKtorfit(
             protobuf()
         }
     })
-    .converterFactories(RemoteResultConverterFactory())
+    .converterFactories(MetaRemoteResultConverterFactory())
     .baseUrl(apiUrl.let { if (it.endsWith("/")) it else "$it/" })
     .build()

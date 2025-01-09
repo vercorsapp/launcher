@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,9 @@ import org.gradle.accessors.dm.LibrariesForLibs
 
 plugins {
     id("app.vercors")
-    id("org.jetbrains.compose")
+    id("app.vercors.di")
     kotlin("plugin.compose")
+    id("org.jetbrains.compose")
 }
 
 repositories {
@@ -41,11 +42,6 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.io)
     implementation(compose.runtime)
-    // DI
-    implementation(libs.koin.core)
-    compileOnly(libs.koin.annotations)
-    ksp(libs.koin.ksp.compiler)
-    testImplementation(libs.koin.test)
     // Logging
     implementation(libs.kotlin.logging.jvm)
 }

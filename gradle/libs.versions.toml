@@ -96,3 +96,14 @@ room = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "ro
 
 [plugins]
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+
+[bundles]
+ktor-client = [
+    "ktor-client-core", "ktor-client-cio", "ktor-client-logging", "ktor-client-content-negotiation",
+    "ktor-serialization-kotlinx-json", "ktor-serialization-kotlinx-xml", "ktor-serialization-kotlinx-protobuf"
+]
+ktor-server = [
+    "ktor-server-core", "ktor-server-netty", "ktor-server-auth", "ktor-server-content-negotiation",
+    "ktor-server-call-logging", "ktor-server-status-pages", "ktor-server-caching-headers",
+    "ktor-serialization-kotlinx-json", "ktor-serialization-kotlinx-xml", "ktor-serialization-kotlinx-protobuf"
+]

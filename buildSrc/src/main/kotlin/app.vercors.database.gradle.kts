@@ -20,30 +20,22 @@
  * SOFTWARE.
  */
 
-package app.vercors.launcher.project.data
+import org.gradle.accessors.dm.LibrariesForLibs
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.project.data.local.LocalProjectDataSource
-import app.vercors.launcher.project.data.remote.RemoteProjectDataSource
-import app.vercors.launcher.project.domain.Project
-import app.vercors.launcher.project.domain.ProjectProvider
-import app.vercors.launcher.project.domain.ProjectRepository
-import app.vercors.launcher.project.domain.ProjectType
-import kotlinx.coroutines.flow.Flow
-import org.koin.core.annotation.Single
+plugins {
+    id("app.vercors")
+    id("com.google.devtools.ksp")
+    id("androidx.room")
+}
 
-@Single
-class ProjectRepositoryImpl(
-    private val localProjectDataSource: LocalProjectDataSource,
-    private val remoteProjectDataSource: RemoteProjectDataSource
-) : ProjectRepository {
-    override fun findProjects(
-        provider: ProjectProvider,
-        type: ProjectType,
-        query: String?,
-        limit: Int
-    ): Flow<Resource<List<Project>, DomainError>> {
-        return remoteProjectDataSource.findProjects(provider, type, query, limit)
-    }
+val Project.libs get() = the<LibrariesForLibs>()
+
+dependencies {
+    ksp(libs.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.sqlite.bundled)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

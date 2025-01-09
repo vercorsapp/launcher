@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,29 +24,14 @@ import org.gradle.accessors.dm.LibrariesForLibs
 
 plugins {
     id("app.vercors.launcher")
-    id("de.jensklingenberg.ktorfit")
-    id("androidx.room")
+    id("app.vercors.network")
+    id("app.vercors.database")
 }
 
 val Project.libs get() = the<LibrariesForLibs>()
 
 dependencies {
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.serialization.kotlinx.protobuf)
-    implementation(libs.ktorfit.lib.light)
-    implementation(libs.ktorfit.converters.flow)
     implementation(libs.datastore)
     implementation(libs.datastore.preferences)
-    ksp(libs.room.compiler)
-    implementation(libs.room.runtime)
-    implementation(libs.sqlite.bundled)
     implementation(libs.appdirs)
-}
-
-room {
-    schemaDirectory("$projectDir/schemas")
 }

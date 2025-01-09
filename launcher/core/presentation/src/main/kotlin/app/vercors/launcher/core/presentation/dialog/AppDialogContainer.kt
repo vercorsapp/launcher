@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import app.vercors.launcher.core.presentation.card.AppCard
 import app.vercors.launcher.core.presentation.modifier.clickableWithoutRipple
 import app.vercors.launcher.core.presentation.ui.AppIconTextButton
 import app.vercors.launcher.core.presentation.ui.AppSectionTitle
+import app.vercors.launcher.core.presentation.ui.appAnimateContentSize
 import app.vercors.launcher.core.resources.appStringResource
 import app.vercors.launcher.core.resources.appVectorResource
 import app.vercors.launcher.core.resources.close
@@ -46,7 +47,7 @@ fun AppDialogContainer(
     buttons: @Composable AppDialogButtonRowScope.() -> Unit,
     content: @Composable () -> Unit,
 ) {
-    AppCard(Modifier.clickableWithoutRipple()) {
+    AppCard(Modifier.clickableWithoutRipple().appAnimateContentSize()) {
         Column(
             modifier = Modifier.padding(20.dp).width(IntrinsicSize.Max),
             verticalArrangement = Arrangement.spacedBy(20.dp),
