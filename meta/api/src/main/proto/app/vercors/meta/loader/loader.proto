@@ -38,3 +38,7 @@ message MetaLoaderVersionList {
   optional string latest = 2;
   repeated string versions = 3;
 }
+
+message MetaLoaderVersionMap {
+  map<string, MetaLoaderVersionList> loaderMap = 1;
+}

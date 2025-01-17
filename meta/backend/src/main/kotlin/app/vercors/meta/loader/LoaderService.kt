@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 
 package app.vercors.meta.loader
 
-fun interface LoaderService {
+interface LoaderService {
     suspend fun getLoaderVersionsForGameVersion(loaderType: MetaLoaderType, gameVersion: String): MetaLoaderVersionList?
+    suspend fun getAllLoadersVersionsForGameVersion(gameVersion: String): MetaLoaderVersionMap
 }

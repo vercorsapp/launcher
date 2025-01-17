@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,4 +31,8 @@ interface LoaderVersionRepository {
         loader: ModLoaderType,
         gameVersion: String
     ): Flow<Resource<List<LoaderVersion>, DomainError>>
+
+    fun observeAllLoadersVersions(
+        gameVersion: String
+    ): Flow<Resource<Map<ModLoaderType, List<LoaderVersion>>, DomainError>>
 }

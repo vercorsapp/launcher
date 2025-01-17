@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import app.vercors.launcher.game.domain.version.GameVersionRepository
 import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.instance.domain.InstanceModLoader
 import app.vercors.launcher.instance.domain.InstanceRepository
+import kotlinx.coroutines.Job
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -40,6 +41,8 @@ class CreateInstanceViewModel(
     private val loaderVersionRepository: LoaderVersionRepository,
     private val instanceRepository: InstanceRepository,
 ) : MviViewModel<CreateInstanceUiState, CreateInstanceUiIntent, CreateInstanceUiEffect>(CreateInstanceUiState()) {
+    private var loaderVersionsJob: Job? = null
+
     override fun onStart() {
         super.onStart()
         resetState()
@@ -52,15 +55,11 @@ class CreateInstanceViewModel(
         }
     }
 
-    override fun onStateUpdate(state: CreateInstanceUiState) {
-        super.onStateUpdate(state)
-        if (state.selectedGameVersionId != null && state.modLoader != null) {
-            collectInScope(
-                loaderVersionRepository.observeLoaderVersions(
-                    loader = state.modLoader,
-                    gameVersion = state.selectedGameVersionId
-                )
-            ) {
+    override fun afterStateUpdate(oldState: CreateInstanceUiState, newState: CreateInstanceUiState) {
+        if (oldState.selectedGameVersionId != newState.selectedGameVersionId && newState.selectedGameVersionId != null) {
+            loaderVersionsJob?.cancel()
+            loaderVersionsJob =
+                collectInScope(loaderVersionRepository.observeAllLoadersVersions(newState.selectedGameVersionId)) {
                 when (it) {
                     is Resource.Error -> {} // TODO
                     Resource.Loading -> {} // TODO
@@ -82,16 +81,16 @@ class CreateInstanceViewModel(
             gameVersions = intent.list.toUi(),
             selectedGameVersionId = intent.list.latestReleaseId
         )
-
         is LoaderVersionsUpdated -> copy(
-            modLoaderVersions = intent.list?.toUi(),
-            selectedModLoaderVersion = intent.list?.firstOrNull()?.id
+            modLoaderVersions = intent.map.mapValues { (_, v) -> v.toUi() },
+            modLoader = if (modLoader in intent.map) modLoader else null,
+            selectedModLoaderVersion = intent.map[modLoader]?.toUi()?.first()
         )
     }
 
     private fun CreateInstanceUiState.selectModLoader(type: ModLoaderType?): CreateInstanceUiState {
-        return if (type == null) copy(modLoader = null, modLoaderVersions = null, selectedModLoaderVersion = null)
-        else copy(modLoader = type)
+        return if (type == null) copy(modLoader = null, selectedModLoaderVersion = null)
+        else copy(modLoader = type, selectedModLoaderVersion = modLoaderVersions?.get(type)?.first())
     }
 
     private fun CreateInstanceUiState.createInstance(): CreateInstanceUiState = apply {
@@ -113,5 +112,5 @@ class CreateInstanceViewModel(
     private value class GameVersionsUpdated(val list: GameVersionList) : CreateInstanceUiIntent
 
     @JvmInline
-    private value class LoaderVersionsUpdated(val list: List<LoaderVersion>?) : CreateInstanceUiIntent
+    private value class LoaderVersionsUpdated(val map: Map<ModLoaderType, List<LoaderVersion>>) : CreateInstanceUiIntent
 }

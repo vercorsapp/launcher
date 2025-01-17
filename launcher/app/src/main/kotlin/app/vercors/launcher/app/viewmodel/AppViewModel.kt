@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,17 +26,26 @@ import app.vercors.launcher.core.config.model.AppConfig
 import app.vercors.launcher.core.config.model.GeneralConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
+import kotlinx.coroutines.Job
 import org.koin.core.annotation.Single
 
 @Single
 class AppViewModel(
     private val configRepository: ConfigRepository
 ) : MviViewModel<AppUiState, AppUiIntent, Nothing>(AppUiState()) {
+    private var configJob: Job? = null
+
     override fun onStart() {
         super.onStart()
-        collectInScope(configRepository.observeConfig()) {
+        configJob?.cancel()
+        configJob = collectInScope(configRepository.observeConfig()) {
             onIntent(ConfigUpdated(it))
         }
+    }
+
+    override fun onStop(cause: Throwable?) {
+        super.onStop(cause)
+        configJob?.cancel()
     }
 
     override fun AppUiState.reduce(intent: AppUiIntent) = when (intent) {

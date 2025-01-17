@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,7 @@ import app.vercors.meta.loader.fabric.FabricService
 import app.vercors.meta.loader.forge.ForgeService
 import app.vercors.meta.loader.neoforge.NeoforgeService
 import app.vercors.meta.loader.quilt.QuiltService
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.koin.core.annotation.Single
-
-private val logger = KotlinLogging.logger {}
 
 @Single
 class LoaderServiceImpl(
@@ -43,6 +40,17 @@ class LoaderServiceImpl(
         gameVersion: String
     ): MetaLoaderVersionList? =
         getLoader(loaderType)?.getLoaderVersionsForGameVersion(gameVersion)
+
+    override suspend fun getAllLoadersVersionsForGameVersion(gameVersion: String): MetaLoaderVersionMap =
+        MetaLoaderType.entries.filter { it != MetaLoaderType.UNRECOGNIZED }
+            .associate { it.name to getLoaderVersionsForGameVersion(it, gameVersion) }
+            .filterValues { it != null }
+            .mapValues { it.value!! }
+            .let {
+                metaLoaderVersionMap {
+                    loaderMap.putAll(it)
+                }
+            }
 
     /*suspend fun getLoaderVersion(loaderType: LoaderType, gameVersion: String, loaderVersion: String) =
         getLoader(loaderType)?.getLoaderVersion(gameVersion, loaderVersion)*/

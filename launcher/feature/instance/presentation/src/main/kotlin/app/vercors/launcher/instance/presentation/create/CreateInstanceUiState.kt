@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ data class CreateInstanceUiState(
     val selectedGameVersionId: String? = null,
     val gameVersions: List<GameVersionUi>? = null,
     val modLoader: ModLoaderType? = null,
-    val modLoaderVersions: List<String>? = null,
+    val modLoaderVersions: Map<ModLoaderType, List<String>>? = null,
     val selectedModLoaderVersion: String? = null,
 ) {
     val filteredGameVersions: List<GameVersionUi>? =

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,18 +25,27 @@ package app.vercors.launcher.home.presentation
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
 import app.vercors.launcher.home.domain.HomeRepository
 import app.vercors.launcher.home.domain.HomeSection
+import kotlinx.coroutines.Job
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class HomeViewModel(
     private val homeRepository: HomeRepository,
 ) : MviViewModel<HomeUiState, HomeUiIntent, HomeUiEffect>(HomeUiState()) {
+    private var sectionsJob: Job? = null
+
     override fun onStart() {
         super.onStart()
-        collectInScope(homeRepository.sectionsState) {
+        sectionsJob?.cancel()
+        sectionsJob = collectInScope(homeRepository.sectionsState) {
             onIntent(UpdateSections(it))
         }
-        runInScope { homeRepository.loadSections() }
+        runInScope { homeRepository.loadSections() } // TODO replace with Meta API call
+    }
+
+    override fun onStop(cause: Throwable?) {
+        super.onStop(cause)
+        sectionsJob?.cancel()
     }
 
     override fun HomeUiState.reduce(intent: HomeUiIntent): HomeUiState =

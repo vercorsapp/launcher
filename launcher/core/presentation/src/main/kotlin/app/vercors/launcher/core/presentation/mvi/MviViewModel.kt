@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,11 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
     fun onIntent(intent: Intent) {
         logger.debug { "Handling Intent: ${intent::class.simpleName}" }
         logger.trace { "Intent data: $intent" }
-        updateState(state.value.reduce(intent))
+        val oldState = state.value
+        val newState = oldState.reduce(intent)
+        if (newState != oldState) {
+            updateState(newState)
+        }
     }
 
     protected open fun onStart() {
@@ -75,7 +79,15 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
     }
 
     protected fun updateState(state: State) {
+        val oldState = _state.value
         _state.tryEmit(state)
+        if (state != oldState) {
+            afterStateUpdate(oldState, state)
+        }
+    }
+
+    protected open fun afterStateUpdate(oldState: State, newState: State) {
+        // To implement if necessary
     }
 
     protected fun produceEffect(effect: Effect) {

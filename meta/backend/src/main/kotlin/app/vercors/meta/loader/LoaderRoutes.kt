@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,16 +35,25 @@ fun Route.loaderRoutes() {
 
     route("/loader") {
         cache(loaderCacheDuration)
-        get("/{loader}/{gameVersion}") {
-            val loaderType = safeValueOf<MetaLoaderType>(pathParam("loader"))
+
+        get("/all/{gameVersion}") {
             val gameVersion = pathParam("gameVersion")
-            val res = loaderService.getLoaderVersionsForGameVersion(loaderType, gameVersion)
-            if (res == null) throw LoaderDataNotFoundException(loaderType.name, gameVersion) else call.respondProtobuf(
-                res
-            )
+            val res = loaderService.getAllLoadersVersionsForGameVersion(gameVersion)
+            call.respondProtobuf(res)
         }
-        get("/{loader}/{gameVersion}/{loaderVersion}") {
-            call.respond(HttpStatusCode.NotImplemented, null)
+
+        route("/{loader}/{gameVersion}") {
+            get {
+                val loaderType = safeValueOf<MetaLoaderType>(pathParam("loader"))
+                val gameVersion = pathParam("gameVersion")
+                val res = loaderService.getLoaderVersionsForGameVersion(loaderType, gameVersion)
+                if (res == null) throw LoaderDataNotFoundException(loaderType.name, gameVersion)
+                else call.respondProtobuf(res)
+            }
+
+            get("/{loaderVersion}") {
+                call.respond(HttpStatusCode.NotImplemented, null)
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@ fun CreateInstanceDialog(
 }
 
 @Composable
-internal fun CreateInstanceDialog(
+private fun CreateInstanceDialog(
     state: CreateInstanceUiState,
     onIntent: (CreateInstanceUiIntent) -> Unit,
 ) {
@@ -92,111 +92,156 @@ internal fun CreateInstanceDialog(
                 )
             }
             AppFormItem {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (!state.filteredGameVersions.isNullOrEmpty()) {
-                        AppDropdownMenuBox(
-                            options = state.filteredGameVersions,
-                            value = state.selectedGameVersion,
-                            label = { Text(text = appStringResource { game_version }) },
-                            textConverter = { it.displayName },
-                            onValueChange = { onIntent(CreateInstanceUiIntent.SelectGameVersion(it.id)) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = it.displayName)
-                                it.icon?.let { icon ->
-                                    Icon(
-                                        modifier = Modifier.size(24.dp),
-                                        imageVector = icon,
-                                        contentDescription = it.displayName
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        OutlinedTextField(
-                            value = "Loading...",
-                            onValueChange = {},
-                            label = { Text(text = appStringResource { game_version }) },
-                            enabled = false,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            checked = state.showSnapshots,
-                            onCheckedChange = { onIntent(CreateInstanceUiIntent.ToggleShowSnapshots(it)) }
-                        )
-                        Text("Show snapshots")
-                    }
-                }
+                GameVersionSelector(
+                    filteredGameVersions = state.filteredGameVersions,
+                    selectedGameVersion = state.selectedGameVersion,
+                    showSnapshots = state.showSnapshots,
+                    onSelect = { onIntent(CreateInstanceUiIntent.SelectGameVersion(it.id)) },
+                    onToggleShowSnapshots = { onIntent(CreateInstanceUiIntent.ToggleShowSnapshots(it)) }
+                )
             }
             AppFormItem {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    (listOf(null) + ModLoaderType.entries).forEach {
-                        AppFilterChip(
-                            selected = state.modLoader == it,
-                            onClick = { onIntent(CreateInstanceUiIntent.SelectModLoader(it)) },
-                            label = { Text(text = it.displayName) },
-                            leadingIcon = { Icon(imageVector = it.icon, contentDescription = it.displayName) },
-                        )
-                    }
-                }
+                LoaderSelector(
+                    modLoader = state.modLoader,
+                    modLoaderVersions = state.modLoaderVersions,
+                    onSelect = { onIntent(CreateInstanceUiIntent.SelectModLoader(it)) })
             }
             if (state.modLoader != null) {
                 AppFormItem {
-                    if (state.modLoaderVersions != null) {
-                        AppDropdownMenuBox(
-                            options = state.modLoaderVersions,
-                            value = state.selectedModLoaderVersion,
-                            label = { Text(text = appStringResource { loader_version }) },
-                            textConverter = { it },
-                            onValueChange = { onIntent(CreateInstanceUiIntent.SelectModLoaderVersion(it)) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = it)
-                            }
-                        }
-                    } else {
-                        OutlinedTextField(
-                            value = "Loading...",
-                            onValueChange = {},
-                            label = { Text(text = appStringResource { loader_version }) },
-                            enabled = false,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    LoaderVersionSelector(
+                        modLoader = state.modLoader,
+                        modLoaderVersions = state.modLoaderVersions,
+                        selectedModLoaderVersion = state.selectedModLoaderVersion,
+                        onSelect = { onIntent(CreateInstanceUiIntent.SelectModLoaderVersion(it)) }
+                    )
                 }
             }
         }
     }
 }
 
-val GameVersionUi.displayName: String
+@Composable
+private fun GameVersionSelector(
+    filteredGameVersions: List<GameVersionUi>?,
+    selectedGameVersion: GameVersionUi?,
+    showSnapshots: Boolean,
+    onSelect: (GameVersionUi) -> Unit,
+    onToggleShowSnapshots: (Boolean) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (!filteredGameVersions.isNullOrEmpty()) {
+            AppDropdownMenuBox(
+                options = filteredGameVersions,
+                value = selectedGameVersion,
+                label = { Text(text = appStringResource { game_version }) },
+                textConverter = { it.displayName },
+                onValueChange = { onSelect(it) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = it.displayName)
+                    it.icon?.let { icon ->
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = icon,
+                            contentDescription = it.displayName
+                        )
+                    }
+                }
+            }
+        } else {
+            OutlinedTextField(
+                value = appStringResource { loading },
+                onValueChange = {},
+                label = { Text(text = appStringResource { game_version }) },
+                enabled = false,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = showSnapshots,
+                onCheckedChange = onToggleShowSnapshots
+            )
+            Text(text = appStringResource { show_snapshots })
+        }
+    }
+}
+
+@Composable
+private fun LoaderSelector(
+    modLoader: ModLoaderType?,
+    modLoaderVersions: Map<ModLoaderType, List<String>>?,
+    onSelect: (ModLoaderType?) -> Unit,
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        (listOf(null) + ModLoaderType.entries).forEach {
+            AppFilterChip(
+                selected = modLoader == it,
+                onClick = { onSelect(it) },
+                enabled = it == null || modLoaderVersions?.contains(it) == true,
+                label = { Text(text = it.displayName) },
+                leadingIcon = { Icon(imageVector = it.icon, contentDescription = it.displayName) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.LoaderVersionSelector(
+    modLoader: ModLoaderType,
+    modLoaderVersions: Map<ModLoaderType, List<String>>?,
+    selectedModLoaderVersion: String?,
+    onSelect: (String) -> Unit,
+) {
+    if (modLoaderVersions != null) {
+        AppDropdownMenuBox(
+            options = modLoaderVersions[modLoader]!!,
+            value = selectedModLoaderVersion,
+            label = { Text(text = appStringResource { loader_version }) },
+            textConverter = { it },
+            onValueChange = { onSelect(it) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = it)
+            }
+        }
+    } else {
+        OutlinedTextField(
+            value = appStringResource { loading },
+            onValueChange = {},
+            label = { Text(text = appStringResource { loader_version }) },
+            enabled = false,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+private val GameVersionUi.displayName: String
     @Composable get() = when {
         isLatestRelease -> appStringResource(id) { latest_release }
         isLatestSnapshot -> appStringResource(id) { latest_snapshot }
         else -> id
     }
 
-val GameVersionUi.icon: ImageVector?
+private val GameVersionUi.icon: ImageVector?
     @Composable get() = when {
         isLatestRelease -> appVectorResource { star }
         isLatestSnapshot -> appVectorResource { bug }

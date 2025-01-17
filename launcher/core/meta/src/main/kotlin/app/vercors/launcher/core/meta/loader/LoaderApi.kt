@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package app.vercors.launcher.core.meta.loader
 
 import app.vercors.launcher.core.domain.RemoteResult
 import app.vercors.meta.loader.MetaLoaderVersionList
+import app.vercors.meta.loader.MetaLoaderVersionMap
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
@@ -31,6 +32,8 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 interface LoaderApi {
+    @GET("v1/loader/all/{gameVersion}")
+    suspend fun getAllLoadersVersions(@Path gameVersion: String): RemoteResult<MetaLoaderVersionMap>
     @GET("v1/loader/{loader}/{gameVersion}")
     suspend fun getLoaderVersions(@Path loader: String, @Path gameVersion: String): RemoteResult<MetaLoaderVersionList>
 }

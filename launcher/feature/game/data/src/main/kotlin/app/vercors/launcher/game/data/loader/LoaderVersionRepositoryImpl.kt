@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.core.domain.map
 import app.vercors.launcher.core.domain.observeResource
 import app.vercors.launcher.core.meta.loader.LoaderApi
+import app.vercors.launcher.game.data.toModLoaderType
 import app.vercors.launcher.game.data.toStringData
 import app.vercors.launcher.game.domain.loader.LoaderVersion
 import app.vercors.launcher.game.domain.loader.LoaderVersionRepository
@@ -43,5 +44,12 @@ class LoaderVersionRepositoryImpl(
         gameVersion: String
     ): Flow<Resource<List<LoaderVersion>, DomainError>> = observeResource {
         loaderApi.getLoaderVersions(loader.toStringData(), gameVersion).map { it.toLoaderVersionList() }
+    }
+
+    override fun observeAllLoadersVersions(
+        gameVersion: String
+    ): Flow<Resource<Map<ModLoaderType, List<LoaderVersion>>, DomainError>> = observeResource {
+        loaderApi.getAllLoadersVersions(gameVersion)
+            .map { it.loaderMapMap.entries.associate { (k, v) -> k.toModLoaderType() to v.toLoaderVersionList() } }
     }
 }
