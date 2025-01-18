@@ -22,10 +22,11 @@
 
 package app.vercors.launcher.project.domain
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.flow.Flow
 
+@Suppress("kotlin:S6517")
 interface ProjectRepository {
     fun findProjects(
         provider: ProjectProvider,

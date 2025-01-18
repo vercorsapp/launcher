@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,10 @@
 
 package app.vercors.launcher.home.domain
 
-enum class HomeSectionType {
-    JumpBackIn, PopularMods, PopularModpacks, PopularResourcePacks, PopularShaderPacks
+enum class HomeSectionType(val remote: Boolean = true, val id: String = "") {
+    JumpBackIn(remote = false),
+    PopularMods(id = "mod"),
+    PopularModpacks(id = "modpack"),
+    PopularResourcePacks(id = "resourcepack"),
+    PopularShaderPacks(id = "shader")
 }

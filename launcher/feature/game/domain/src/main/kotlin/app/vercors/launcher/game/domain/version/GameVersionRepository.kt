@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,10 @@
 
 package app.vercors.launcher.game.domain.version
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.flow.Flow
 
-interface GameVersionRepository {
+fun interface GameVersionRepository {
     fun observeVersionList(): Flow<Resource<GameVersionList, DomainError.Remote>>
 }

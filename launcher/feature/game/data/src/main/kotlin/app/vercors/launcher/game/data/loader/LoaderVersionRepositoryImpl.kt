@@ -22,16 +22,16 @@
 
 package app.vercors.launcher.game.data.loader
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.core.domain.map
-import app.vercors.launcher.core.domain.observeResource
 import app.vercors.launcher.core.meta.loader.LoaderApi
 import app.vercors.launcher.game.data.toModLoaderType
 import app.vercors.launcher.game.data.toStringData
 import app.vercors.launcher.game.domain.loader.LoaderVersion
 import app.vercors.launcher.game.domain.loader.LoaderVersionRepository
 import app.vercors.launcher.game.domain.loader.ModLoaderType
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
+import app.vercors.lib.domain.map
+import app.vercors.lib.domain.observeResource
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,10 @@
 
 package app.vercors.meta.loader.fabric
 
+import app.vercors.lib.loader.fabric.FabricApi
 import app.vercors.meta.loader.fabriclike.FabricLikeApi
 import app.vercors.meta.loader.fabriclike.FabricLikeService
+import io.ktor.client.*
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 
@@ -45,3 +47,6 @@ class FabricServiceImpl(
         "\${loaderVersion}"
     )
 ), FabricService
+
+@Single
+fun provideFabricApi(httpClient: HttpClient): FabricApi = FabricApi(httpClient)

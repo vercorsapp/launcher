@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ val ModLoaderType?.displayName: String
         when (this@displayName) {
             ModLoaderType.Forge -> forge
             ModLoaderType.Fabric -> fabric
-            ModLoaderType.Neoforge -> neoforge
+            ModLoaderType.NeoForge -> neoforge
             ModLoaderType.Quilt -> quilt
             null -> vanilla
         }
@@ -43,7 +43,7 @@ val ModLoaderType?.icon: ImageVector
         when (this@icon) {
             ModLoaderType.Forge -> forge
             ModLoaderType.Fabric -> fabric
-            ModLoaderType.Neoforge -> neoforge
+            ModLoaderType.NeoForge -> neoforge
             ModLoaderType.Quilt -> quilt
             null -> feather
         }

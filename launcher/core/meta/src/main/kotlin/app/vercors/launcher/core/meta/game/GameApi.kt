@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,14 @@
 
 package app.vercors.launcher.core.meta.game
 
-import app.vercors.launcher.core.domain.RemoteResult
+import app.vercors.lib.domain.RemoteResult
 import app.vercors.meta.game.MetaGameVersionList
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.GET
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
+@Suppress("kotlin:S6517")
 interface GameApi {
     @GET("v1/game")
     suspend fun getGameVersions(): RemoteResult<MetaGameVersionList>

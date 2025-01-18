@@ -22,9 +22,9 @@
 
 package app.vercors.launcher.core.meta
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.RemoteResult
-import app.vercors.launcher.core.domain.Result
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.RemoteResult
+import app.vercors.lib.domain.Result
 import app.vercors.meta.MetaError
 import app.vercors.meta.MetaResponse
 import com.google.protobuf.InvalidProtocolBufferException
@@ -65,7 +65,7 @@ class MetaRemoteResultConverterFactory() : Converter.Factory {
 
             is KtorfitResult.Failure -> {
                 logger.error(result.throwable) { "Network error" }
-                Result.Error(DomainError.Remote.NetworkError)
+                Result.Error(DomainError.NetworkError)
             }
         }
 

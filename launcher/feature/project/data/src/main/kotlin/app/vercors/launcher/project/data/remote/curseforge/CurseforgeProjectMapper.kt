@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,13 @@
 
 package app.vercors.launcher.project.data.remote.curseforge
 
-import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeProject
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectId
 import app.vercors.launcher.project.domain.ProjectProvider
+import app.vercors.lib.platform.curseforge.CurseForgeProject
 
-fun CurseforgeProject.toProject(): Project = Project(
-    id = ProjectId(ProjectProvider.Curseforge, id.toString()),
+fun CurseForgeProject.toProject(): Project = Project(
+    id = ProjectId(ProjectProvider.CurseForge, id.toString()),
     name = name,
     author = authors.first().name,
     description = summary,

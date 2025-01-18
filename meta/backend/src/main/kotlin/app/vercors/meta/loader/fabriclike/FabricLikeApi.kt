@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,9 @@
 
 package app.vercors.meta.loader.fabriclike
 
+import app.vercors.lib.domain.RemoteResult
+import app.vercors.lib.loader.fabriclike.FabricLikeVersions
+
 fun interface FabricLikeApi {
-    suspend fun getAllVersions(): FabricLikeVersions
+    suspend fun getAllVersions(): RemoteResult<FabricLikeVersions>
 }

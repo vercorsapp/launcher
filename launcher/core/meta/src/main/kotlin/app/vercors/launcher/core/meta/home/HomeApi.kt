@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 
 package app.vercors.launcher.core.meta.home
 
-import app.vercors.launcher.core.domain.RemoteResult
+import app.vercors.lib.domain.RemoteResult
 import app.vercors.meta.home.MetaHomeSectionList
 import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.GET
@@ -31,6 +31,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
+@Suppress("kotlin:S6517")
 interface HomeApi {
     @GET("v1/home/{provider}")
     suspend fun getHome(@Path provider: String, @Query types: List<String>): RemoteResult<MetaHomeSectionList>

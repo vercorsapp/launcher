@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,21 +22,21 @@
 
 package app.vercors.launcher.project.data.remote.curseforge
 
-import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeClassId
-import app.vercors.launcher.project.data.remote.curseforge.dto.CurseforgeClassIds
 import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.platform.curseforge.CurseForgeClassId
+import app.vercors.lib.platform.curseforge.CurseForgeClassIds
 
-fun CurseforgeClassId?.toProjectType(): ProjectType = when (this) {
-    CurseforgeClassIds.MODPACK -> ProjectType.Modpack
-    CurseforgeClassIds.MOD -> ProjectType.Mod
-    CurseforgeClassIds.RESOURCEPACK -> ProjectType.ResourcePack
-    CurseforgeClassIds.SHADERPACK -> ProjectType.ShaderPack
-    else -> throw IllegalArgumentException("Unknown Curseforge classId: $this")
+fun CurseForgeClassId?.toProjectType(): ProjectType = when (this) {
+    CurseForgeClassIds.MODPACK -> ProjectType.Modpack
+    CurseForgeClassIds.MOD -> ProjectType.Mod
+    CurseForgeClassIds.RESOURCEPACK -> ProjectType.ResourcePack
+    CurseForgeClassIds.SHADERPACK -> ProjectType.ShaderPack
+    else -> throw IllegalArgumentException("Unknown CurseForge classId: $this")
 }
 
-fun ProjectType.toClassId(): CurseforgeClassId = when (this) {
-    ProjectType.Mod -> CurseforgeClassIds.MOD
-    ProjectType.Modpack -> CurseforgeClassIds.MODPACK
-    ProjectType.ResourcePack -> CurseforgeClassIds.RESOURCEPACK
-    ProjectType.ShaderPack -> CurseforgeClassIds.SHADERPACK
+fun ProjectType.toClassId(): CurseForgeClassId = when (this) {
+    ProjectType.Mod -> CurseForgeClassIds.MOD
+    ProjectType.Modpack -> CurseForgeClassIds.MODPACK
+    ProjectType.ResourcePack -> CurseForgeClassIds.RESOURCEPACK
+    ProjectType.ShaderPack -> CurseForgeClassIds.SHADERPACK
 }

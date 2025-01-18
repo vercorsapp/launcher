@@ -22,12 +22,12 @@
 
 package app.vercors.launcher.project.data.remote
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.flow.Flow
 
-interface ProviderDataSource {
+fun interface ProviderDataSource {
     fun findProjects(projectType: ProjectType, query: String?, limit: Int): Flow<Resource<List<Project>, DomainError>>
 }

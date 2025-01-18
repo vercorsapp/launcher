@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package app.vercors.launcher.home.data
 
 import app.vercors.launcher.core.config.model.HomeSectionConfig
 import app.vercors.launcher.home.domain.HomeSectionType
+import app.vercors.meta.project.MetaProjectType
 
 fun HomeSectionConfig.toType(): HomeSectionType = when (this) {
     HomeSectionConfig.JumpBackIn -> HomeSectionType.JumpBackIn
@@ -31,4 +32,12 @@ fun HomeSectionConfig.toType(): HomeSectionType = when (this) {
     HomeSectionConfig.PopularModpacks -> HomeSectionType.PopularModpacks
     HomeSectionConfig.PopularResourcePacks -> HomeSectionType.PopularResourcePacks
     HomeSectionConfig.PopularShaderPacks -> HomeSectionType.PopularShaderPacks
+}
+
+fun MetaProjectType.toSectionType(): HomeSectionType = when (this) {
+    MetaProjectType.mod -> HomeSectionType.PopularMods
+    MetaProjectType.modpack -> HomeSectionType.PopularModpacks
+    MetaProjectType.resourcepack -> HomeSectionType.PopularResourcePacks
+    MetaProjectType.shader -> HomeSectionType.PopularShaderPacks
+    MetaProjectType.UNRECOGNIZED -> throw IllegalStateException("Unrecognized HomeSectionType: $this")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,8 @@
 
 package app.vercors.launcher.home.domain
 
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
-interface HomeRepository {
-    val sectionsState: StateFlow<List<HomeSection>>
-    suspend fun loadSections()
+fun interface HomeRepository {
+    fun observeSections(): Flow<List<HomeSection>>
 }

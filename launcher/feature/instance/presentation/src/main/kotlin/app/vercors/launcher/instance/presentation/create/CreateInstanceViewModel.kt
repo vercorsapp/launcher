@@ -22,7 +22,6 @@
 
 package app.vercors.launcher.instance.presentation.create
 
-import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.core.presentation.mvi.MviViewModel
 import app.vercors.launcher.game.domain.loader.LoaderVersion
 import app.vercors.launcher.game.domain.loader.LoaderVersionRepository
@@ -32,6 +31,7 @@ import app.vercors.launcher.game.domain.version.GameVersionRepository
 import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.instance.domain.InstanceModLoader
 import app.vercors.launcher.instance.domain.InstanceRepository
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.Job
 import org.koin.android.annotation.KoinViewModel
 

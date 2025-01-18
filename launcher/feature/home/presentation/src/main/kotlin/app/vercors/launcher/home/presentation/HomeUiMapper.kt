@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,28 +25,22 @@ package app.vercors.launcher.home.presentation
 import app.vercors.launcher.core.presentation.ui.countToString
 import app.vercors.launcher.core.resources.*
 import app.vercors.launcher.home.domain.HomeSection
-import app.vercors.launcher.home.domain.HomeSectionData
 import app.vercors.launcher.home.domain.HomeSectionType
 import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.project.domain.Project
+import app.vercors.lib.domain.Resource
 import kotlinx.datetime.toJavaInstant
 import org.jetbrains.compose.resources.StringResource
 
 fun HomeSection.toUi(): HomeSectionUi {
     val title = type.toUi()
     return when (this) {
-        is HomeSection.Instances -> {
-            val uiData = when (val dat = data) {
-                is HomeSectionData.Loaded -> HomeSectionDataUi.Loaded(dat.items.map { it.toUi() })
-                is HomeSectionData.Loading -> HomeSectionDataUi.Loading()
-            }
-            HomeSectionUi.Instances(title, uiData)
-        }
-
+        is HomeSection.Instances -> HomeSectionUi.Instances(title, HomeSectionDataUi.Loaded(data.map { it.toUi() }))
         is HomeSection.Projects -> {
-            val uiData = when (val dat = data) {
-                is HomeSectionData.Loaded -> HomeSectionDataUi.Loaded(dat.items.map { it.toUi() })
-                is HomeSectionData.Loading -> HomeSectionDataUi.Loading()
+            val uiData = when (val finalData = data) {
+                Resource.Loading -> HomeSectionDataUi.Loading()
+                is Resource.Success -> HomeSectionDataUi.Loaded(finalData.value.map { it.toUi() })
+                is Resource.Error -> HomeSectionDataUi.Loading() // TODO error handling
             }
             HomeSectionUi.Projects(title, uiData)
         }
@@ -65,9 +59,9 @@ private fun Project.toUi(): HomeSectionItemUi.Project = HomeSectionItemUi.Projec
     id = id,
     name = name,
     author = author,
+    description = description,
     iconUrl = iconUrl,
     imageUrl = bannerUrl,
-    description = description,
     downloadCount = downloads.countToString(),
     lastUpdated = lastUpdated.toJavaInstant()
 )

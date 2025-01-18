@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 
 package app.vercors.meta.loader.fabriclike
 
+import app.vercors.lib.domain.asSuccess
 import app.vercors.meta.loader.LoaderServiceBase
 import app.vercors.meta.loader.MetaLoaderVersionList
 import app.vercors.meta.loader.loaderCacheDuration
@@ -49,7 +50,7 @@ abstract class FabricLikeService(
 
     override suspend fun fetchData(): FabricLikeData {
         logger.info { "Loading $name Loader data..." }
-        val (game, loader, installer) = api.getAllVersions()
+        val (game, loader, installer) = api.getAllVersions().asSuccess()
         val minecraftVersions = game.map { it.version }
         val latestInstaller = installer.first()
         val installerVersion = metaProjectInstaller {

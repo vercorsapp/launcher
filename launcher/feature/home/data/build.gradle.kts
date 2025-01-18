@@ -27,6 +27,8 @@ plugins {
 dependencies {
     implementation(projects.launcher.core.domain)
     implementation(projects.launcher.core.config)
+    implementation(projects.launcher.core.meta)
+    implementation(projects.meta.api)
     implementation(projects.launcher.feature.home.domain)
     implementation(projects.launcher.feature.project.domain)
     implementation(projects.launcher.feature.instance.domain)

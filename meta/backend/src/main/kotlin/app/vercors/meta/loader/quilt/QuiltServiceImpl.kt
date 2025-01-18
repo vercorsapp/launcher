@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,10 @@
 
 package app.vercors.meta.loader.quilt
 
+import app.vercors.lib.loader.quilt.QuiltApi
 import app.vercors.meta.loader.fabriclike.FabricLikeApi
 import app.vercors.meta.loader.fabriclike.FabricLikeService
+import io.ktor.client.*
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 
@@ -44,3 +46,6 @@ class QuiltServiceImpl(
         "--no-profile"
     )
 ), QuiltService
+
+@Single
+fun provideQuiltApi(httpClient: HttpClient): QuiltApi = QuiltApi(httpClient)

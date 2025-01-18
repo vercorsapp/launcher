@@ -32,11 +32,18 @@ application {
 
 dependencies {
     implementation(projects.meta.api)
+    implementation(projects.lib.domain)
+    implementation(projects.lib.loader.fabricLike)
+    implementation(projects.lib.loader.fabric)
+    implementation(projects.lib.loader.quilt)
+    implementation(projects.lib.loader.neoforge)
+    implementation(projects.lib.loader.forge)
+    implementation(projects.lib.platform.modrinth)
+    implementation(projects.lib.platform.curseforge)
     implementation(libs.bundles.ktor.server)
     implementation(libs.koin.ktor3)
     implementation(libs.koin.logger.slf4j)
     implementation(libs.logback.classic)
-    implementation(libs.kotlin.logging.jvm)
     testImplementation(libs.ktor.server.test.host)
 }
 
@@ -47,8 +54,7 @@ tasks {
 
         destinationFile = layout.buildDirectory.file("koin.properties")
         encoding = "UTF-8"
-        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
-        appProperty("modrinthApiKey", "MODRINTH_API_KEY")
+        appProperty("curseForgeApiKey", "CURSEFORGE_API_KEY")
         appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
         appProperty("vercorsApiKey", "VERCORS_API_KEY")
     }

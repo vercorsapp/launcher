@@ -22,18 +22,21 @@
 
 package app.vercors.launcher.project.data.remote.curseforge
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.core.domain.map
-import app.vercors.launcher.core.domain.observeResource
 import app.vercors.launcher.project.data.remote.ProviderDataSource
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
+import app.vercors.lib.domain.map
+import app.vercors.lib.domain.observeResource
+import app.vercors.lib.platform.curseforge.CurseForgeApi
+import io.ktor.client.*
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Property
 import org.koin.core.annotation.Single
 
 @Single
-class CurseforgeDataSource(private val api: CurseforgeApi) : ProviderDataSource {
+class CurseForgeDataSource(private val api: CurseForgeApi) : ProviderDataSource {
     override fun findProjects(
         projectType: ProjectType,
         query: String?,
@@ -52,4 +55,8 @@ class CurseforgeDataSource(private val api: CurseforgeApi) : ProviderDataSource 
     }
 }
 
-
+@Single
+fun provideCurseForgeApi(
+    httpClient: HttpClient,
+    @Property("curseForgeApiKey") curseForgeApiKey: String,
+): CurseForgeApi = CurseForgeApi(httpClient, curseForgeApiKey)

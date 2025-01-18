@@ -24,7 +24,7 @@ package app.vercors.meta.loader
 
 import app.vercors.meta.loader.fabric.FabricService
 import app.vercors.meta.loader.forge.ForgeService
-import app.vercors.meta.loader.neoforge.NeoforgeService
+import app.vercors.meta.loader.neoforge.NeoForgeService
 import app.vercors.meta.loader.quilt.QuiltService
 import org.koin.core.annotation.Single
 
@@ -32,7 +32,7 @@ import org.koin.core.annotation.Single
 class LoaderServiceImpl(
     private val fabricService: FabricService,
     private val forgeService: ForgeService,
-    private val neoforgeService: NeoforgeService,
+    private val neoforgeService: NeoForgeService,
     private val quiltService: QuiltService
 ) : LoaderService {
     override suspend fun getLoaderVersionsForGameVersion(
@@ -51,9 +51,6 @@ class LoaderServiceImpl(
                     loaderMap.putAll(it)
                 }
             }
-
-    /*suspend fun getLoaderVersion(loaderType: LoaderType, gameVersion: String, loaderVersion: String) =
-        getLoader(loaderType)?.getLoaderVersion(gameVersion, loaderVersion)*/
 
     private fun getLoader(loaderType: MetaLoaderType): LoaderServiceBase? = when (loaderType) {
         MetaLoaderType.fabric -> fabricService

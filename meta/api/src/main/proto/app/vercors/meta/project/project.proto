@@ -24,6 +24,8 @@
 syntax = "proto3";
 package app.vercors.meta.project;
 
+import "google/protobuf/timestamp.proto";
+
 option java_multiple_files = true;
 
 enum MetaProjectProvider {
@@ -39,13 +41,16 @@ enum MetaProjectType {
 }
 
 message MetaProject {
-  MetaProjectProvider provider = 1;
-  MetaProjectType type = 2;
-  string name = 3;
-  string author = 4;
-  optional string logoUrl = 5;
-  optional string imageUrl = 6;
-  string description = 7;
+  string id = 1;
+  MetaProjectProvider provider = 2;
+  MetaProjectType type = 3;
+  string name = 4;
+  string author = 5;
+  optional string logoUrl = 6;
+  optional string imageUrl = 7;
+  string description = 8;
+  int64 downloads = 9;
+  google.protobuf.Timestamp lastUpdated = 10;
 }
 
 message MetaProjectInstaller {

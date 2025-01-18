@@ -29,4 +29,6 @@ dependencies {
     implementation(projects.launcher.core.network)
     implementation(projects.launcher.feature.project.domain)
     implementation(projects.launcher.feature.game.data)
+    implementation(projects.lib.platform.modrinth)
+    implementation(projects.lib.platform.curseforge)
 }

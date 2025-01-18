@@ -22,14 +22,14 @@
 
 package app.vercors.launcher.project.data
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
 import app.vercors.launcher.project.data.local.LocalProjectDataSource
 import app.vercors.launcher.project.data.remote.RemoteProjectDataSource
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectProvider
 import app.vercors.launcher.project.domain.ProjectRepository
 import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 

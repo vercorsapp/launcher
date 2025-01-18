@@ -23,7 +23,7 @@
 import org.gradle.accessors.dm.LibrariesForLibs
 
 plugins {
-    id("app.vercors.launcher")
+    id("app.vercors.launcher.domain")
     id("app.vercors.network")
     id("app.vercors.database")
 }

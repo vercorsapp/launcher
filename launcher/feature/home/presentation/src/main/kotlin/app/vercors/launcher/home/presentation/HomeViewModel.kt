@@ -37,10 +37,9 @@ class HomeViewModel(
     override fun onStart() {
         super.onStart()
         sectionsJob?.cancel()
-        sectionsJob = collectInScope(homeRepository.sectionsState) {
+        sectionsJob = collectInScope(homeRepository.observeSections()) {
             onIntent(UpdateSections(it))
         }
-        runInScope { homeRepository.loadSections() } // TODO replace with Meta API call
     }
 
     override fun onStop(cause: Throwable?) {

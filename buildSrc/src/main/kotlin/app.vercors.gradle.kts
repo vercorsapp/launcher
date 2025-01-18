@@ -33,8 +33,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation(libs.kotlin.test)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlin.logging)
+    implementation(libs.kotlinx.datetime)
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
 }
 

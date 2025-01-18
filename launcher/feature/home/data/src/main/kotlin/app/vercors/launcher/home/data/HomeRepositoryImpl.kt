@@ -22,26 +22,17 @@
 
 package app.vercors.launcher.home.data
 
-import app.vercors.launcher.core.config.model.HomeProviderConfig
 import app.vercors.launcher.core.config.repository.ConfigRepository
-import app.vercors.launcher.core.domain.Resource
+import app.vercors.launcher.core.meta.home.HomeApi
 import app.vercors.launcher.home.domain.HomeRepository
 import app.vercors.launcher.home.domain.HomeSection
-import app.vercors.launcher.home.domain.HomeSection.Instances
-import app.vercors.launcher.home.domain.HomeSection.Projects
-import app.vercors.launcher.home.domain.HomeSectionData
-import app.vercors.launcher.home.domain.HomeSectionData.Loaded
-import app.vercors.launcher.home.domain.HomeSectionType
-import app.vercors.launcher.instance.domain.Instance
 import app.vercors.launcher.instance.domain.InstanceRepository
-import app.vercors.launcher.project.domain.Project
-import app.vercors.launcher.project.domain.ProjectRepository
-import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.domain.Resource
+import app.vercors.lib.domain.observeResource
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 
 private val logger = KotlinLogging.logger {}
@@ -50,93 +41,32 @@ private val logger = KotlinLogging.logger {}
 class HomeRepositoryImpl(
     private val configRepository: ConfigRepository,
     private val instanceRepository: InstanceRepository,
-    private val projectRepository: ProjectRepository
+    private val homeApi: HomeApi,
 ) : HomeRepository {
-    private val sectionCache: MutableMap<HomeSectionCacheKey, HomeSection> = mutableMapOf()
-
-    private val _sectionsState = MutableStateFlow<List<HomeSection>>(emptyList())
-    override val sectionsState = _sectionsState.asStateFlow()
-
-    override suspend fun loadSections() = coroutineScope {
-        combine(
-            configRepository.observeConfig().map { it.home },
-            instanceRepository.observeAll()
-        ) { config, instance -> config to instance }
-            .distinctUntilChanged()
-            .collect { (config, instances) ->
-                val (sectionConfigs, providerConfig) = config
-                logger.debug { "Processing home config changes: $sectionConfigs, $providerConfig" }
-                val sectionTypes = sectionConfigs.map { it.toType() }
-                _sectionsState.update { sections -> sections.filter { it.type in sectionTypes } }
-                sectionTypes.map { sectionType -> launch { loadSection(providerConfig, instances, sectionType) } }
-                    .joinAll()
-                logger.debug { "Finished processing home config changes" }
-            }
-    }
-
-    private suspend fun loadSection(
-        providerConfig: HomeProviderConfig,
-        instances: List<Instance>,
-        sectionType: HomeSectionType
-    ) {
-        when (sectionType) {
-            HomeSectionType.JumpBackIn -> updateSection(
-                instances
-                    .sortedByDescending { it.lastPlayedAt }
-                    .let { Instances(sectionType, Loaded(it)) })
-
-            else -> {
-                val providerType = providerConfig.toType()
-                val cacheKey = HomeSectionCacheKey(sectionType, providerConfig)
-                val section = sectionCache.getOrPut(cacheKey) {
-                    logger.debug { "Home section cache miss for key $cacheKey" }
-                    updateSection(createLoadingSection(sectionType))
-                    return@getOrPut when (sectionType) {
-                        HomeSectionType.PopularMods -> projectRepository.findProjects(
-                            providerType,
-                            ProjectType.Mod
-                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
-                            .let { Projects(sectionType, Loaded(it.value)) }
-
-                        HomeSectionType.PopularModpacks -> projectRepository.findProjects(
-                            providerType,
-                            ProjectType.Modpack
-                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
-                            .let { Projects(sectionType, Loaded(it.value)) }
-
-                        HomeSectionType.PopularResourcePacks -> projectRepository.findProjects(
-                            providerType,
-                            ProjectType.ResourcePack
-                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
-                            .let { Projects(sectionType, Loaded(it.value)) }
-
-                        HomeSectionType.PopularShaderPacks -> projectRepository.findProjects(
-                            providerType,
-                            ProjectType.ShaderPack
-                        ).filterIsInstance<Resource.Success<List<Project>>>().first()
-                            .let { Projects(sectionType, Loaded(it.value)) }
-
-                        HomeSectionType.JumpBackIn -> throw IllegalStateException("Unreachable")
+    override fun observeSections(): Flow<List<HomeSection>> = combineTransform(
+        configRepository.observeConfig().map { it.home },
+        instanceRepository.observeAll()
+    ) { config, instances ->
+        val (sectionConfigs, providerConfig) = config
+        val (remoteSectionTypes, localSectionTypes) = sectionConfigs.map { it.toType() }.partition { it.remote }
+        val localSections = localSectionTypes.map { HomeSection.Instances(it, instances) }
+        observeResource {
+            homeApi.getHome(
+                providerConfig.toType().id,
+                remoteSectionTypes.map { it.id })
+        }.collect { res ->
+            emit(
+                localSections + when (res) {
+                    Resource.Loading -> remoteSectionTypes.map { HomeSection.Projects(it, Resource.Loading) }
+                    is Resource.Success -> res.value.sectionsList.map {
+                        HomeSection.Projects(
+                            it.type.toSectionType(),
+                            Resource.Success(it.projectsList.map { it.toDomain() })
+                        )
                     }
-                }
-                updateSection(section)
-            }
+
+                    is Resource.Error -> remoteSectionTypes.map { HomeSection.Projects(it, Resource.Error(res.error)) }
+                })
         }
     }
-
-    private fun createLoadingSection(type: HomeSectionType): HomeSection = when (type) {
-        HomeSectionType.JumpBackIn -> Instances(HomeSectionType.JumpBackIn, HomeSectionData.Loading())
-        else -> Projects(type, HomeSectionData.Loading())
-    }
-
-    private fun updateSection(section: HomeSection) {
-        logger.debug { "Updating section: ${section.type}" }
-        logger.trace { "Section data: $section" }
-        _sectionsState.update { sections ->
-            if (sections.any { it.type == section.type }) sections.map { if (it.type == section.type) section else it }
-            else (sections + section).sortedBy { it.type }
-        }
-    }
-
-    private data class HomeSectionCacheKey(val type: HomeSectionType, val provider: HomeProviderConfig)
 }

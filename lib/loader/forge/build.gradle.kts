@@ -23,3 +23,8 @@
 plugins {
     id("app.vercors.network")
 }
+
+dependencies {
+    implementation(projects.lib.domain)
+    implementation(projects.lib.network)
+}

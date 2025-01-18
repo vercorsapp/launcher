@@ -22,7 +22,7 @@
 
 package app.vercors.launcher.core.meta.loader
 
-import app.vercors.launcher.core.domain.RemoteResult
+import app.vercors.lib.domain.RemoteResult
 import app.vercors.meta.loader.MetaLoaderVersionList
 import app.vercors.meta.loader.MetaLoaderVersionMap
 import de.jensklingenberg.ktorfit.Ktorfit

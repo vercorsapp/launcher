@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -90,7 +90,7 @@ tasks {
 
         destinationFile = layout.buildDirectory.file("koin.properties")
         encoding = "UTF-8"
-        appProperty("curseforgeApiKey", "CURSEFORGE_API_KEY")
+        appProperty("curseForgeApiKey", "CURSEFORGE_API_KEY")
         appProperty("microsoftClientId", "MICROSOFT_CLIENT_ID")
         appProperty("vercorsApiKey", "VERCORS_API_KEY")
         appProperty("vercorsApiUrl", "VERCORS_API_URL")

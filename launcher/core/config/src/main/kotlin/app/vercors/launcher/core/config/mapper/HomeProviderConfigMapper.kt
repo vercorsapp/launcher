@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ import app.vercors.launcher.core.config.proto.HomeProviderProto
 
 fun HomeProviderProto.toConfig(): HomeProviderConfig = when (this) {
     HomeProviderProto.MODRINTH -> HomeProviderConfig.Modrinth
-    HomeProviderProto.CURSEFORGE -> HomeProviderConfig.Curseforge
+    HomeProviderProto.CURSEFORGE -> HomeProviderConfig.CurseForge
     HomeProviderProto.UNRECOGNIZED -> HomeProviderConfig.entries.first()
 }
 
 fun HomeProviderConfig.toProto(): HomeProviderProto = when (this) {
     HomeProviderConfig.Modrinth -> HomeProviderProto.MODRINTH
-    HomeProviderConfig.Curseforge -> HomeProviderProto.CURSEFORGE
+    HomeProviderConfig.CurseForge -> HomeProviderProto.CURSEFORGE
 }

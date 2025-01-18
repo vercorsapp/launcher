@@ -22,13 +22,15 @@
 
 package app.vercors.launcher.project.data.remote.modrinth
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.core.domain.map
-import app.vercors.launcher.core.domain.observeResource
 import app.vercors.launcher.project.data.remote.ProviderDataSource
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectType
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
+import app.vercors.lib.domain.map
+import app.vercors.lib.domain.observeResource
+import app.vercors.lib.platform.modrinth.ModrinthApi
+import io.ktor.client.*
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 
@@ -51,4 +53,7 @@ class ModrinthDataSource(private val api: ModrinthApi) : ProviderDataSource {
         "[[\"project_type:${projectType.toModrinthProjectType().value}\"]]"
 }
 
-
+@Single
+fun provideModrinthApi(
+    httpClient: HttpClient
+): ModrinthApi = ModrinthApi(httpClient)

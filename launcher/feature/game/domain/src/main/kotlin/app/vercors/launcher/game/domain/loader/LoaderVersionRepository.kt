@@ -22,8 +22,8 @@
 
 package app.vercors.launcher.game.domain.loader
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface LoaderVersionRepository {

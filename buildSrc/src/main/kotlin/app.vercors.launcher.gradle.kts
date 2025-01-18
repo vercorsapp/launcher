@@ -42,8 +42,6 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.io)
     implementation(compose.runtime)
-    // Logging
-    implementation(libs.kotlin.logging.jvm)
 }
 
 kotlin {

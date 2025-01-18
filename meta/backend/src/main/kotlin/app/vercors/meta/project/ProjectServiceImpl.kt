@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,14 @@
 
 package app.vercors.meta.project
 
-import app.vercors.meta.project.curseforge.CurseforgeService
+import app.vercors.meta.project.curseforge.CurseForgeService
 import app.vercors.meta.project.modrinth.ModrinthService
 import org.koin.core.annotation.Single
 
 @Single
 class ProjectServiceImpl(
     private val modrinthService: ModrinthService,
-    private val curseforgeService: CurseforgeService
+    private val curseforgeService: CurseForgeService
 ) : ProjectService {
     override suspend fun searchProject(
         provider: MetaProjectProvider,

@@ -22,13 +22,29 @@
 
 package app.vercors.lib.loader.fabric
 
+import app.vercors.lib.domain.RemoteResult
 import app.vercors.lib.loader.fabriclike.FabricLikeVersions
+import app.vercors.lib.network.RemoteResultConverterFactory
+import de.jensklingenberg.ktorfit.Ktorfit
 import de.jensklingenberg.ktorfit.http.GET
-
-const val API_URL = "https://meta.fabricmc.net/"
+import io.ktor.client.*
 
 @Suppress("kotlin:S6517")
 interface FabricApi {
     @GET("v2/versions")
-    suspend fun getAllVersions(): FabricLikeVersions
+    suspend fun getAllVersions(): RemoteResult<FabricLikeVersions>
+
+    companion object {
+        const val BASE_URL = "https://meta.fabricmc.net/"
+    }
 }
+
+fun FabricApi(
+    httpClient: HttpClient,
+    baseUrl: String = FabricApi.BASE_URL
+): FabricApi = Ktorfit.Builder()
+    .baseUrl(baseUrl)
+    .httpClient(httpClient)
+    .converterFactories(RemoteResultConverterFactory)
+    .build()
+    .createFabricApi()

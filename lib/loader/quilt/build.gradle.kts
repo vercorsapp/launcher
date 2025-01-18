@@ -25,5 +25,7 @@ plugins {
 }
 
 dependencies {
+    implementation(projects.lib.domain)
+    implementation(projects.lib.network)
     implementation(projects.lib.loader.fabricLike)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,16 @@
 
 package app.vercors.meta.project.modrinth
 
+import app.vercors.lib.domain.asSuccess
+import app.vercors.lib.platform.modrinth.ModrinthApi
+import app.vercors.lib.platform.modrinth.ModrinthProjectResult
+import app.vercors.lib.platform.modrinth.ModrinthProjectType
 import app.vercors.meta.project.MetaProject
+import app.vercors.meta.project.MetaProjectProvider
 import app.vercors.meta.project.MetaProjectType
 import app.vercors.meta.project.metaProject
+import com.google.protobuf.timestamp
+import io.ktor.client.*
 import org.koin.core.annotation.Single
 
 @Single
@@ -32,16 +39,21 @@ class ModrinthServiceImpl(private val api: ModrinthApi) : ModrinthService {
     override suspend fun search(type: MetaProjectType, limit: Int) = api.search(
         facets = listOf(mapOf(type.asFacet())).asString(),
         limit = limit
-    ).hits.convertAll()
+    ).asSuccess().hits.convertAll()
 
     private fun List<ModrinthProjectResult>.convertAll(): List<MetaProject> = map { convert(it) }
 
     private fun convert(project: ModrinthProjectResult): MetaProject = metaProject {
+        provider = MetaProjectProvider.modrinth
+        id = project.projectId
+        type = project.projectType.toMeta()
         name = project.title
         author = project.author
         project.iconUrl?.let { logoUrl = it }
         project.featuredGallery?.let { imageUrl = it }
         description = project.description
+        downloads = project.downloads
+        lastUpdated = timestamp { seconds = project.dateModified.epochSeconds }
     }
 
     private val projectTypeToFacet = mapOf(
@@ -56,4 +68,16 @@ class ModrinthServiceImpl(private val api: ModrinthApi) : ModrinthService {
     private fun List<Map<String, String>>.asString(): String = joinToString(",") { map ->
         map.entries.joinToString(",") { (key, value) -> "\"$key:$value\"" }.let { "[$it]" }
     }.let { "[$it]" }
+
+    private fun ModrinthProjectType.toMeta(): MetaProjectType = when (this) {
+        ModrinthProjectType.Mod -> MetaProjectType.mod
+        ModrinthProjectType.Modpack -> MetaProjectType.modpack
+        ModrinthProjectType.ResourcePack -> MetaProjectType.resourcepack
+        ModrinthProjectType.ShaderPack -> MetaProjectType.shader
+    }
 }
+
+@Single
+fun provideModrinthApi(
+    httpClient: HttpClient
+): ModrinthApi = ModrinthApi(httpClient)

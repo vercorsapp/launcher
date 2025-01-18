@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,13 @@
 
 package app.vercors.launcher.game.data.version
 
-import app.vercors.launcher.core.domain.DomainError
-import app.vercors.launcher.core.domain.Resource
-import app.vercors.launcher.core.domain.map
-import app.vercors.launcher.core.domain.observeResource
 import app.vercors.launcher.core.meta.game.GameApi
 import app.vercors.launcher.game.domain.version.GameVersionList
 import app.vercors.launcher.game.domain.version.GameVersionRepository
+import app.vercors.lib.domain.DomainError
+import app.vercors.lib.domain.Resource
+import app.vercors.lib.domain.map
+import app.vercors.lib.domain.observeResource
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 

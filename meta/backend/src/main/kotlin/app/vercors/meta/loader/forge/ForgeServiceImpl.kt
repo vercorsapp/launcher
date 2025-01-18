@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,15 @@
 
 package app.vercors.meta.loader.forge
 
+import app.vercors.lib.domain.asSuccess
+import app.vercors.lib.loader.forge.ForgeApi
 import app.vercors.meta.loader.MetaLoaderVersionList
 import app.vercors.meta.loader.loaderCacheDuration
 import app.vercors.meta.loader.metaLoaderVersionList
 import app.vercors.meta.project.MetaProjectInstaller
 import app.vercors.meta.utils.InMemoryCache
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -50,8 +53,8 @@ class ForgeServiceImpl(
 
     override suspend fun fetchData(): VersionMap = coroutineScope {
         logger.info { "Loading Forge Loader data..." }
-        val promotions = async { forgeApi.getPromotions().promos }
-        val metadata = forgeApi.getMavenMetadata()
+        val promotions = async { forgeApi.getPromotions().asSuccess().promos }
+        val metadata = forgeApi.getMavenMetadata().asSuccess()
         val data = metadata.versioning.versions
             .map { it.split('-') }
             .filter { it.size == 2 }
@@ -67,5 +70,8 @@ class ForgeServiceImpl(
         data
     }
 }
+
+@Single
+fun provideForgeApi(httpClient: HttpClient): ForgeApi = ForgeApi(httpClient)
 
 private typealias VersionMap = Map<String, MetaLoaderVersionList>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,10 @@
 
 package app.vercors.launcher.project.data.remote.modrinth
 
-import app.vercors.launcher.project.data.remote.modrinth.dto.ModrinthProjectResult
 import app.vercors.launcher.project.domain.Project
 import app.vercors.launcher.project.domain.ProjectId
 import app.vercors.launcher.project.domain.ProjectProvider
+import app.vercors.lib.platform.modrinth.ModrinthProjectResult
 
 fun ModrinthProjectResult.toProject(): Project = Project(
     id = ProjectId(ProjectProvider.Modrinth, projectId),
