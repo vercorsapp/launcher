@@ -49,11 +49,9 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
     fun onIntent(intent: Intent) {
         logger.debug { "Handling Intent: ${intent::class.simpleName}" }
         logger.trace { "Intent data: $intent" }
-        val oldState = state.value
-        val newState = oldState.reduce(intent)
-        if (newState != oldState) {
-            updateState(newState)
-        }
+        val reductionState = ReductionState().apply { reduce(intent) }
+        reductionState.update?.let { updateState(it) }
+        reductionState.effects.forEach { produceEffect(it) }
     }
 
     protected open fun onStart() {
@@ -75,14 +73,17 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
     }
 
     protected fun resetState() {
-        updateState(defaultState)
+        updateState { defaultState }
     }
 
-    protected fun updateState(state: State) {
-        val oldState = _state.value
-        _state.tryEmit(state)
-        if (state != oldState) {
-            afterStateUpdate(oldState, state)
+    protected fun updateState(update: (State) -> State) {
+        runInScope {
+            val oldState = _state.value
+            _state.update(update)
+            val newState = _state.value
+            if (newState != oldState) {
+                afterStateUpdate(oldState, newState)
+            }
         }
     }
 
@@ -99,12 +100,19 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
 
     protected fun runInScope(block: suspend CoroutineScope.() -> Unit) = viewModelScope.launch { block() }
 
-    /**
-     * Take the current state and an intent.
-     * Returns the updated state or null if it shouldn't be updated.
-     */
-    protected abstract fun State.reduce(intent: Intent): State
+    protected abstract fun ReductionState.reduce(intent: Intent)
 
-    protected fun State.withEffect(vararg effects: Effect): State = also { effects.forEach { produceEffect(it) } }
+    protected inner class ReductionState(
+        var update: (State.() -> State)? = null,
+        var effects: List<Effect> = emptyList()
+    ) {
+        fun update(update: State.() -> State) {
+            this.update = update
+        }
+
+        fun effect(vararg effects: Effect) {
+            this.effects = effects.toList()
+        }
+    }
 }
 

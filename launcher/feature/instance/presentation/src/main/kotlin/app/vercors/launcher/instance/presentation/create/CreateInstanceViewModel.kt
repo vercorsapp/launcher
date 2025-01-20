@@ -69,43 +69,52 @@ class CreateInstanceViewModel(
         }
     }
 
-    override fun CreateInstanceUiState.reduce(intent: CreateInstanceUiIntent): CreateInstanceUiState = when (intent) {
-        is CreateInstanceUiIntent.UpdateInstanceName -> copy(instanceName = intent.value)
-        is CreateInstanceUiIntent.SelectGameVersion -> copy(selectedGameVersionId = intent.value)
-        is CreateInstanceUiIntent.ToggleShowSnapshots -> copy(showSnapshots = intent.value)
+    override fun ReductionState.reduce(intent: CreateInstanceUiIntent) = when (intent) {
+        is CreateInstanceUiIntent.UpdateInstanceName -> update { copy(instanceName = intent.value) }
+        is CreateInstanceUiIntent.SelectGameVersion -> update { copy(selectedGameVersionId = intent.value) }
+        is CreateInstanceUiIntent.ToggleShowSnapshots -> update { copy(showSnapshots = intent.value) }
         is CreateInstanceUiIntent.SelectModLoader -> selectModLoader(intent.value)
-        is CreateInstanceUiIntent.SelectModLoaderVersion -> copy(selectedModLoaderVersion = intent.value)
-        CreateInstanceUiIntent.CreateInstance -> createInstance().withEffect(CreateInstanceUiEffect.CloseDialog)
-        CreateInstanceUiIntent.CloseDialog -> withEffect(CreateInstanceUiEffect.CloseDialog)
-        is GameVersionsUpdated -> copy(
+        is CreateInstanceUiIntent.SelectModLoaderVersion -> update { copy(selectedModLoaderVersion = intent.value) }
+        CreateInstanceUiIntent.CreateInstance -> createInstance()
+        CreateInstanceUiIntent.CloseDialog -> effect(CreateInstanceUiEffect.CloseDialog)
+        is GameVersionsUpdated -> update {
+            copy(
             gameVersions = intent.list.toUi(),
             selectedGameVersionId = intent.list.latestReleaseId
-        )
-        is LoaderVersionsUpdated -> copy(
+            )
+        }
+
+        is LoaderVersionsUpdated -> update {
+            copy(
             modLoaderVersions = intent.map.mapValues { (_, v) -> v.toUi() },
             modLoader = if (modLoader in intent.map) modLoader else null,
             selectedModLoaderVersion = intent.map[modLoader]?.toUi()?.first()
-        )
+            )
+        }
     }
 
-    private fun CreateInstanceUiState.selectModLoader(type: ModLoaderType?): CreateInstanceUiState {
-        return if (type == null) copy(modLoader = null, selectedModLoaderVersion = null)
-        else copy(modLoader = type, selectedModLoaderVersion = modLoaderVersions?.get(type)?.first())
+    private fun ReductionState.selectModLoader(type: ModLoaderType?) {
+        return update {
+            if (type == null) copy(modLoader = null, selectedModLoaderVersion = null)
+            else copy(modLoader = type, selectedModLoaderVersion = modLoaderVersions?.get(type)?.first())
+        }
     }
 
-    private fun CreateInstanceUiState.createInstance(): CreateInstanceUiState = apply {
+    private fun ReductionState.createInstance() {
         runInScope {
+            val stateValue = state.value
             instanceRepository.create(
                 Instance(
-                    name = instanceName,
-                    gameVersion = selectedGameVersionId!!,
-                    modLoader = if (modLoader != null) InstanceModLoader(
-                        type = modLoader,
-                        version = selectedModLoaderVersion!!
+                    name = stateValue.instanceName,
+                    gameVersion = stateValue.selectedGameVersionId!!,
+                    modLoader = if (stateValue.modLoader != null) InstanceModLoader(
+                        type = stateValue.modLoader,
+                        version = stateValue.selectedModLoaderVersion!!
                     ) else null
                 )
             )
         }
+        effect(CreateInstanceUiEffect.CloseDialog)
     }
 
     @JvmInline

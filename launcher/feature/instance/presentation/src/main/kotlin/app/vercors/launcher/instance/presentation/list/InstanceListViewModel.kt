@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class InstanceListViewModel : MviViewModel<InstanceListUiState, InstanceListIntent, Nothing>(InstanceListUiState()) {
-    override fun InstanceListUiState.reduce(intent: InstanceListIntent): InstanceListUiState {
-        return this
+    override fun ReductionState.reduce(intent: InstanceListIntent) {
+        // TODO
     }
 }

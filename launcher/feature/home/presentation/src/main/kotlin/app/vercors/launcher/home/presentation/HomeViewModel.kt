@@ -47,15 +47,20 @@ class HomeViewModel(
         sectionsJob?.cancel()
     }
 
-    override fun HomeUiState.reduce(intent: HomeUiIntent): HomeUiState =
+    override fun ReductionState.reduce(intent: HomeUiIntent) {
         when (intent) {
-            HomeUiIntent.CreateInstance -> withEffect(HomeUiEffect.CreateInstance)
-            is HomeUiIntent.InstallProject -> this
-            is HomeUiIntent.LaunchOrStopInstance -> this
-            is HomeUiIntent.ShowInstance -> withEffect(HomeUiEffect.NavigateToInstance(intent.instanceId))
-            is HomeUiIntent.ShowProject -> withEffect(HomeUiEffect.NavigateToProject(intent.projectId))
-            is UpdateSections -> HomeUiState(intent.sections.map { it.toUi() })
+            HomeUiIntent.CreateInstance -> effect(HomeUiEffect.CreateInstance)
+            is HomeUiIntent.InstallProject -> { /* TODO */
+            }
+
+            is HomeUiIntent.LaunchOrStopInstance -> { /* TODO */
+            }
+
+            is HomeUiIntent.ShowInstance -> effect(HomeUiEffect.NavigateToInstance(intent.instanceId))
+            is HomeUiIntent.ShowProject -> effect(HomeUiEffect.NavigateToProject(intent.projectId))
+            is UpdateSections -> update { HomeUiState(intent.sections.map { it.toUi() }) }
         }
+    }
 
 
     @JvmInline

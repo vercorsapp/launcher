@@ -48,10 +48,10 @@ class AppViewModel(
         configJob?.cancel()
     }
 
-    override fun AppUiState.reduce(intent: AppUiIntent) = when (intent) {
-        AppUiIntent.CloseDialog -> copy(currentDialog = null)
-        is AppUiIntent.OpenDialog -> copy(currentDialog = intent.dialog)
-        is ConfigUpdated -> copy(generalConfig = generalConfig.updateConfigState(intent.config.general))
+    override fun ReductionState.reduce(intent: AppUiIntent) = when (intent) {
+        AppUiIntent.CloseDialog -> update { copy(currentDialog = null) }
+        is AppUiIntent.OpenDialog -> update { copy(currentDialog = intent.dialog) }
+        is ConfigUpdated -> update { copy(generalConfig = generalConfig.updateConfigState(intent.config.general)) }
     }
 
     private fun GeneralConfigState.updateConfigState(config: GeneralConfig): GeneralConfigState = when (this) {

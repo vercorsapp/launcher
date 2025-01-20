@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 skyecodes
+ * Copyright (c) 2024-2025 skyecodes
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,22 +32,22 @@ import org.koin.android.annotation.KoinViewModel
 class SetupViewModel(
     private val setupRepository: SetupRepository
 ) : MviViewModel<SetupUiState, SetupUiEvent, SetupUiEffect>(SetupUiState(setupRepository.defaultPath)) {
-    override fun SetupUiState.reduce(intent: SetupUiEvent): SetupUiState =
+    override fun ReductionState.reduce(intent: SetupUiEvent) =
         when (intent) {
             is SetupUiEvent.PickDirectory -> pickDirectory(intent.path)
             is SetupUiEvent.UpdatePath -> updatePath(intent.path)
             SetupUiEvent.StartApp -> launchApp()
         }
 
-    private fun SetupUiState.pickDirectory(path: String): SetupUiState =
+    private fun ReductionState.pickDirectory(path: String) =
         updatePath(if (path.endsWith(APP_NAME)) path else Path(path, APP_NAME).toString())
 
-    private fun SetupUiState.updatePath(path: String): SetupUiState = SetupUiState(path)
+    private fun ReductionState.updatePath(path: String) = update { SetupUiState(path) }
 
-    private fun SetupUiState.launchApp(): SetupUiState {
+    private fun ReductionState.launchApp() {
         val path = state.value.path
         setupRepository.updatePath(path)
         logger.info { "User selected directory: $path - now launching application" }
-        return withEffect(SetupUiEffect.Launch)
+        effect(SetupUiEffect.Launch)
     }
 }
