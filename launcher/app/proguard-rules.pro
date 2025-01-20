@@ -1,4 +1,4 @@
--keep class app.vercors.launcher.** { *; }
+-keep class app.vercors.** { *; }
 
 -keep,allowoptimization class ch.qos.logback.classic.spi.LogbackServiceProvider { *; }
 -keep,allowoptimization class kotlinx.coroutines.swing.SwingDispatcherFactory { *; }
